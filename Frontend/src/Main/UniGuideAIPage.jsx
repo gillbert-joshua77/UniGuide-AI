@@ -50,6 +50,8 @@ const EMPTY_PROFILE = {
 }
 
 const ACTIVE_SESSION_STORAGE_KEY = 'uniguide_active_session_id'
+const PINNED_SESSIONS_STORAGE_KEY = 'uniguide_pinned_session_ids'
+const THEME_STORAGE_KEY = 'uniguide_theme'
 
 const UniGuideChat = () => {
   const [messages, setMessages] = useState([])
@@ -64,6 +66,21 @@ const UniGuideChat = () => {
   const [creatingChat, setCreatingChat] = useState(false)
   const [renamingSessionId, setRenamingSessionId] = useState(null)
   const [renameTitle, setRenameTitle] = useState('')
+  const [pinnedSessionIds, setPinnedSessionIds] = useState(() => {
+    try {
+      const raw = localStorage.getItem(PINNED_SESSIONS_STORAGE_KEY)
+      const parsed = raw ? JSON.parse(raw) : []
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  })
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    sessionId: null,
+  })
 
   const [showProfile, setShowProfile] = useState(false)
   const [profile, setProfile] = useState(EMPTY_PROFILE)
@@ -71,6 +88,14 @@ const UniGuideChat = () => {
   const [profileError, setProfileError] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSavedAt, setProfileSavedAt] = useState('')
+  const [theme, setTheme] = useState(() => {
+    try {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY)
+      return savedTheme === 'light' ? 'light' : 'dark'
+    } catch {
+      return 'dark'
+    }
+  })
 
   const chatEndRef = useRef(null)
   const textareaRef = useRef(null)
@@ -95,6 +120,30 @@ const UniGuideChat = () => {
     }
     localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY)
   }, [activeSessionId])
+
+  useEffect(() => {
+    localStorage.setItem(PINNED_SESSIONS_STORAGE_KEY, JSON.stringify(pinnedSessionIds))
+  }, [pinnedSessionIds])
+
+  useEffect(() => {
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }, [theme])
+
+  useEffect(() => {
+    const closeContextMenu = () => {
+      setContextMenu((prev) => (prev.visible ? { ...prev, visible: false } : prev))
+    }
+
+    window.addEventListener('click', closeContextMenu)
+    window.addEventListener('scroll', closeContextMenu, true)
+    window.addEventListener('resize', closeContextMenu)
+
+    return () => {
+      window.removeEventListener('click', closeContextMenu)
+      window.removeEventListener('scroll', closeContextMenu, true)
+      window.removeEventListener('resize', closeContextMenu)
+    }
+  }, [])
 
   const getCurrentUser = () => {
     try {
@@ -124,6 +173,7 @@ const UniGuideChat = () => {
       const res = await axiosInstance.get('uniguide/chat/')
       const nextSessions = Array.isArray(res.data) ? res.data : []
       setSessions(nextSessions)
+      setPinnedSessionIds((prev) => prev.filter((id) => nextSessions.some((session) => session.id === id)))
 
       if (!activeSessionId && nextSessions.length > 0) {
         const savedSessionId = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY)
@@ -204,6 +254,7 @@ const UniGuideChat = () => {
     try {
       await axiosInstance.delete(`uniguide/chat/sessions/${sessionId}/`)
       setSessions((prev) => prev.filter((session) => session.id !== sessionId))
+      setPinnedSessionIds((prev) => prev.filter((id) => id !== sessionId))
       if (sessionId === activeSessionId) {
         setActiveSessionId(null)
         setMessages([])
@@ -217,6 +268,31 @@ const UniGuideChat = () => {
     setRenamingSessionId(session.id)
     setRenameTitle(session.title || '')
   }
+
+  const togglePinSession = (sessionId) => {
+    setPinnedSessionIds((prev) =>
+      prev.includes(sessionId) ? prev.filter((id) => id !== sessionId) : [sessionId, ...prev]
+    )
+  }
+
+  const openSessionContextMenu = (event, sessionId) => {
+    event.preventDefault()
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      sessionId,
+    })
+  }
+
+  const displayedSessions = [...sessions].sort((a, b) => {
+    const aPinned = pinnedSessionIds.includes(a.id)
+    const bPinned = pinnedSessionIds.includes(b.id)
+
+    if (aPinned && !bPinned) return -1
+    if (!aPinned && bPinned) return 1
+    return 0
+  })
 
   const submitRenameSession = async (sessionId) => {
     const nextTitle = renameTitle.trim()
@@ -368,10 +444,14 @@ const UniGuideChat = () => {
     }
   }
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }
+
   return (
     <>
-      <Navbar />
-      <div className="chat-wrapper">
+      <Navbar theme={theme} />
+      <div className={`chat-wrapper ${theme === 'light' ? 'theme-light' : ''}`}>
 
         {/* Sidebar */}
         <aside className="chat-sidebar">
@@ -408,8 +488,13 @@ const UniGuideChat = () => {
             <div className="sidebar-note">No chats yet. Start a new one.</div>
           )}
 
-          {!sessionsLoading && !sessionsError && sessions.map((session) => (
-            <div className={`sidebar-item-wrap ${activeSessionId === session.id ? 'active' : ''}`} key={session.id}>
+          {!sessionsLoading && !sessionsError && displayedSessions.map((session) => (
+            <div
+              className={`sidebar-item-wrap ${activeSessionId === session.id ? 'active' : ''} ${pinnedSessionIds.includes(session.id) ? 'pinned' : ''}`}
+              key={session.id}
+              onContextMenu={(event) => openSessionContextMenu(event, session.id)}
+              title="Right click for options"
+            >
               <button
                 className={`sidebar-item ${activeSessionId === session.id ? 'active' : ''}`}
                 onClick={() => openSession(session.id)}
@@ -435,24 +520,57 @@ const UniGuideChat = () => {
                     autoFocus
                   />
                 ) : (
-                  <span className="session-title-text">{session.title || 'New Chat'}</span>
+                  <>
+                    {pinnedSessionIds.includes(session.id) && <span className="session-pin-indicator">📌</span>}
+                    <span className="session-title-text">{session.title || 'New Chat'}</span>
+                  </>
                 )}
               </button>
-              <div className="session-actions">
-                {renamingSessionId === session.id ? (
-                  <>
-                    <button className="session-action-btn" onClick={() => submitRenameSession(session.id)}>Save</button>
-                    <button className="session-action-btn" onClick={() => setRenamingSessionId(null)}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="session-action-btn" onClick={() => startRenameSession(session)}>Rename</button>
-                    <button className="session-action-btn danger" onClick={() => handleDeleteSession(session.id)}>Delete</button>
-                  </>
-                )}
-              </div>
             </div>
           ))}
+
+          {contextMenu.visible && (
+            <div
+              className="session-context-menu"
+              style={{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="session-context-item"
+                onClick={() => {
+                  const target = sessions.find((session) => session.id === contextMenu.sessionId)
+                  if (target) {
+                    startRenameSession(target)
+                  }
+                  setContextMenu((prev) => ({ ...prev, visible: false }))
+                }}
+              >
+                Rename
+              </button>
+              <button
+                className="session-context-item"
+                onClick={() => {
+                  if (contextMenu.sessionId) {
+                    togglePinSession(contextMenu.sessionId)
+                  }
+                  setContextMenu((prev) => ({ ...prev, visible: false }))
+                }}
+              >
+                {pinnedSessionIds.includes(contextMenu.sessionId) ? 'Unpin' : 'Pin'}
+              </button>
+              <button
+                className="session-context-item danger"
+                onClick={() => {
+                  if (contextMenu.sessionId) {
+                    handleDeleteSession(contextMenu.sessionId)
+                  }
+                  setContextMenu((prev) => ({ ...prev, visible: false }))
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          )}
 
           {sessionError && <div className="sidebar-note error">{sessionError}</div>}
 
@@ -489,6 +607,9 @@ const UniGuideChat = () => {
               </div>
             </div>
             <div className="chat-header-actions">
+              <button className="clear-btn" onClick={toggleTheme}>
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </button>
               <button className="clear-btn" onClick={() => setShowProfile((prev) => !prev)}>
                 {showProfile ? 'Hide Profile' : 'Edit Profile'}
               </button>

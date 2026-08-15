@@ -83,10 +83,18 @@
 .sidebar-item-wrap.active {
   border-color: rgba(0,180,216,0.3);
 }
+.sidebar-item-wrap.pinned {
+  border-color: rgba(247,127,0,0.4);
+}
 .session-title-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.session-pin-indicator {
+  margin-right: 6px;
+  font-size: 11px;
+  opacity: 0.9;
 }
 .session-rename-input {
   width: 100%;
@@ -122,6 +130,38 @@
 .session-action-btn.danger:hover {
   color: #ffd2d2;
   border-color: rgba(240,80,80,0.65);
+}
+.session-context-menu {
+  position: fixed;
+  min-width: 140px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(26,61,92,0.7);
+  background: rgba(6,17,28,0.98);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+  z-index: 2200;
+}
+.session-context-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #c0dff0;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.session-context-item:hover {
+  background: rgba(0,180,216,0.14);
+  color: #e0f0ff;
+}
+.session-context-item.danger {
+  color: #ff9c9c;
+}
+.session-context-item.danger:hover {
+  background: rgba(240,80,80,0.18);
+  color: #ffd2d2;
 }
 .sidebar-note {
   font-size: 12px;
@@ -432,6 +472,125 @@
 .chat-footer-hint {
   font-size: 11px; color: #2a5a78;
   margin-top: 8px; text-align: center;
+}
+
+/* Light theme */
+.chat-wrapper.theme-light {
+  background: #f4f8fc;
+}
+
+.chat-wrapper.theme-light .chat-sidebar,
+.chat-wrapper.theme-light .chat-header,
+.chat-wrapper.theme-light .chat-input-area {
+  background: #ffffff;
+  border-color: rgba(20, 55, 85, 0.12);
+}
+
+.chat-wrapper.theme-light .student-profile-panel {
+  background: #f7fbff;
+  border-bottom-color: rgba(20, 55, 85, 0.12);
+}
+
+.chat-wrapper.theme-light .sidebar-brand-name,
+.chat-wrapper.theme-light .chat-header-name,
+.chat-wrapper.theme-light .welcome-heading,
+.chat-wrapper.theme-light .profile-panel-title,
+.chat-wrapper.theme-light .msg-bubble strong,
+.chat-wrapper.theme-light .sidebar-user-name {
+  color: #103452;
+}
+
+.chat-wrapper.theme-light .sidebar-item {
+  color: #3c6f8f;
+}
+
+.chat-wrapper.theme-light .sidebar-item:hover,
+.chat-wrapper.theme-light .sidebar-item.active {
+  background: rgba(0, 119, 182, 0.1);
+  color: #0a5f93;
+}
+
+.chat-wrapper.theme-light .sidebar-item-wrap {
+  background: rgba(220, 236, 249, 0.42);
+}
+
+.chat-wrapper.theme-light .sidebar-user {
+  background: rgba(220, 236, 249, 0.5);
+}
+
+.chat-wrapper.theme-light .sidebar-note,
+.chat-wrapper.theme-light .chat-inline-note,
+.chat-wrapper.theme-light .profile-panel-note,
+.chat-wrapper.theme-light .welcome-sub,
+.chat-wrapper.theme-light .chat-footer-hint,
+.chat-wrapper.theme-light .msg-label,
+.chat-wrapper.theme-light .sidebar-user-role,
+.chat-wrapper.theme-light .profile-panel-subtitle {
+  color: #4f7895;
+}
+
+.chat-wrapper.theme-light .profile-field label,
+.chat-wrapper.theme-light .sidebar-section-label {
+  color: #5a86a8;
+}
+
+.chat-wrapper.theme-light .msg-bubble,
+.chat-wrapper.theme-light .profile-field input,
+.chat-wrapper.theme-light .profile-field select,
+.chat-wrapper.theme-light .profile-field textarea,
+.chat-wrapper.theme-light .chat-textarea,
+.chat-wrapper.theme-light .session-context-menu,
+.chat-wrapper.theme-light .session-rename-input {
+  color: #1a3f5d;
+}
+
+.chat-wrapper.theme-light .profile-field input,
+.chat-wrapper.theme-light .profile-field select,
+.chat-wrapper.theme-light .profile-field textarea,
+.chat-wrapper.theme-light .chat-textarea,
+.chat-wrapper.theme-light .session-rename-input {
+  background: #ffffff;
+  border-color: rgba(20, 55, 85, 0.18);
+}
+
+.chat-wrapper.theme-light .chat-textarea::placeholder {
+  color: #7393ad;
+}
+
+.chat-wrapper.theme-light .bot-bubble {
+  background: #ffffff;
+  border-color: rgba(20, 55, 85, 0.14);
+}
+
+.chat-wrapper.theme-light .user-bubble {
+  background: rgba(0, 180, 216, 0.14);
+  border-color: rgba(0, 119, 182, 0.22);
+}
+
+.chat-wrapper.theme-light .clear-btn,
+.chat-wrapper.theme-light .quick-btn,
+.chat-wrapper.theme-light .session-context-item:hover {
+  background: rgba(0, 119, 182, 0.08);
+  border-color: rgba(0, 119, 182, 0.22);
+  color: #0a5f93;
+}
+
+.chat-wrapper.theme-light .session-context-menu {
+  background: #ffffff;
+  border-color: rgba(20, 55, 85, 0.18);
+}
+
+.chat-wrapper.theme-light .session-context-item {
+  color: #1a3f5d;
+}
+
+.chat-wrapper.theme-light .session-context-item.danger {
+  color: #c24343;
+}
+
+.chat-wrapper.theme-light .typing-bubble {
+  background: #ffffff;
+  border-color: rgba(20, 55, 85, 0.14);
 }
 
 @media (max-width: 700px) {

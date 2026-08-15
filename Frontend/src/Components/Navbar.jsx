@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import '../assets/Style/Navbar.css'
 import Logo from '../assets/Image/UniGuide 1.png'
 
-const Navbar = () => {
+const Navbar = ({ theme = 'dark' }) => {
   const getInitials = (name) => {
     if (!name) return "U";
     return name
@@ -18,12 +18,12 @@ const Navbar = () => {
   try {
     const stored = localStorage.getItem("user");
     user = stored ? JSON.parse(stored) : null;
-  } catch (err) {
+  } catch {
     user = null;
   }
 
   return (
-    <nav className="navbar-wrapper">
+    <nav className={`navbar-wrapper ${theme === 'light' ? 'navbar-light' : ''}`}>
 
       {/* Brand */}
       <div className="nav-brand">

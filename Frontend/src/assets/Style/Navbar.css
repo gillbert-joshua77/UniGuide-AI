@@ -12,6 +12,11 @@
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.navbar-wrapper.navbar-light {
+  background: #ffffff;
+  border-bottom-color: rgba(20, 55, 85, 0.12);
+}
+
 /* Brand */
 .nav-brand {
   display: flex;
@@ -29,6 +34,10 @@
   color: #e0f0ff;
 }
 .nav-title span { color: #f77f00; }
+
+.navbar-wrapper.navbar-light .nav-title {
+  color: #103452;
+}
 
 /* Links */
 .nav-links {
@@ -54,6 +63,16 @@
   background: rgba(0,180,216,0.1);
 }
 
+.navbar-wrapper.navbar-light .nav-link {
+  color: #3c6f8f;
+}
+
+.navbar-wrapper.navbar-light .nav-link:hover,
+.navbar-wrapper.navbar-light .nav-link.active {
+  color: #0a5f93;
+  background: rgba(0, 119, 182, 0.12);
+}
+
 /* Profile button */
 .profile-btn {
   display: flex;
@@ -71,6 +90,16 @@
   border-color: #00b4d8;
   background: rgba(0,180,216,0.14);
 }
+
+.navbar-wrapper.navbar-light .profile-btn {
+  background: rgba(0, 119, 182, 0.08);
+  border-color: rgba(0, 119, 182, 0.22);
+}
+
+.navbar-wrapper.navbar-light .profile-btn:hover {
+  background: rgba(0, 119, 182, 0.14);
+  border-color: #0a5f93;
+}
 .nav-avatar {
   width: 28px;
   height: 28px;
@@ -87,6 +116,10 @@
   font-size: 13px;
   color: #c0dff0;
   font-weight: 500;
+}
+
+.navbar-wrapper.navbar-light .nav-username {
+  color: #1a3f5d;
 }
 
 @keyframes float {
