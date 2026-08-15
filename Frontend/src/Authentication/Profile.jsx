@@ -21,14 +21,49 @@ const COLOR_PALETTE = [
   "#00b4d8", "#3b82f6", "#8b5cf6", "#ec4899", "#f77f00", "#10b981"
 ];
 
+const EDUCATION_LABELS = {
+  high_school: 'High School',
+  undergraduate: 'Undergraduate',
+  postgraduate: 'Postgraduate / Masters',
+  doctoral: 'Doctoral / PhD',
+  diploma: 'Diploma / Certificate',
+  other: 'Other',
+};
+
+const YEAR_LABELS = {
+  '1': '1st Year',
+  '2': '2nd Year',
+  '3': '3rd Year',
+  '4': '4th Year',
+  '5': '5th Year or above',
+  graduated: 'Graduated',
+};
+
+const EMPTY_STUDENT_PROFILE = {
+  education_level: '',
+  institution: '',
+  course: '',
+  year_of_study: '',
+  academic_performance: '',
+  interests: '',
+  career_goal: '',
+  preferred_location: '',
+  preferred_country: '',
+  budget: '',
+  bio: '',
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   
   // --- STATE ---
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(EMPTY_STUDENT_PROFILE);
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
 
   const [newSkill, setNewSkill] = useState({
     name: '',
@@ -51,7 +86,9 @@ const Profile = () => {
     if (!token) {
       navigate("/login");
     } else {
-      fetchProfileData();
+      Promise.all([fetchProfileData(), fetchStudentProfile()]).finally(() => {
+        setLoading(false);
+      });
     }
   }, [navigate, token]);
 
@@ -60,11 +97,18 @@ const Profile = () => {
     try {
       const resp = await axiosInstance.get("students/me/");
       setProfileData(resp.data);
-      setLoading(false);
     } catch (err) {
       console.error("Profile fetch error:", err);
       toast.error("Failed to load profile data");
-      setLoading(false);
+    }
+  };
+
+  const fetchStudentProfile = async () => {
+    try {
+      const resp = await axiosInstance.get("students/profile/");
+      setStudentProfile({ ...EMPTY_STUDENT_PROFILE, ...resp.data });
+    } catch (err) {
+      console.error("Student profile fetch error:", err);
     }
   };
 
@@ -85,7 +129,7 @@ const Profile = () => {
 
       if (res.status === 201 || res.status === 200) {
         toast.success(`Skill "${newSkill.name}" saved to database! 🎯`);
-        setShowModal(false); 
+        setShowSkillModal(false);
         setNewSkill({ name: '', percentage: 85, color: '#00b4d8', level: 'Advanced' }); 
         fetchProfileData();
       }
@@ -136,6 +180,30 @@ const Profile = () => {
     }));
   };
 
+  const handleProfileFieldChange = (e) => {
+    const { name, value } = e.target;
+    setStudentProfile((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveStudentProfile = async (e) => {
+    e.preventDefault();
+    try {
+      setProfileSubmitting(true);
+      const res = await axiosInstance.put('students/profile/', studentProfile);
+      setStudentProfile({ ...EMPTY_STUDENT_PROFILE, ...res.data });
+      setShowProfileModal(false);
+      toast.success('Profile details updated');
+    } catch (err) {
+      const errMsg = err?.response?.data?.detail || 'Failed to update profile details';
+      toast.error(errMsg);
+    } finally {
+      setProfileSubmitting(false);
+    }
+  };
+
+  const displayEducation = EDUCATION_LABELS[studentProfile?.education_level] || studentProfile?.education_level || 'Not set';
+  const displayYear = YEAR_LABELS[studentProfile?.year_of_study] || studentProfile?.year_of_study || 'Not set';
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -164,16 +232,37 @@ const Profile = () => {
               <h2 className="profile-name">{displayUser?.full_name || "Student User"}</h2>
               <p className="profile-email">{displayUser?.email}</p>
               <div className="badge-row">
-                <span className="badge-pill">Computer Science</span>
-                <span className="badge-pill">3rd Year</span>
+                <span className="badge-pill">{studentProfile?.course || 'Course not set'}</span>
+                <span className="badge-pill">{displayYear}</span>
                 <span className="badge-pill orange">Pro Member</span>
               </div>
             </div>
 
             <div className="profile-actions">
-              <button className="edit-btn" onClick={() => setShowModal(true)}>+ Add Skill</button>
+              <button className="edit-btn" onClick={() => setShowProfileModal(true)}>Edit Profile</button>
+              <button className="edit-btn" onClick={() => setShowSkillModal(true)}>+ Add Skill</button>
               <button onClick={handleLogout} className="logout-btn">Log out</button>
             </div>
+          </div>
+        </div>
+
+        <div className="profile-card mb-3">
+          <div className="section-header">
+            <span className="section-title">Student Profile Details</span>
+            <button className="edit-btn" onClick={() => setShowProfileModal(true)}>Edit</button>
+          </div>
+          <div className="details-grid">
+            <div className="detail-item"><span>Education</span><strong>{displayEducation}</strong></div>
+            <div className="detail-item"><span>Institution</span><strong>{studentProfile?.institution || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Course</span><strong>{studentProfile?.course || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Year</span><strong>{displayYear}</strong></div>
+            <div className="detail-item"><span>Academic Performance</span><strong>{studentProfile?.academic_performance || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Career Goal</span><strong>{studentProfile?.career_goal || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Preferred Location</span><strong>{studentProfile?.preferred_location || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Preferred Country</span><strong>{studentProfile?.preferred_country || 'Not set'}</strong></div>
+            <div className="detail-item"><span>Budget</span><strong>{studentProfile?.budget || 'Not set'}</strong></div>
+            <div className="detail-item detail-item-full"><span>Interests</span><strong>{studentProfile?.interests || 'Not set'}</strong></div>
+            <div className="detail-item detail-item-full"><span>Bio</span><strong>{studentProfile?.bio || 'Not set'}</strong></div>
           </div>
         </div>
 
@@ -204,7 +293,7 @@ const Profile = () => {
               <span className="section-title">Verified Skills &amp; Endorsements</span>
               <span className="skill-count-badge ms-2">{profileData?.skills?.length || 0}</span>
             </div>
-            <button className="edit-btn" onClick={() => setShowModal(true)}>
+            <button className="edit-btn" onClick={() => setShowSkillModal(true)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="me-1">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
@@ -252,7 +341,7 @@ const Profile = () => {
                 <div className="empty-icon">💡</div>
                 <div className="empty-title">No skills added yet</div>
                 <div className="empty-sub">Add skills to get personalized internship recommendations and SOP guidance.</div>
-                <button className="add-first-skill-btn mt-2" onClick={() => setShowModal(true)}>+ Add Your First Skill</button>
+                <button className="add-first-skill-btn mt-2" onClick={() => setShowSkillModal(true)}>+ Add Your First Skill</button>
               </div>
             )}
           </div>
@@ -316,15 +405,15 @@ const Profile = () => {
         </div>
 
         {/* --- LINKEDIN STYLE ADD SKILL MODAL --- */}
-        {showModal && (
-          <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        {showSkillModal && (
+          <div className="modal-overlay" onClick={() => setShowSkillModal(false)}>
             <div className="modal-content linkedin-modal" onClick={e => e.stopPropagation()}>
               <div className="modal-header">
                 <div>
                   <h3 className="modal-title">Add Skill</h3>
                   <p className="modal-subtitle">Showcase your top capabilities to receive AI career guidance</p>
                 </div>
-                <button className="close-x" onClick={() => setShowModal(false)}>&times;</button>
+                <button className="close-x" onClick={() => setShowSkillModal(false)}>&times;</button>
               </div>
 
               <form onSubmit={handleAddSkill}>
@@ -394,9 +483,105 @@ const Profile = () => {
                 </div>
 
                 <div className="modal-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="button" className="cancel-btn" onClick={() => setShowSkillModal(false)}>Cancel</button>
                   <button type="submit" className="save-btn" disabled={submitting}>
                     {submitting ? "Saving to DB..." : "Save to Profile"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showProfileModal && (
+          <div className="modal-overlay" onClick={() => setShowProfileModal(false)}>
+            <div className="modal-content linkedin-modal profile-details-modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <h3 className="modal-title">Edit Profile Details</h3>
+                  <p className="modal-subtitle">Update your academic and career preferences</p>
+                </div>
+                <button className="close-x" onClick={() => setShowProfileModal(false)}>&times;</button>
+              </div>
+
+              <form onSubmit={handleSaveStudentProfile}>
+                <div className="profile-edit-grid">
+                  <div className="form-group">
+                    <label>Education Level</label>
+                    <select name="education_level" value={studentProfile.education_level} onChange={handleProfileFieldChange}>
+                      <option value="">Select education level</option>
+                      <option value="high_school">High School</option>
+                      <option value="undergraduate">Undergraduate</option>
+                      <option value="postgraduate">Postgraduate / Masters</option>
+                      <option value="doctoral">Doctoral / PhD</option>
+                      <option value="diploma">Diploma / Certificate</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Institution</label>
+                    <input type="text" name="institution" value={studentProfile.institution} onChange={handleProfileFieldChange} placeholder="Your college or university" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Course</label>
+                    <input type="text" name="course" value={studentProfile.course} onChange={handleProfileFieldChange} placeholder="Program or major" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Year of Study</label>
+                    <select name="year_of_study" value={studentProfile.year_of_study} onChange={handleProfileFieldChange}>
+                      <option value="">Select year</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                      <option value="5">5th Year or above</option>
+                      <option value="graduated">Graduated</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Academic Performance</label>
+                    <input type="text" name="academic_performance" value={studentProfile.academic_performance} onChange={handleProfileFieldChange} placeholder="CGPA 8.5/10 or GPA 3.7/4" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Career Goal</label>
+                    <input type="text" name="career_goal" value={studentProfile.career_goal} onChange={handleProfileFieldChange} placeholder="Target role" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Preferred Location</label>
+                    <input type="text" name="preferred_location" value={studentProfile.preferred_location} onChange={handleProfileFieldChange} placeholder="City or region" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Preferred Country</label>
+                    <input type="text" name="preferred_country" value={studentProfile.preferred_country} onChange={handleProfileFieldChange} placeholder="Country" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Budget</label>
+                    <input type="text" name="budget" value={studentProfile.budget} onChange={handleProfileFieldChange} placeholder="$15,000/year" />
+                  </div>
+
+                  <div className="form-group profile-edit-full">
+                    <label>Interests</label>
+                    <textarea name="interests" value={studentProfile.interests} onChange={handleProfileFieldChange} rows={2} placeholder="AI, cloud, product engineering" />
+                  </div>
+
+                  <div className="form-group profile-edit-full">
+                    <label>Bio</label>
+                    <textarea name="bio" value={studentProfile.bio} onChange={handleProfileFieldChange} rows={3} placeholder="Any additional background details" />
+                  </div>
+                </div>
+
+                <div className="modal-actions">
+                  <button type="button" className="cancel-btn" onClick={() => setShowProfileModal(false)}>Cancel</button>
+                  <button type="submit" className="save-btn" disabled={profileSubmitting}>
+                    {profileSubmitting ? "Saving..." : "Save Profile Details"}
                   </button>
                 </div>
               </form>
