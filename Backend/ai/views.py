@@ -2,114 +2,170 @@ import time
 import re
 import requests
 
-from django.shortcuts import render
-from .models import *
-# Create your views here.
+import logging
+
+from django.shortcuts import get_object_or_404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
-import google.generativeai as genai  # ✅ Add this    
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.conf import settings
 
-SYSTEM_PROMPT = """You are UniGuide AI, an intelligent, friendly, and motivating assistant helping students navigate their education, career, and study abroad journeys.
+from .models import ChatSession, ChatMessage
+from .serializers import (
+    ChatSessionSerializer,
+    ChatSessionDetailSerializer,
+    ChatSessionCreateSerializer,
+    ChatRenameSerializer,
+    ChatSendSerializer,
+)
+from .services.context_builder import build_system_instruction, build_chat_history
+from .services.gemini_client import GeminiService, GeminiError
+from .services.rate_limit import check_chat_rate_limit, RateLimitExceeded
 
-🎯 Your Core Responsibilities:
-- Suggest universities based on budget, skills, and country preferences.
-- Provide clear, step-by-step guidance for studying abroad.
-- Recommend scholarships, internships, and hackathons.
-- Assist with SOPs, resumes, and career roadmaps.
+logger = logging.getLogger('uniguide.ai')
 
-✨ Communication Rules (Strictly Follow):
-- Bite-Sized Delivery: Avoid long walls of text. If the user asks for a complex roadmap, provide a brief, high-level summary of the steps first, then ask which specific step they want to dive deeper into.
-- Clean Formatting: Use bullet points and short sections. Use properly indented markdown for nested lists (e.g., use '-' with spaces for sub-bullets) so it renders perfectly on the frontend. 
-- Emoji Integration: Format responses using emojis for visual structure (e.g., 🎓 Universities, 💰 Fees, 📍 Location, 📌 Requirements, 🚀 Next Steps).
-- Personalization: Tailor your advice contextually based on the user's profile and previous messages.
-- The Conversational Engine: ALWAYS end your response with a single, specific, and engaging follow-up question to keep the conversation moving forward (e.g., "What year of your degree are you currently in?" or "Does that budget align with what you were planning?")."""
+
+def _owned_session(user, session_id):
+    return get_object_or_404(ChatSession, id=session_id, user=user)
+
+
+def _rollback_failed_message(session, user_msg, is_new_session):
+    """Undo a message that could not be answered by Gemini.
+
+    Removes the unsaved user message and, for a brand new session that
+    never produced a reply, removes the session itself so no empty
+    conversation is left behind.
+    """
+    user_msg.delete()
+    if is_new_session and not session.chat_messages.exists():
+        session.delete()
+
 
 class UniGuideChatView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        messages  = request.data.get('messages', [])
-        user_msg  = request.data.get('message', '')
-        session_id = request.data.get('session_id', None)
-
-        if not user_msg:
-            return Response(
-                {'error': 'Message is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        """Send a message. Continues the owned session when session_id is
+        provided, otherwise creates a new ChatSession."""
+        serializer = ChatSendSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Retrieve or create chat session for persistence
-            if session_id:
-                session, _ = ChatSession.objects.get_or_create(id=session_id)
-            else:
-                session = ChatSession.objects.create()
-
-            # Save user message
-            ChatMessage.objects.create(
-                session=session,
-                role='user',
-                content=user_msg
-            )
-
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel(
-                model_name='gemini-2.5-flash',
-                system_instruction=SYSTEM_PROMPT
-            ) 
-
-
-            history = []
-            for msg in messages:
-                if msg.get('role') == 'user':
-                    history.append({
-                        'role': 'user',
-                        'parts': [msg.get('content', '')]
-                    })
-                elif msg.get('role') in ['assistant', 'model']:
-                    history.append({
-                        'role': 'model',
-                        'parts': [msg.get('content', '')]
-                    })
-
-            chat = model.start_chat(history=history)
-            response = chat.send_message(user_msg)
-            reply = response.text
-
-            # Save assistant reply
-            ChatMessage.objects.create(
-                session=session,
-                role='assistant',
-                content=reply
-            )
-
+            check_chat_rate_limit(request.user)
+        except RateLimitExceeded as exc:
             return Response(
-                {
-                    'session_id': str(session.id),
-                    'reply': reply,
-                    'status': 200,
-                    'message': 'Success'
-                },
-                status=status.HTTP_200_OK
+                {'error': str(exc), 'retry_after': exc.retry_after},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        except Exception as e:
+        message = serializer.validated_data['message']
+        session_id = serializer.validated_data.get('session_id')
+        is_new_session = session_id is None
+
+        if session_id:
+            session = _owned_session(request.user, session_id)
+        else:
+            session = ChatSession.objects.create(user=request.user)
+
+        user_msg = ChatMessage.objects.create(
+            session=session,
+            role='user',
+            content=message,
+        )
+
+        if session.title == 'New Chat':
+            session.title = message[:60]
+            session.save(update_fields=['title', 'updated_at'])
+
+        try:
+            service = GeminiService()
+            system_instruction = build_system_instruction(request.user)
+            history = build_chat_history(session)
+            reply = service.generate_reply(message, history, system_instruction)
+        except GeminiError as exc:
+            _rollback_failed_message(session, user_msg, is_new_session)
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except Exception as exc:
+            logger.exception('Unexpected error while sending chat message')
+            _rollback_failed_message(session, user_msg, is_new_session)
+            return Response(
+                {'error': 'Something went wrong. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-class ChatHistoryView(APIView):
+        ChatMessage.objects.create(
+            session=session,
+            role='assistant',
+            content=reply,
+        )
+
+        return Response(
+            {
+                'session_id': str(session.id),
+                'title': session.title,
+                'reply': reply,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def get(self, request):
+        """List the current user's chat sessions, newest first."""
+        sessions = ChatSession.objects.filter(user=request.user)
+        return Response(
+            ChatSessionSerializer(sessions, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class ChatSessionCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChatSessionCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        session = ChatSession.objects.create(
+            user=request.user,
+            title=serializer.validated_data['title'],
+        )
+        return Response(
+            ChatSessionSerializer(session).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ChatSessionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, session_id):
-        try:
-            session = ChatSession.objects.get(id=session_id)
-            messages = session.chat_messages.all()
-            data = [{"role": m.role, "content": m.content, "timestamp": m.timestamp} for m in messages]
-            return Response(data, status=status.HTTP_200_OK)
-        except ChatSession.DoesNotExist:
-            return Response({"error": "Chat session not found"}, status=status.HTTP_404_NOT_FOUND)
+        session = _owned_session(request.user, session_id)
+        return Response(
+            ChatSessionDetailSerializer(session).data,
+            status=status.HTTP_200_OK,
+        )
+
+    def patch(self, request, session_id):
+        session = _owned_session(request.user, session_id)
+        serializer = ChatRenameSerializer(session, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(
+            ChatSessionSerializer(session).data,
+            status=status.HTTP_200_OK,
+        )
+
+    def delete(self, request, session_id):
+        session = _owned_session(request.user, session_id)
+        session.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # ─── IT NEWS ─────────────────────────────────────────────────────────────────
 
@@ -269,4 +325,4 @@ def _normalize_articles(raw_articles, category, label):
             "publishedAt": published_at,
             "readTime": _estimate_read_time(f"{summary} {art.get('content') or ''}"),
         })
-    return articles
+    return articles
