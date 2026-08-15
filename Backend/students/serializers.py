@@ -5,7 +5,8 @@ from .models import Skill, Application
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = ['name', 'percentage', 'color']
+        fields = ['id', 'name', 'percentage', 'color']
+
 
 class AppSerializer(serializers.ModelSerializer):
     class Meta:

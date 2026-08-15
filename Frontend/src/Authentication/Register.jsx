@@ -1,16 +1,15 @@
 import React, { useState } from 'react'
 import '../assets/Style/Register.css';
 import Logo from '../assets/Image/UniGuide 1.png';
-import axios from "axios"
+import axiosInstance from '../Utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import SocialLoginPopup from './SocialAuthentication';
+import { toast } from 'react-toastify';
+import GoogleOAuthButton from './SocialAuthentication';
 
 
 const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [showSocialPopup, setShowSocialPopup] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     first_name: "",
@@ -18,6 +17,7 @@ const Register = () => {
     password: "",
     password2: "",
   });
+
 
   const [error, setError] = useState("");
 
@@ -44,8 +44,8 @@ const Register = () => {
 
     console.log("SENDING 👉", formData);
 
-    const res = await axios.post(
-      "http://localhost:8000/api/v1/auth/register/",
+    const res = await axiosInstance.post(
+      "auth/register/",
       formData
     );
 
@@ -203,26 +203,14 @@ const Register = () => {
             </button> 
           </form>
 
-          {/* Social Authentication*/}
+          {/* Social Authentication */}
           <div className="divider my-3">
             <span /><em>or</em><span />
           </div>
 
-          <button
-            type="button"
-            className="btn google-btn w-100 mb-3"
-            onClick={() => setShowSocialPopup(true)}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
-            </svg>
-            Continue with social account
-          </button>
-
-          {showSocialPopup && (
-            <SocialLoginPopup onClose={() => setShowSocialPopup(false)} />
-          )}
+          <div className="mb-3">
+            <GoogleOAuthButton />
+          </div>
 
           <p className="login-link text-center mb-0">
             Already have an account? <a href="/login">Log in</a>
@@ -233,5 +221,6 @@ const Register = () => {
     </div>
   );
 }
+
 
 export default Register

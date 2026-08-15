@@ -11,7 +11,8 @@ import About from './Main/About';
 import ResetPassword from './Authentication/ResetPassword';
 import UniGuideChat from './Main/UniGuideAIPage';
 import Hackathon from './Main/Hackathon';
-import Itnews from './Main/Itnews'; 
+import Itnews from './Main/Itnews';
+import ProtectedRoute from './Authentication/ProtectRoute';
 
 const App = () => {
   return (
@@ -23,16 +24,18 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/otp/verify' element={<OtpForm />} />
         <Route path='/forgetpassword' element={<ForgetPassword />} />
-        <Route path='/dashboard' element={<Profile />} />
-        <Route path='/home' element={<Home />} />
-        <Route path='/about' element = {<About/>} />
-        <Route path='/password-reset-confirm/:uid/:token' element ={<ResetPassword/>} />
-        <Route path='ai' element = {<UniGuideChat/>} />
-        <Route path='hackathon' element = {<Hackathon/>} />
-        <Route path='itnews' element = {<Itnews/>} />
+        <Route path='/about' element={<About />} />
+        <Route path='/password-reset-confirm/:uid/:token' element={<ResetPassword />} />
+
+        {/* 🔒 Protected Routes */}
+        <Route path='/dashboard' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path='/ai' element={<ProtectedRoute><UniGuideChat /></ProtectedRoute>} />
+        <Route path='/hackathon' element={<ProtectedRoute><Hackathon /></ProtectedRoute>} />
+        <Route path='/itnews' element={<ProtectedRoute><Itnews /></ProtectedRoute>} />
       </Routes>
     </Router>
   )
 }
 
-export default App;
+export default App;

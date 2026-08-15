@@ -38,7 +38,8 @@ class RegisterUserView(GenericAPIView):
 class VerifyUserEmail(APIView):
 
     def post(self, request):
-        otpcode = request.data.get('otp')   # Get OTP from request
+        otpcode = request.data.get('otp')     # Get OTP from request
+        email = request.data.get('email')     # Get optional user email
 
         if not otpcode:
             return Response({
@@ -46,26 +47,38 @@ class VerifyUserEmail(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user_code_obj = OneTimePassword.objects.get(code=otpcode)   # Get OTP object
+            if email:
+                user_code_obj = OneTimePassword.objects.get(code=otpcode, user__email=email)
+            elif request.user and request.user.is_authenticated:
+                user_code_obj = OneTimePassword.objects.get(code=otpcode, user=request.user)
+            else:
+                user_code_obj = OneTimePassword.objects.get(code=otpcode)
+
             user = user_code_obj.user   # Get related user
 
-            # If user is not verified
+            if user_code_obj.is_expired():
+                user_code_obj.delete()
+                return Response({
+                    'message': 'OTP has expired. Please request a new code.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Mark user as verified
             if not user.is_verified:
-                user.is_verified = True   # Mark as verified
+                user.is_verified = True
                 user.save()
 
-                return Response({
-                    'message': 'Account email verified successfully'
-                }, status=status.HTTP_200_OK)
+            # Clean up used OTP code
+            user_code_obj.delete()
 
             return Response({
-                'message': 'User already verified'
+                'message': 'Account email verified successfully'
             }, status=status.HTTP_200_OK)
 
         except OneTimePassword.DoesNotExist:
             return Response({
-                'message': 'Invalid OTP'
+                'message': 'Invalid OTP or email'
             }, status=status.HTTP_404_NOT_FOUND)
+
         
 
 # View for user login

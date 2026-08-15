@@ -47,11 +47,18 @@ class User(AbstractBaseUser ,PermissionsMixin):
       'access' : str(refresh.access_token), # Return access token
     }
 
+from django.utils import timezone
+
 # Model to store one-time password (OTP)
 class OneTimePassword(models.Model):
 
-  user = models.OneToOneField(User , on_delete=models.CASCADE)  # Each user has one OTP
-  code = models.CharField(max_length=6 ,unique= True)           # 6-digit unique OTP code
+  user = models.OneToOneField(User, on_delete=models.CASCADE)  # Each user has one active OTP
+  code = models.CharField(max_length=6)                        # 6-digit OTP code (not globally unique)
+  created_at = models.DateTimeField(auto_now=True)             # Timestamp when OTP was generated/updated
+
+  def is_expired(self):
+    # OTP is valid for 5 minutes (300 seconds)
+    return (timezone.now() - self.created_at).total_seconds() > 300
 
   def __str__(self):
-    return  f"{self.user.first_name}-passcode"   # String representation of OTP object
+    return f"{self.user.first_name}-passcode"   # String representation of OTP object

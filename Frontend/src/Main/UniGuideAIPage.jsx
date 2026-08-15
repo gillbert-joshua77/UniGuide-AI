@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Navbar from '../Components/Navbar'
 import '../assets/Style/ai.css'
-import axios from 'axios'
+import axiosInstance from '../Utils/axiosInstance'
 
 const SYSTEM_PROMPT = `You are UniGuide AI, an intelligent assistant that helps students plan their education, career, and study abroad journey.
 Your responsibilities:
@@ -53,33 +53,30 @@ const UniGuideChat = () => {
   }
 
   const sendMessage = async (text = input) => {
-  const trimmed = text.trim()
-  if (!trimmed || isTyping) return
+    const trimmed = text.trim()
+    if (!trimmed || isTyping) return
 
-  const userMsg = { role: 'user', content: trimmed }
-  const updated = [...messages, userMsg]
-  setMessages(updated)
-  setInput('')
-  if (textareaRef.current) textareaRef.current.style.height = 'auto'
-  setIsTyping(true)
+    const userMsg = { role: 'user', content: trimmed }
+    const updated = [...messages, userMsg]
+    setMessages(updated)
+    setInput('')
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
+    setIsTyping(true)
 
-  try {
-    const res = await axios.post(
-      'http://localhost:8000/api/v1/uniguide/chat/',
-      {
+    try {
+      const res = await axiosInstance.post('uniguide/chat/', {
         message:  trimmed,
         messages: messages,
-      }
-    )
-    const reply = res.data.reply || 'Sorry, I could not respond right now.'
-    setMessages(prev => [...prev, { role: 'assistant', content: reply }])
-  } catch (err) {
-    const errMsg = err?.response?.data?.error || '⚠️ Something went wrong. Please try again.'
-    setMessages(prev => [...prev, { role: 'assistant', content: errMsg }])
-  } finally {
-    setIsTyping(false)
+      })
+      const reply = res.data.reply || 'Sorry, I could not respond right now.'
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+    } catch (err) {
+      const errMsg = err?.response?.data?.error || '⚠️ Something went wrong. Please try again.'
+      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }])
+    } finally {
+      setIsTyping(false)
+    }
   }
-}
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -93,9 +90,16 @@ const UniGuideChat = () => {
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br/>')
 
-  const user = JSON.parse(localStorage.getItem("user"));    
+  let user = null;
+  try {
+    const stored = localStorage.getItem("user");
+    user = stored ? JSON.parse(stored) : null;
+  } catch (err) {
+    user = null;
+  }
+
   const getInitials = (name) => {
-  if (!name) return "";
+    if (!name) return "U";
     return name
       .trim()
       .split(/\s+/)
@@ -150,13 +154,14 @@ const UniGuideChat = () => {
           <div className="sidebar-spacer" />
 
           <div className="sidebar-user">
-            <div className="sidebar-avatar">{getInitials(user.full_name)}</div>
+            <div className="sidebar-avatar">{getInitials(user?.full_name)}</div>
             <div>
-              <div className="sidebar-user-name">{user.full_name}</div>
+              <div className="sidebar-user-name">{user?.full_name || "Student"}</div>
               <div className="sidebar-user-role">Pro Member</div>
             </div>
           </div>
         </aside>
+
 
         {/* Main Chat */}
         <main className="chat-main">

@@ -19,18 +19,17 @@ def send_code_to_user(email):
 
   Subject = "One Time passcode for Email verification"   # Email subject
   otp_code = generateOtp()   # Generate OTP
-
-  print(otp_code)   # Print OTP in console (for debugging)
-  print("Sending OTP to:", email)   # Debug log
+  print(f"[TESTING LOG] Generated OTP for {email}: {otp_code}")
 
   user = User.objects.get(email=email)   # Get user object from database
 
-  current_site = 'myAuth.com'   # Hardcoded site name (used in email body)
+
+  current_site = 'UniGuide AI'   # Application name
 
   # Email content with OTP
   email_body =  f"""
-                    Hi,
-                    {user.first_name} {user.last_login}
+                    Hi {user.first_name},
+
                     Welcome to UniGuide AI!
 
                     To complete your registration, please use the OTP below:
@@ -42,15 +41,15 @@ def send_code_to_user(email):
                     For your security, do not share this code with anyone.
 
                     If you didn’t request this, you can safely ignore this email.
-                    Thanks for signing {current_site}
+
                     Best regards,
                     UniGuide AI Team
                     """
 
-  from_email = settings.DEFAULTS_FROM_EMAIL   # Sender email from settings
+  from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', getattr(settings, 'DEFAULTS_FROM_EMAIL', settings.EMAIL_HOST_USER))
 
-  # Save OTP in database linked to user
-  OneTimePassword.objects.create(user=user, code=otp_code)
+  # Save or update OTP in database linked to user
+  OneTimePassword.objects.update_or_create(user=user, defaults={'code': otp_code})
 
   # Create email object
   d_email = EmailMessage(
@@ -60,9 +59,7 @@ def send_code_to_user(email):
     to=[email]
   )
 
-  d_email.send(fail_silently=True)   # Send email (ignore errors if any)
-
-  print("Sending OTP to:", email)   # Debug log again
+  d_email.send(fail_silently=True)   # Send email
 
 
 # Function to send a normal email (used for password reset etc.)

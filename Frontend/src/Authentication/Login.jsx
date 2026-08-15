@@ -2,9 +2,10 @@ import React from 'react'
 import Logo from '../assets/Image/UniGuide 1.png';
 import '../assets/Style/Login.css';
 import { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../Utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import GoogleOAuthButton from './SocialAuthentication';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,11 +36,10 @@ const Login = () => {
       setIsLoading(true);
       setError("");
 
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/auth/login/",
+      const res = await axiosInstance.post(
+        "auth/login/",
         { email, password }
       );
-      console.log(res.data);
 
       if (res.status === 200) {
         toast.success("Login Success 🎉");
@@ -199,15 +199,9 @@ const Login = () => {
           </div>
 
           {/* Google */}
-          <button className="btn google-btn w-100 mb-3" disabled={isLoading}>
-            <svg width="16" height="16" viewBox="0 0 24 24" className="me-2">
-              <path fill="#EA4335" d="M5.27 9.76A7.08 7.08 0 0112 5c1.69 0 3.21.6 4.4 1.57l3.29-3.29A12 12 0 000 12c0 1.94.46 3.77 1.28 5.38z" />
-              <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.9l-3.67-3.02A7.1 7.1 0 0112 19.1c-3.4 0-6.28-2.3-7.31-5.4L.82 17.1A12 12 0 0012 24z" />
-              <path fill="#4A90E2" d="M23.76 12.27c0-.82-.07-1.62-.2-2.4H12v4.54h6.61A5.65 5.65 0 0116.27 18l3.67 3.02C22.19 18.99 23.76 15.87 23.76 12.27z" />
-              <path fill="#FBBC05" d="M4.69 13.7A7.14 7.14 0 014.62 12c0-.6.08-1.17.22-1.72L1.28 6.62A12 12 0 000 12c0 1.94.46 3.77 1.28 5.38z" />
-            </svg>
-            Continue with Google
-          </button>
+          <div className="mb-3">
+            <GoogleOAuthButton />
+          </div>
 
           <p className="login-link text-center mb-0">
             Don't have an account? <a href="/">Sign up</a>
@@ -220,3 +214,4 @@ const Login = () => {
 };
 
 export default Login;
+
