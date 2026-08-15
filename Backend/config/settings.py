@@ -89,6 +89,11 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD', default='1234'),
         'HOST': env('DB_HOST', default='127.0.0.1'),
         'PORT': env('DB_PORT', default='3307'),
+        'OPTIONS': {
+            'ssl': {
+                'ca': str(BASE_DIR / 'certs' / 'ca.pem'),
+             }
+        }
     }
 }
 
@@ -178,4 +183,4 @@ AUTHENTICATION_BACKENDS = [
 
 GEMINI_API_KEY = env('GEMINI_API_KEY', default=os.environ.get('GEMINI_API_KEY', ''))
 
-NEWS_API_KEY = env('NEWS_API_KEY', default='')
+NEWS_API_KEY = env('NEWS_API_KEY', default='')
