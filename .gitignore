@@ -188,4 +188,5 @@ sketch
 
 # Credentials & secrets
 client_secret_*.json
-*.json.secret
+*.json.secret
+.aider*
