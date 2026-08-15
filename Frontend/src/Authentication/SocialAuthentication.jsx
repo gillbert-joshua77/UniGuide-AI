@@ -10,6 +10,11 @@ const GoogleOAuthButton = () => {
   const handleSignWithGoogle = async (response) => {
     try {
       const payload = response.credential;
+      if (!payload) {
+        toast.error("Google did not return a credential. Please try again.");
+        return;
+      }
+
       const res = await axiosInstance.post('auth/google/', {
         access_token: payload,
       });
@@ -28,6 +33,10 @@ const GoogleOAuthButton = () => {
       }
     } catch (err) {
       console.error("Google Auth Error:", err);
+      if (err?.code === 'ERR_NETWORK') {
+        toast.error("Cannot connect to backend. Start Django on http://127.0.0.1:8000 and try again.");
+        return;
+      }
       const msg = err.response?.data?.detail || err.response?.data?.access_token || "Google authentication failed";
       toast.error(typeof msg === 'string' ? msg : "Google Authentication Failed");
     }

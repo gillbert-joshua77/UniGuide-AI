@@ -1,21 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import Navbar from '../Components/Navbar'
 import '../assets/Style/ai.css'
 import axiosInstance from '../Utils/axiosInstance'
-
-const SYSTEM_PROMPT = `You are UniGuide AI, an intelligent assistant that helps students plan their education, career, and study abroad journey.
-Your responsibilities:
-- Suggest universities based on budget, skills, and country preference
-- Provide clear step-by-step guidance for study abroad
-- Recommend scholarships, internships, and hackathons
-- Help with SOP, resume, and career planning
-- Give structured and easy-to-read answers
-Always:
-- Be friendly and motivating
-- Use bullet points and sections
-- Personalize responses based on user profile if available
-- Avoid long paragraphs
-Format responses using emojis like 🎓 Universities, 💰 Fees, 📍 Location, 📌 Requirements, 🚀 Next Steps when relevant.`
 
 const QUICK_PROMPTS = [
   { label: '🎓 Study abroad',  text: 'Best universities in Canada for CS with budget under $20,000' },
@@ -25,25 +13,280 @@ const QUICK_PROMPTS = [
   { label: '💰 Scholarships',  text: 'List scholarships available for Indian students in Germany' },
 ]
 
-const RECENT_CHATS = [
-  'Study abroad guide',
-  'Career in ML',
-  'Internship finder',
-  'Resume tips',
+const EDUCATION_LEVEL_CHOICES = [
+  { value: '', label: 'Select education level' },
+  { value: 'high_school', label: 'High School' },
+  { value: 'undergraduate', label: 'Undergraduate' },
+  { value: 'postgraduate', label: 'Postgraduate / Masters' },
+  { value: 'doctoral', label: 'Doctoral / PhD' },
+  { value: 'diploma', label: 'Diploma / Certificate' },
+  { value: 'other', label: 'Other' },
 ]
 
+const YEAR_OF_STUDY_CHOICES = [
+  { value: '', label: 'Select year' },
+  { value: '1', label: '1st Year' },
+  { value: '2', label: '2nd Year' },
+  { value: '3', label: '3rd Year' },
+  { value: '4', label: '4th Year' },
+  { value: '5', label: '5th Year or above' },
+  { value: 'graduated', label: 'Graduated' },
+]
+
+const EMPTY_PROFILE = {
+  full_name: '',
+  email: '',
+  education_level: '',
+  institution: '',
+  course: '',
+  year_of_study: '',
+  academic_performance: '',
+  interests: '',
+  career_goal: '',
+  preferred_location: '',
+  preferred_country: '',
+  budget: '',
+  bio: '',
+}
+
+const ACTIVE_SESSION_STORAGE_KEY = 'uniguide_active_session_id'
+
 const UniGuideChat = () => {
-  const [messages,   setMessages]   = useState([])
-  const [input,      setInput]      = useState('')
-  const [isTyping,   setIsTyping]   = useState(false)
-  const chatEndRef  = useRef(null)
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const [sessions, setSessions] = useState([])
+  const [activeSessionId, setActiveSessionId] = useState(null)
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [sessionsError, setSessionsError] = useState('')
+  const [sessionLoading, setSessionLoading] = useState(false)
+  const [sessionError, setSessionError] = useState('')
+  const [creatingChat, setCreatingChat] = useState(false)
+  const [renamingSessionId, setRenamingSessionId] = useState(null)
+  const [renameTitle, setRenameTitle] = useState('')
+
+  const [showProfile, setShowProfile] = useState(false)
+  const [profile, setProfile] = useState(EMPTY_PROFILE)
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileError, setProfileError] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSavedAt, setProfileSavedAt] = useState('')
+
+  const chatEndRef = useRef(null)
   const textareaRef = useRef(null)
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => { scrollToBottom() }, [messages, isTyping])
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, isTyping])
+
+  useEffect(() => {
+    fetchSessions()
+    fetchStudentProfile()
+  }, [])
+
+  useEffect(() => {
+    if (activeSessionId) {
+      localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, activeSessionId)
+      return
+    }
+    localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY)
+  }, [activeSessionId])
+
+  const getCurrentUser = () => {
+    try {
+      const stored = localStorage.getItem('user')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
+  }
+
+  const user = getCurrentUser()
+
+  const getInitials = (name) => {
+    if (!name) return 'U'
+    return name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase())
+      .join('')
+  }
+
+  const fetchSessions = async () => {
+    setSessionsLoading(true)
+    setSessionsError('')
+    try {
+      const res = await axiosInstance.get('uniguide/chat/')
+      const nextSessions = Array.isArray(res.data) ? res.data : []
+      setSessions(nextSessions)
+
+      if (!activeSessionId && nextSessions.length > 0) {
+        const savedSessionId = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY)
+        if (savedSessionId && nextSessions.some((session) => session.id === savedSessionId)) {
+          openSession(savedSessionId)
+        }
+      }
+    } catch (err) {
+      const errMsg = err?.response?.data?.error || 'Failed to load chats.'
+      setSessionsError(errMsg)
+    } finally {
+      setSessionsLoading(false)
+    }
+  }
+
+  const fetchStudentProfile = async () => {
+    setProfileLoading(true)
+    setProfileError('')
+    try {
+      const res = await axiosInstance.get('students/profile/')
+      setProfile({ ...EMPTY_PROFILE, ...res.data })
+    } catch {
+      setProfileError('Could not load student profile.')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const openSession = async (sessionId) => {
+    if (!sessionId) return
+    setSessionLoading(true)
+    setSessionError('')
+    try {
+      const res = await axiosInstance.get(`uniguide/chat/sessions/${sessionId}/`)
+      const sessionMessages = (res.data.messages || []).map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+      }))
+      setMessages(sessionMessages)
+      setActiveSessionId(res.data.id)
+      setSessionError('')
+    } catch (err) {
+      const errMsg = err?.response?.data?.error || 'Failed to open this chat.'
+      setSessionError(errMsg)
+    } finally {
+      setSessionLoading(false)
+    }
+  }
+
+  const createNewChat = async () => {
+    setCreatingChat(true)
+    setSessionError('')
+    try {
+      const res = await axiosInstance.post('uniguide/chat/sessions/', { title: 'New Chat' })
+      const newSession = res.data
+      setSessions((prev) => [newSession, ...prev])
+      setActiveSessionId(newSession.id)
+      setMessages([])
+      setRenamingSessionId(null)
+      setRenameTitle('')
+    } catch {
+      setActiveSessionId(null)
+      setMessages([])
+      setSessionError('Could not create a new chat right now.')
+    } finally {
+      setCreatingChat(false)
+    }
+  }
+
+  const clearCurrentChat = () => {
+    setMessages([])
+    setSessionError('')
+  }
+
+  const handleDeleteSession = async (sessionId) => {
+    if (!sessionId || !window.confirm('Delete this chat?')) return
+    try {
+      await axiosInstance.delete(`uniguide/chat/sessions/${sessionId}/`)
+      setSessions((prev) => prev.filter((session) => session.id !== sessionId))
+      if (sessionId === activeSessionId) {
+        setActiveSessionId(null)
+        setMessages([])
+      }
+    } catch {
+      setSessionError('Unable to delete this chat.')
+    }
+  }
+
+  const startRenameSession = (session) => {
+    setRenamingSessionId(session.id)
+    setRenameTitle(session.title || '')
+  }
+
+  const submitRenameSession = async (sessionId) => {
+    const nextTitle = renameTitle.trim()
+    if (!nextTitle) {
+      setSessionError('Title cannot be empty.')
+      return
+    }
+
+    try {
+      const res = await axiosInstance.patch(`uniguide/chat/sessions/${sessionId}/`, {
+        title: nextTitle,
+      })
+      setSessions((prev) =>
+        prev.map((session) => (session.id === sessionId ? { ...session, ...res.data } : session))
+      )
+      setRenamingSessionId(null)
+      setRenameTitle('')
+      setSessionError('')
+    } catch {
+      setSessionError('Unable to rename this chat.')
+    }
+  }
+
+  const onProfileChange = (e) => {
+    const { name, value } = e.target
+    setProfile((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const saveProfile = async (e) => {
+    e.preventDefault()
+    setProfileSaving(true)
+    setProfileError('')
+    setProfileSavedAt('')
+
+    try {
+      const payload = {
+        education_level: profile.education_level,
+        institution: profile.institution,
+        course: profile.course,
+        year_of_study: profile.year_of_study,
+        academic_performance: profile.academic_performance,
+        interests: profile.interests,
+        career_goal: profile.career_goal,
+        preferred_location: profile.preferred_location,
+        preferred_country: profile.preferred_country,
+        budget: profile.budget,
+        bio: profile.bio,
+      }
+
+      const res = await axiosInstance.put('students/profile/', payload)
+      setProfile((prev) => ({ ...prev, ...res.data }))
+      setProfileSavedAt('Profile saved')
+    } catch (err) {
+      const data = err?.response?.data
+      if (typeof data === 'object' && data !== null) {
+        const firstError = Object.values(data)?.[0]
+        if (Array.isArray(firstError)) {
+          setProfileError(firstError[0])
+        } else if (typeof firstError === 'string') {
+          setProfileError(firstError)
+        } else {
+          setProfileError('Could not save profile.')
+        }
+      } else {
+        setProfileError('Could not save profile.')
+      }
+    } finally {
+      setProfileSaving(false)
+    }
+  }
 
   const autoResize = () => {
     const ta = textareaRef.current
@@ -54,25 +297,65 @@ const UniGuideChat = () => {
 
   const sendMessage = async (text = input) => {
     const trimmed = text.trim()
-    if (!trimmed || isTyping) return
+    if (!trimmed || isTyping || sessionLoading || creatingChat) return
 
     const userMsg = { role: 'user', content: trimmed }
-    const updated = [...messages, userMsg]
-    setMessages(updated)
+    setMessages((prev) => [...prev, userMsg])
     setInput('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
     setIsTyping(true)
 
     try {
+      let sessionId = activeSessionId
+
+      if (!sessionId) {
+        const createdSession = await axiosInstance.post('uniguide/chat/sessions/', { title: 'New Chat' })
+        const newSession = createdSession.data
+        sessionId = newSession.id
+        setActiveSessionId(sessionId)
+        setSessions((prev) => [newSession, ...prev])
+      }
+
       const res = await axiosInstance.post('uniguide/chat/', {
-        message:  trimmed,
-        messages: messages,
+        message: trimmed,
+        session_id: sessionId,
       })
+
       const reply = res.data.reply || 'Sorry, I could not respond right now.'
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+      const returnedSessionId = res.data.session_id || sessionId
+      if (returnedSessionId) {
+        setActiveSessionId(returnedSessionId)
+      }
+
+      if (res.data.title && returnedSessionId) {
+        setSessions((prev) => {
+          const existing = prev.find((session) => session.id === returnedSessionId)
+          if (!existing) {
+            return [
+              {
+                id: returnedSessionId,
+                title: res.data.title,
+                message_count: 0,
+              },
+              ...prev,
+            ]
+          }
+          return prev.map((session) =>
+            session.id === returnedSessionId
+              ? {
+                  ...session,
+                  title: res.data.title,
+                }
+              : session
+          )
+        })
+      }
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
+      fetchSessions()
     } catch (err) {
       const errMsg = err?.response?.data?.error || '⚠️ Something went wrong. Please try again.'
-      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }])
+      setMessages((prev) => [...prev, { role: 'assistant', content: errMsg }])
     } finally {
       setIsTyping(false)
     }
@@ -84,29 +367,6 @@ const UniGuideChat = () => {
       sendMessage()
     }
   }
-
-  const formatMsg = (text) =>
-    text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br/>')
-
-  let user = null;
-  try {
-    const stored = localStorage.getItem("user");
-    user = stored ? JSON.parse(stored) : null;
-  } catch (err) {
-    user = null;
-  }
-
-  const getInitials = (name) => {
-    if (!name) return "U";
-    return name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map(word => word[0].toUpperCase())
-      .join("");
-  };
 
   return (
     <>
@@ -133,23 +393,68 @@ const UniGuideChat = () => {
             </div>
           </div>
 
-          <button className="new-chat-btn" onClick={() => setMessages([])}>
+          <button className="new-chat-btn" onClick={createNewChat} disabled={creatingChat}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            New Chat
+            {creatingChat ? 'Creating...' : 'New Chat'}
           </button>
 
-          <div className="sidebar-section-label">Recent</div>
+          <div className="sidebar-section-label">Your Chats</div>
 
-          {RECENT_CHATS.map((c, i) => (
-            <div className={`sidebar-item ${i === 0 ? 'active' : ''}`} key={c}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-              </svg>
-              {c}
+          {sessionsLoading && <div className="sidebar-note">Loading chats...</div>}
+          {!sessionsLoading && sessionsError && <div className="sidebar-note error">{sessionsError}</div>}
+          {!sessionsLoading && !sessionsError && sessions.length === 0 && (
+            <div className="sidebar-note">No chats yet. Start a new one.</div>
+          )}
+
+          {!sessionsLoading && !sessionsError && sessions.map((session) => (
+            <div className={`sidebar-item-wrap ${activeSessionId === session.id ? 'active' : ''}`} key={session.id}>
+              <button
+                className={`sidebar-item ${activeSessionId === session.id ? 'active' : ''}`}
+                onClick={() => openSession(session.id)}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+                {renamingSessionId === session.id ? (
+                  <input
+                    className="session-rename-input"
+                    value={renameTitle}
+                    onChange={(e) => setRenameTitle(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        submitRenameSession(session.id)
+                      }
+                      if (e.key === 'Escape') {
+                        setRenamingSessionId(null)
+                      }
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span className="session-title-text">{session.title || 'New Chat'}</span>
+                )}
+              </button>
+              <div className="session-actions">
+                {renamingSessionId === session.id ? (
+                  <>
+                    <button className="session-action-btn" onClick={() => submitRenameSession(session.id)}>Save</button>
+                    <button className="session-action-btn" onClick={() => setRenamingSessionId(null)}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="session-action-btn" onClick={() => startRenameSession(session)}>Rename</button>
+                    <button className="session-action-btn danger" onClick={() => handleDeleteSession(session.id)}>Delete</button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
+
+          {sessionError && <div className="sidebar-note error">{sessionError}</div>}
 
           <div className="sidebar-spacer" />
 
@@ -183,11 +488,131 @@ const UniGuideChat = () => {
                 </div>
               </div>
             </div>
-            <button className="clear-btn" onClick={() => setMessages([])}>Clear</button>
+            <div className="chat-header-actions">
+              <button className="clear-btn" onClick={() => setShowProfile((prev) => !prev)}>
+                {showProfile ? 'Hide Profile' : 'Edit Profile'}
+              </button>
+              <button className="clear-btn" onClick={clearCurrentChat}>Clear</button>
+            </div>
           </div>
+
+          {showProfile && (
+            <div className="student-profile-panel">
+              <div className="profile-panel-title">Student Profile</div>
+              <div className="profile-panel-subtitle">
+                Keep this updated so UniGuide AI can tailor responses better.
+              </div>
+
+              {profileLoading ? (
+                <div className="profile-panel-note">Loading profile...</div>
+              ) : (
+                <form className="profile-form-grid" onSubmit={saveProfile}>
+                  <div className="profile-field">
+                    <label>Education Level</label>
+                    <select name="education_level" value={profile.education_level || ''} onChange={onProfileChange}>
+                      {EDUCATION_LEVEL_CHOICES.map((option) => (
+                        <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Year of Study</label>
+                    <select name="year_of_study" value={profile.year_of_study || ''} onChange={onProfileChange}>
+                      {YEAR_OF_STUDY_CHOICES.map((option) => (
+                        <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Institution</label>
+                    <input name="institution" value={profile.institution || ''} onChange={onProfileChange} placeholder="Your college/university" />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Course</label>
+                    <input name="course" value={profile.course || ''} onChange={onProfileChange} placeholder="Program or major" />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Academic Performance</label>
+                    <input
+                      name="academic_performance"
+                      value={profile.academic_performance || ''}
+                      onChange={onProfileChange}
+                      placeholder="CGPA 8.5/10 or 85%"
+                    />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Career Goal</label>
+                    <input name="career_goal" value={profile.career_goal || ''} onChange={onProfileChange} placeholder="Target role" />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Preferred Location</label>
+                    <input
+                      name="preferred_location"
+                      value={profile.preferred_location || ''}
+                      onChange={onProfileChange}
+                      placeholder="City or region"
+                    />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Preferred Country</label>
+                    <input
+                      name="preferred_country"
+                      value={profile.preferred_country || ''}
+                      onChange={onProfileChange}
+                      placeholder="Country"
+                    />
+                  </div>
+
+                  <div className="profile-field">
+                    <label>Budget</label>
+                    <input name="budget" value={profile.budget || ''} onChange={onProfileChange} placeholder="$15,000/year" />
+                  </div>
+
+                  <div className="profile-field profile-field-full">
+                    <label>Interests</label>
+                    <textarea
+                      name="interests"
+                      value={profile.interests || ''}
+                      onChange={onProfileChange}
+                      rows={2}
+                      placeholder="AI, cloud, product engineering"
+                    />
+                  </div>
+
+                  <div className="profile-field profile-field-full">
+                    <label>Bio</label>
+                    <textarea
+                      name="bio"
+                      value={profile.bio || ''}
+                      onChange={onProfileChange}
+                      rows={3}
+                      placeholder="Any extra context about your background"
+                    />
+                  </div>
+
+                  <div className="profile-form-actions profile-field-full">
+                    <button className="save-profile-btn" type="submit" disabled={profileSaving}>
+                      {profileSaving ? 'Saving...' : 'Save Profile'}
+                    </button>
+                    {profileSavedAt && <span className="profile-success-text">{profileSavedAt}</span>}
+                    {profileError && <span className="profile-error-text">{profileError}</span>}
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
 
           {/* Messages */}
           <div className="chat-messages">
+
+            {sessionLoading && <div className="chat-inline-note">Loading conversation...</div>}
 
             {messages.length === 0 && (
               <div className="chat-welcome">
@@ -231,7 +656,7 @@ const UniGuideChat = () => {
               <div key={i} className={`msg-row ${msg.role === 'user' ? 'user' : 'bot'}`}>
                 <div className={`msg-avatar ${msg.role === 'user' ? 'user-avatar' : 'bot-avatar'}`}>
                   {msg.role === 'user'
-                    ? getInitials(user.full_name)
+                    ? getInitials(user?.full_name)
                     : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
                   }
                 </div>
@@ -239,10 +664,13 @@ const UniGuideChat = () => {
                   <div className={`msg-label ${msg.role === 'user' ? 'user-label' : ''}`}>
                     {msg.role === 'user' ? 'You' : 'UniGuide AI'}
                   </div>
-                  <div
-                    className={`msg-bubble ${msg.role === 'user' ? 'user-bubble' : 'bot-bubble'}`}
-                    dangerouslySetInnerHTML={{ __html: formatMsg(msg.content) }}
-                  />
+                  <div className={`msg-bubble ${msg.role === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
+                    {msg.role === 'user' ? (
+                      msg.content
+                    ) : (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || ''}</ReactMarkdown>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
