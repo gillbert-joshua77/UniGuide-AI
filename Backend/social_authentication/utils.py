@@ -1,7 +1,6 @@
 from google.auth.transport import requests   # Used to make HTTP requests for Google token verification
 from google.oauth2 import id_token   # Used to verify Google OAuth2 tokens
 from authentication.models import User   # Import custom User model
-from django.contrib.auth import authenticate   # Django authentication function
 from django.conf import settings   # Access project settings
 from rest_framework.exceptions import AuthenticationFailed   # Exception for authentication failure
 
@@ -12,10 +11,16 @@ class Google():
   def validate(access_token):
     try:
       # Verify the token with Google servers (allow 10s clock skew)
+      # Passing the audience makes Google enforce that the token was issued to OUR client.
+      verify_kwargs = {'clock_skew_in_seconds': 10}
+      client_id = getattr(settings, 'GOOGLE_CLIENT_ID', '')
+      if client_id:
+        verify_kwargs['audience'] = client_id
+
       id_info = id_token.verify_oauth2_token(
         access_token,
         requests.Request(),
-        clock_skew_in_seconds=10
+        **verify_kwargs
       )
 
       # Check issuer to confirm it's from Google
@@ -31,22 +36,17 @@ class Google():
 
 
 
-# Function to login a social user
-def login_social_user(email, password):
-
-  user = authenticate(email=email, password=password)   # Authenticate user with email & password
-
-  if not user:
-    raise AuthenticationFailed("Social authentication failed")
+# Function to build the login response for a verified social user
+def login_social_user(user):
 
   user_tokens = user.tokens()   # Generate JWT tokens
 
   # Return user info with tokens
   return {
     'email': user.email,
-    'full_name': user.get_full_name,   
+    'full_name': user.get_full_name,
     'access_token': str(user_tokens.get('access')),
-    'refresh_token': str(user_tokens.get('refresh')),  
+    'refresh_token': str(user_tokens.get('refresh')),
   }
 
 
@@ -63,7 +63,8 @@ def register_social_user(provider, email, first_name, last_name):
         user_obj.auth_provider = provider
         user_obj.is_verified = True
         user_obj.save()
-      return login_social_user(email, settings.SOCIAL_AUTH_PASSWORD)
+      # Issue tokens directly; do not re-authenticate with a password the user never set.
+      return login_social_user(user_obj)
 
     else:
       raise AuthenticationFailed(
@@ -85,5 +86,5 @@ def register_social_user(provider, email, first_name, last_name):
     register_user.is_verified = True   # Mark user as verified
     register_user.save()   # Save user
 
-    # Login newly created user with string email
-    return login_social_user(email=register_user.email, password=settings.SOCIAL_AUTH_PASSWORD)
+    # Login newly created user
+    return login_social_user(register_user)

@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': env('DB_ENGINE', default='django.db.backends.mysql'),
-        'NAME': env('DB_NAME', default='uniguide_ai'),
+        'NAME': env('DB_NAME', default='uniguide_ai_1'),
         'USER': env('DB_USER', default='root'),
         'PASSWORD': env('DB_PASSWORD', default='1234'),
         'HOST': env('DB_HOST', default='127.0.0.1'),
@@ -178,4 +178,4 @@ AUTHENTICATION_BACKENDS = [
 
 GEMINI_API_KEY = env('GEMINI_API_KEY', default=os.environ.get('GEMINI_API_KEY', ''))
 
-NEWS_API_KEY = env('NEWS_API_KEY', default='')
+NEWS_API_KEY = env('NEWS_API_KEY', default='')
