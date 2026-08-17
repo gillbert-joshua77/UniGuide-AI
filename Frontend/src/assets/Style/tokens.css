@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════════
+   UniGuide AI — Design Token System
+   Single source of truth for all color values.
+   Raw brand/neutral values live here.
+   Semantic mappings live in theme.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ───────────────────────────────────────────────────────────────
+     A. RAW BRAND TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --color-primary: #00b4d8;
+  --color-primary-dark: #0077b6;
+  --color-primary-deep: #005f8a;
+
+  --color-secondary: #f77f00;
+  --color-secondary-dark: #e05a00;
+
+  --color-success: #22c97a;
+  --color-success-dark: #0f9e55;
+
+  --color-tertiary: #a78bfa;
+  --color-tertiary-dark: #7c3aed;
+
+  --color-danger: #ef4444;
+  --color-danger-dark: #dc2626;
+
+  /* ───────────────────────────────────────────────────────────────
+     B. AI INTERACTION TOKENS
+     Blue is NOT a second brand — it is reserved for AI/chat UI.
+     ─────────────────────────────────────────────────────────────── */
+  --color-ai: #3B82F6;
+  --color-ai-dark: #2563EB;
+  --color-ai-light: #93C5FD;
+  --color-ai-text: #1E40AF;
+  --color-ai-user-text: #DBEAFE;
+
+  /* ───────────────────────────────────────────────────────────────
+     C. NEUTRAL SCALE
+     ─────────────────────────────────────────────────────────────── */
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* ───────────────────────────────────────────────────────────────
+     D. SEMANTIC TEXT TOKENS (raw, theme-mapped in theme.css)
+     ─────────────────────────────────────────────────────────────── */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-disabled: #475569;
+  --text-inverse: #0f172a;
+  --text-accent: #00b4d8;
+  --text-brand: #00b4d8;
+  --text-brand-alt: #f77f00;
+
+  /* ───────────────────────────────────────────────────────────────
+     E. SEMANTIC SURFACE TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --surface-page: #040d16;
+  --surface-section: rgba(6, 17, 28, 0.9);
+  --surface-card: #081420;
+  --surface-card-hover: #0a1a2a;
+  --surface-elevated: #0F172A;
+  --surface-input: #0a1a2a;
+  --surface-overlay: rgba(2, 6, 18, 0.75);
+  --surface-sidebar: #0F172A;
+  --surface-header: #0F172A;
+  --surface-footer: #06111c;
+  --surface-inset: rgba(8, 20, 32, 0.85);
+
+  /* ───────────────────────────────────────────────────────────────
+     F. SEMANTIC BORDER TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --border-subtle: rgba(30, 77, 107, 0.3);
+  --border-default: rgba(30, 77, 107, 0.4);
+  --border-strong: rgba(30, 77, 107, 0.5);
+  --border-focus: var(--color-primary);
+
+  /* ───────────────────────────────────────────────────────────────
+     G. SEMANTIC STATUS TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --status-success: #22c97a;
+  --status-success-dark: #0f9e55;
+  --status-success-soft: rgba(34, 201, 122, 0.12);
+  --status-success-border: rgba(34, 201, 122, 0.25);
+  --status-warning: #f77f00;
+  --status-warning-soft: rgba(247, 127, 0, 0.12);
+  --status-warning-border: rgba(247, 127, 0, 0.25);
+  --status-danger: #ef4444;
+  --status-danger-soft: rgba(239, 68, 68, 0.12);
+  --status-danger-border: rgba(239, 68, 68, 0.25);
+  --status-info: #00b4d8;
+  --status-info-soft: rgba(0, 180, 216, 0.12);
+  --status-info-border: rgba(0, 180, 216, 0.25);
+
+  /* ───────────────────────────────────────────────────────────────
+     H. INTERACTION TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --interactive-primary: var(--color-primary);
+  --interactive-primary-hover: var(--color-primary-dark);
+  --interactive-primary-soft: rgba(0, 180, 216, 0.1);
+  --interactive-primary-subtle: rgba(0, 180, 216, 0.06);
+  --interactive-primary-border: rgba(0, 180, 216, 0.25);
+  --interactive-primary-glow: rgba(0, 180, 216, 0.15);
+
+  --interactive-ai: var(--color-ai);
+  --interactive-ai-hover: var(--color-ai-dark);
+  --interactive-ai-soft: rgba(59, 130, 246, 0.1);
+  --interactive-ai-subtle: rgba(59, 130, 246, 0.06);
+  --interactive-ai-border: rgba(59, 130, 246, 0.25);
+  --interactive-ai-glow: rgba(59, 130, 246, 0.15);
+
+  --interactive-secondary: var(--color-secondary);
+  --interactive-secondary-hover: var(--color-secondary-dark);
+  --interactive-secondary-soft: rgba(247, 127, 0, 0.1);
+  --interactive-secondary-subtle: rgba(247, 127, 0, 0.06);
+  --interactive-secondary-border: rgba(247, 127, 0, 0.25);
+  --interactive-secondary-glow: rgba(247, 127, 0, 0.15);
+
+  --interactive-danger: var(--color-danger);
+  --interactive-danger-hover: var(--color-danger-dark);
+  --interactive-danger-soft: rgba(239, 68, 68, 0.1);
+  --interactive-danger-subtle: rgba(239, 68, 68, 0.06);
+  --interactive-danger-border: rgba(239, 68, 68, 0.25);
+  --interactive-danger-glow: rgba(239, 68, 68, 0.15);
+
+  /* ───────────────────────────────────────────────────────────────
+     I. BRAND ALPHA / TRANSPARENCY TOKENS
+     ─────────────────────────────────────────────────────────────── */
+  --color-primary-soft: rgba(0, 180, 216, 0.1);
+  --color-primary-subtle: rgba(0, 180, 216, 0.06);
+  --color-primary-border: rgba(0, 180, 216, 0.25);
+  --color-primary-glow: rgba(0, 180, 216, 0.15);
+
+  --color-secondary-soft: rgba(247, 127, 0, 0.1);
+  --color-secondary-subtle: rgba(247, 127, 0, 0.06);
+  --color-secondary-border: rgba(247, 127, 0, 0.25);
+
+  --color-success-soft: rgba(34, 201, 122, 0.1);
+  --color-success-subtle: rgba(34, 201, 122, 0.06);
+  --color-success-border: rgba(34, 201, 122, 0.25);
+
+  --color-tertiary-soft: rgba(167, 139, 250, 0.1);
+  --color-tertiary-subtle: rgba(167, 139, 250, 0.06);
+  --color-tertiary-border: rgba(167, 139, 250, 0.25);
+
+  --color-danger-soft: rgba(239, 68, 68, 0.1);
+  --color-danger-subtle: rgba(239, 68, 68, 0.06);
+  --color-danger-border: rgba(239, 68, 68, 0.25);
+
+  --color-ai-soft: rgba(59, 130, 246, 0.1);
+  --color-ai-subtle: rgba(59, 130, 246, 0.06);
+  --color-ai-border: rgba(59, 130, 246, 0.25);
+  --color-ai-glow: rgba(59, 130, 246, 0.15);
+
+  /* ───────────────────────────────────────────────────────────────
+     J. OPACITY LAYERS
+     ─────────────────────────────────────────────────────────────── */
+  --opacity-backdrop: rgba(0, 0, 0, 0.5);
+  --opacity-scrim: rgba(0, 0, 0, 0.75);
+  --opacity-overlay: rgba(2, 6, 18, 0.6);
+  --opacity-hover: rgba(255, 255, 255, 0.05);
+  --opacity-hover-text: rgba(255, 255, 255, 0.1);
+  --opacity-divider: rgba(30, 77, 107, 0.4);
+  --opacity-pressed: rgba(255, 255, 255, 0.12);
+  --opacity-disabled: rgba(255, 255, 255, 0.25);
+
+  /* ───────────────────────────────────────────────────────────────
+     K. Z-INDEX SCALE
+     ─────────────────────────────────────────────────────────────── */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 1000;
+  --z-modal: 1100;
+  --z-drawer: 1050;
+  --z-popover: 1200;
+  --z-toast: 1300;
+  --z-tooltip: 1400;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL RESETS
+   ═══════════════════════════════════════════════════════════════════ */
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+img, svg, iframe, video {
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--text-primary);
+}
+
+/* Links */
+a {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
