@@ -384,85 +384,91 @@ const UniGuideChat = () => {
 
         {/* Sidebar */}
         <aside className="chat-sidebar">
-          <div className="sidebar-brand">
-            <div className="sidebar-logo">
-              <svg width="26" height="26" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="90" fill="#0a1e30" stroke="#1a3d5c" strokeWidth="2"/>
-                <polygon points="100,25 112,88 175,100 112,112 100,175 88,112 25,100 88,88" fill="#0e6e9e" opacity="0.7"/>
-                <polygon points="100,42 107,88 152,100 107,112 100,158 93,112 48,100 93,88" fill="#00b4d8" opacity="0.9"/>
-                <polygon points="100,58 128,95 142,100 128,105 100,142 72,105 58,100 72,95" fill="#f77f00" opacity="0.9"/>
-                <circle cx="100" cy="100" r="18" fill="#040d16" stroke="#00b4d8" strokeWidth="1.5"/>
-              </svg>
-              <div>
-                <div className="sidebar-brand-name">UniGuide <span>AI</span></div>
-                <div className="sidebar-status">
-                  <span className="status-dot" />Online
+          <div className="sidebar-top">
+            <div className="sidebar-brand">
+              <div className="sidebar-logo">
+                <svg width="26" height="26" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="90" fill="var(--surface-elevated)" stroke="var(--surface-card)" strokeWidth="2"/>
+                  <polygon points="100,25 112,88 175,100 112,112 100,175 88,112 25,100 88,88" fill="var(--color-primary)" opacity="0.7"/>
+                  <polygon points="100,42 107,88 152,100 107,112 100,158 93,112 48,100 93,88" fill="var(--color-primary)" opacity="0.9"/>
+                  <polygon points="100,58 128,95 142,100 128,105 100,142 72,105 58,100 72,95" fill="var(--color-secondary)" opacity="0.9"/>
+                  <circle cx="100" cy="100" r="18" fill="var(--surface-page)" stroke="var(--color-primary)" strokeWidth="1.5"/>
+                </svg>
+                <div>
+                  <div className="sidebar-brand-name">UniGuide <span>AI</span></div>
+                  <div className="sidebar-status">
+                    <span className="status-dot" />Online
+                  </div>
                 </div>
               </div>
-            </div>
-            <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close chat menu">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <button className="new-chat-btn" onClick={() => { createNewChat(); setSidebarOpen(false); }} disabled={creatingChat}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            {creatingChat ? 'Creating...' : 'New Chat'}
-          </button>
-
-          <div className="sidebar-section-label">Your Chats</div>
-
-          {sessionsLoading && <div className="sidebar-note">Loading chats...</div>}
-          {!sessionsLoading && sessionsError && <div className="sidebar-note error">{sessionsError}</div>}
-          {!sessionsLoading && !sessionsError && sessions.length === 0 && (
-            <div className="sidebar-note">No chats yet. Start a new one.</div>
-          )}
-
-          {!sessionsLoading && !sessionsError && displayedSessions.map((session) => (
-            <div
-              className={`sidebar-item-wrap ${activeSessionId === session.id ? 'active' : ''} ${pinnedSessionIds.includes(session.id) ? 'pinned' : ''}`}
-              key={session.id}
-              onContextMenu={(event) => openSessionContextMenu(event, session.id)}
-              title="Right click for options"
-            >
-              <button
-                className={`sidebar-item ${activeSessionId === session.id ? 'active' : ''}`}
-                onClick={() => { openSession(session.id); setSidebarOpen(false); }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close chat menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
-                {renamingSessionId === session.id ? (
-                  <input
-                    className="session-rename-input"
-                    value={renameTitle}
-                    onChange={(e) => setRenameTitle(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        submitRenameSession(session.id)
-                      }
-                      if (e.key === 'Escape') {
-                        setRenamingSessionId(null)
-                      }
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <>
-                    {pinnedSessionIds.includes(session.id) && <span className="session-pin-indicator">📌</span>}
-                    <span className="session-title-text">{session.title || 'New Chat'}</span>
-                    <span className="session-timestamp">{formatSessionTime(session.updated_at)}</span>
-                  </>
-                )}
               </button>
             </div>
-          ))}
+
+            <button className="new-chat-btn" onClick={() => { createNewChat(); setSidebarOpen(false); }} disabled={creatingChat}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              {creatingChat ? 'Creating...' : 'New Chat'}
+            </button>
+
+            <div className="sidebar-section-label">Your Chats</div>
+          </div>
+
+          <div className="sidebar-history">
+            {sessionsLoading && <div className="sidebar-note">Loading chats...</div>}
+            {!sessionsLoading && sessionsError && <div className="sidebar-note error">{sessionsError}</div>}
+            {!sessionsLoading && !sessionsError && sessions.length === 0 && (
+              <div className="sidebar-note">No chats yet. Start a new one.</div>
+            )}
+
+            {!sessionsLoading && !sessionsError && displayedSessions.map((session) => (
+              <div
+                className={`sidebar-item-wrap ${activeSessionId === session.id ? 'active' : ''} ${pinnedSessionIds.includes(session.id) ? 'pinned' : ''}`}
+                key={session.id}
+                onContextMenu={(event) => openSessionContextMenu(event, session.id)}
+                title="Right click for options"
+              >
+                <button
+                  className={`sidebar-item ${activeSessionId === session.id ? 'active' : ''}`}
+                  onClick={() => { openSession(session.id); setSidebarOpen(false); }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                  {renamingSessionId === session.id ? (
+                    <input
+                      className="session-rename-input"
+                      value={renameTitle}
+                      onChange={(e) => setRenameTitle(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          submitRenameSession(session.id)
+                        }
+                        if (e.key === 'Escape') {
+                          setRenamingSessionId(null)
+                        }
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      {pinnedSessionIds.includes(session.id) && <span className="session-pin-indicator">📌</span>}
+                      <span className="session-title-text">{session.title || 'New Chat'}</span>
+                      <span className="session-timestamp">{formatSessionTime(session.updated_at)}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+
+            {sessionError && <div className="sidebar-note error">{sessionError}</div>}
+          </div>
 
           {contextMenu.visible && (
             <div
@@ -507,10 +513,6 @@ const UniGuideChat = () => {
             </div>
           )}
 
-          {sessionError && <div className="sidebar-note error">{sessionError}</div>}
-
-          <div className="sidebar-spacer" />
-
           <div className="sidebar-user">
             <div className="sidebar-avatar">
               {user?.profile_picture ? (
@@ -539,7 +541,7 @@ const UniGuideChat = () => {
                 </svg>
               </button>
               <div className="chat-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                   <path d="M2 17l10 5 10-5"/>
                   <path d="M2 12l10 5 10-5"/>
@@ -549,7 +551,7 @@ const UniGuideChat = () => {
                 <div className="chat-header-name">
                   UniGuide AI
                   <span className="chat-verified-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
                   </span>
@@ -580,27 +582,10 @@ const UniGuideChat = () => {
                 <div className="welcome-heading">How can I guide you today? 🎓</div>
                 <div className="welcome-sub">Ask me anything about careers, internships, study abroad, or skills</div>
 
-                <div className="guided-section">
-                  <div className="guided-options">
-                    <button className="guided-option" onClick={() => setGuidedMode('internship')}>
-                      <span className="guided-option-label">💼 Internship</span>
-                      <span className="guided-option-desc">Find internships that fit you</span>
-                    </button>
-                    <button className="guided-option" onClick={() => setGuidedMode('hackathon')}>
-                      <span className="guided-option-label">🚀 Hackathon</span>
-                      <span className="guided-option-desc">Hackathons, ideas & prep</span>
-                    </button>
-                    <button className="guided-option" onClick={() => setGuidedMode('university')}>
-                      <span className="guided-option-label">🎓 University / College</span>
-                      <span className="guided-option-desc">Pick the right program</span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Welcome bot message */}
                 <div className="msg-row bot">
                   <div className="msg-avatar bot-avatar">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round">
                       <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                       <path d="M2 17l10 5 10-5"/>
                     </svg>
@@ -627,7 +612,7 @@ const UniGuideChat = () => {
                 <div className={`msg-avatar ${msg.role === 'user' ? 'user-avatar' : 'bot-avatar'}`}>
                   {msg.role === 'user'
                     ? getInitials(user?.full_name)
-                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
                   }
                 </div>
                 <div className="msg-content-wrap">
@@ -648,7 +633,7 @@ const UniGuideChat = () => {
             {isTyping && (
               <div className="msg-row bot">
                 <div className="msg-avatar bot-avatar">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2" strokeLinecap="round">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5"/>
                   </svg>
@@ -677,25 +662,28 @@ const UniGuideChat = () => {
                 rows={1}
               />
               <button className="send-btn" onClick={() => sendMessage()} disabled={isTyping || !input.trim()}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="2.5" strokeLinecap="round">
                   <line x1="22" y1="2" x2="11" y2="13"/>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
               </button>
             </div>
-            {!activeSessionId && messages.length === 0 && (
-              <div className="quick-chips-row">
-                <button className="quick-chip" onClick={() => setGuidedMode('internship')}>
-                  <span className="quick-chip-icon">💼</span>Internship
-                </button>
-                <button className="quick-chip" onClick={() => setGuidedMode('hackathon')}>
-                  <span className="quick-chip-icon">🚀</span>Hackathon
-                </button>
-                <button className="quick-chip" onClick={() => setGuidedMode('university')}>
-                  <span className="quick-chip-icon">🎓</span>University / College
-                </button>
-              </div>
-            )}
+
+            <div className="chat-quick-options">
+              <button className="chat-quick-option" onClick={() => setGuidedMode('internship')}>
+                <span className="chat-quick-option-icon">💼</span>
+                <span>Internship</span>
+              </button>
+              <button className="chat-quick-option" onClick={() => setGuidedMode('hackathon')}>
+                <span className="chat-quick-option-icon">🚀</span>
+                <span>Hackathon</span>
+              </button>
+              <button className="chat-quick-option" onClick={() => setGuidedMode('university')}>
+                <span className="chat-quick-option-icon">🎓</span>
+                <span>University / College</span>
+              </button>
+            </div>
+
             <div className="chat-footer-hint">
               Press Enter to send, Shift+Enter for new line
             </div>

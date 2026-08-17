@@ -39,18 +39,18 @@ function TickerBar({ headlines }) {
   const text = headlines.length ? headlines.join("     ·     ") : "Loading the latest IT news...";
   return (
     <div style={{
-      background: "rgba(239,68,68,0.08)", borderBottom: "1px solid rgba(239,68,68,0.2)",
+      background: "rgba(239,68,68,0.08)", borderBottom: "1px solid var(--status-danger-border)",
       display: "flex", alignItems: "center", overflow: "hidden", height: 36
     }}>
       <div style={{
-        background: "#ef4444", color: "#fff", padding: "0 14px", fontSize: 10,
+        background: "var(--color-danger)", color: "var(--text-inverse)", padding: "0 14px", fontSize: 10,
         fontWeight: 800, letterSpacing: 2, height: "100%", display: "flex",
         alignItems: "center", flexShrink: 0, whiteSpace: "nowrap"
       }}>LIVE</div>
       <div style={{ overflow: "hidden", flex: 1, position: "relative" }}>
         <div style={{
           display: "inline-block", whiteSpace: "nowrap",
-          color: "#fca5a5", fontSize: 12, fontWeight: 500, lineHeight: 1,
+          color: "var(--color-danger)", fontSize: 12, fontWeight: 500, lineHeight: 1,
           willChange: "transform", animation: "ticker 45s linear infinite", paddingTop: 12
         }}>
           <span>{text}</span><span>     ·     </span><span>{text}</span>
@@ -95,11 +95,11 @@ function FeaturedCard({ article }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(30,41,59,0.98)" : "rgba(15,23,42,0.85)",
-        border: hovered ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(51,65,85,0.5)",
+        background: hovered ? "var(--surface-card)" : "var(--surface-inset)",
+        border: hovered ? "1px solid var(--color-tertiary)" : "1px solid var(--border-default)",
         borderRadius: 18, overflow: "hidden", cursor: "pointer",
         transition: "all 0.25s ease", height: "100%",
-        boxShadow: hovered ? "0 12px 48px rgba(99,102,241,0.15)" : "0 4px 16px rgba(0,0,0,0.3)",
+        boxShadow: hovered ? "0 12px 48px rgba(99,102,241,0.15)" : "0 4px 16px var(--opacity-backdrop)",
         transform: hovered ? "translateY(-4px)" : "none", display: "flex", flexDirection: "column"
       }}
     >
@@ -114,7 +114,7 @@ function FeaturedCard({ article }) {
       ) : (
         <div style={{
           height: 150, flexShrink: 0,
-          background: `linear-gradient(135deg, ${meta.color}2e, rgba(15,23,42,0.2))`,
+          background: `linear-gradient(135deg, ${meta.color}2e, var(--surface-inset))`,
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 46, position: "relative"
         }}>
           <span style={{ opacity: 0.9 }}>{meta.emoji}</span>
@@ -131,31 +131,31 @@ function FeaturedCard({ article }) {
             background: `${meta.color}1f`, border: `1px solid ${meta.color}55`, color: meta.color,
             borderRadius: 6, padding: "3px 9px", fontSize: 10, fontWeight: 700, letterSpacing: 0.5
           }}>{article.category}</span>
-          <span style={{ color: "#64748b", fontSize: 11 }}>🕐 {timeAgo(article.publishedAt)}</span>
+          <span style={{ color: "var(--text-muted)", fontSize: 11 }}>🕐 {timeAgo(article.publishedAt)}</span>
         </div>
 
         <div style={{
-          color: "#f1f5f9", fontSize: 17, fontWeight: 800, lineHeight: 1.4,
+          color: "var(--text-primary)", fontSize: 17, fontWeight: 800, lineHeight: 1.4,
           display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden"
         }}>{article.title}</div>
 
         {article.summary && (
           <div style={{
-            color: "#94a3b8", fontSize: 12.5, lineHeight: 1.65,
+            color: "var(--text-muted)", fontSize: 12.5, lineHeight: 1.65,
             display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
           }}>{article.summary}</div>
         )}
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 8, flexWrap: "wrap", gap: 10 }}>
-          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-muted)", flexWrap: "wrap" }}>
             <span>📰 {article.source}</span>
             <span>⏱ {article.readTime} min read</span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); open(); }}
             style={{
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none",
-              color: "#fff", borderRadius: 8, padding: "8px 16px", fontSize: 12,
+              background: "linear-gradient(135deg, var(--color-tertiary), var(--color-tertiary-dark))", border: "none",
+              color: "var(--text-inverse)", borderRadius: 8, padding: "8px 16px", fontSize: 12,
               fontWeight: 600, cursor: "pointer"
             }}
           >Read Original →</button>
@@ -176,8 +176,8 @@ function NewsRow({ article, bookmarked, onToggleBookmark }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(30,41,59,0.95)" : "rgba(15,23,42,0.7)",
-        border: hovered ? "1px solid rgba(99,102,241,0.4)" : "1px solid rgba(51,65,85,0.4)",
+        background: hovered ? "var(--surface-inset)" : "var(--surface-inset)",
+        border: hovered ? "1px solid var(--color-tertiary)" : "1px solid var(--border-default)",
         borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, cursor: "pointer",
         transition: "all 0.2s ease"
       }}
@@ -189,26 +189,26 @@ function NewsRow({ article, bookmarked, onToggleBookmark }) {
             background: `${meta.color}1f`, border: `1px solid ${meta.color}55`, color: meta.color,
             borderRadius: 5, padding: "2px 7px", fontSize: 9, fontWeight: 700, letterSpacing: 0.5
           }}>{article.category}</span>
-          <span style={{ color: "#94a3b8", fontSize: 11 }}>{article.source}</span>
-          <span style={{ color: "#475569", fontSize: 11, marginLeft: "auto" }}>🕐 {timeAgo(article.publishedAt)}</span>
+          <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{article.source}</span>
+          <span style={{ color: "var(--text-disabled)", fontSize: 11, marginLeft: "auto" }}>🕐 {timeAgo(article.publishedAt)}</span>
         </div>
         <div style={{
-          color: "#e2e8f0", fontSize: 14, fontWeight: 600, lineHeight: 1.4,
+          color: "var(--text-primary)", fontSize: 14, fontWeight: 600, lineHeight: 1.4,
           marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical", overflow: "hidden"
         }}>{article.title}</div>
-        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-muted)", alignItems: "center", flexWrap: "wrap" }}>
           <span>⏱ {article.readTime} min read</span>
           <button
             onClick={(e) => { e.stopPropagation(); onToggleBookmark(article.id); }}
             title={bookmarked ? "Remove bookmark" : "Bookmark"}
             style={{
-              marginLeft: "auto", background: "rgba(15,23,42,0.8)", border: "1px solid rgba(51,65,85,0.5)",
+              marginLeft: "auto", background: "var(--surface-inset)", border: "1px solid var(--border-default)",
               borderRadius: 7, width: 28, height: 28, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13
             }}
           >{bookmarked ? "🔖" : "📑"}</button>
-          <span style={{ color: hovered ? "#a5b4fc" : "#64748b", fontWeight: 600 }}>Read Original ↗</span>
+          <span style={{ color: hovered ? "var(--color-tertiary)" : "var(--text-muted)", fontWeight: 600 }}>Read Original ↗</span>
         </div>
       </div>
     </div>
@@ -224,19 +224,19 @@ function TopSources({ articles }) {
 
   return (
     <div style={{
-      background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,0.5)",
+      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
       borderRadius: 16, padding: "22px 24px"
     }}>
-      <div style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>📰 Top Sources</div>
+      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>📰 Top Sources</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {top.map(([name, count]) => (
           <div key={name}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ color: "#cbd5e1", fontSize: 12.5 }}>{name}</span>
-              <span style={{ color: "#64748b", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>{count}</span>
+              <span style={{ color: "var(--text-secondary)", fontSize: 12.5 }}>{name}</span>
+              <span style={{ color: "var(--text-muted)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>{count}</span>
             </div>
-            <div style={{ height: 4, background: "rgba(51,65,85,0.5)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: `${Math.max(6, (count / max) * 100)}%`, height: "100%", background: "linear-gradient(90deg, #6366f1, #22d3ee)", borderRadius: 3 }} />
+            <div style={{ height: 4, background: "var(--border-default)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ width: `${Math.max(6, (count / max) * 100)}%`, height: "100%", background: "linear-gradient(90deg, var(--color-tertiary), var(--color-primary))", borderRadius: 3 }} />
             </div>
           </div>
         ))}
@@ -253,10 +253,10 @@ function LatestHeadlines({ articles }) {
 
   return (
     <div style={{
-      background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,0.5)",
+      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
       borderRadius: 16, padding: "22px 24px"
     }}>
-      <div style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>⚡ Latest Headlines</div>
+      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>⚡ Latest Headlines</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {latest.map((a, i) => (
           <a
@@ -266,17 +266,17 @@ function LatestHeadlines({ articles }) {
             rel="noopener noreferrer"
             style={{
               display: "flex", gap: 10, textDecoration: "none", padding: "9px 10px",
-              borderRadius: 8, background: i === 0 ? "rgba(99,102,241,0.12)" : "transparent",
+              borderRadius: 8, background: i === 0 ? "var(--color-tertiary-soft)" : "transparent",
               transition: "background 0.2s"
             }}
           >
-            <span style={{ color: "#475569", fontSize: 11, fontWeight: 700, width: 16, paddingTop: 1 }}>{i + 1}</span>
+            <span style={{ color: "var(--text-disabled)", fontSize: 11, fontWeight: 700, width: 16, paddingTop: 1 }}>{i + 1}</span>
             <div>
               <div style={{
-                color: "#cbd5e1", fontSize: 12.5, fontWeight: 600, lineHeight: 1.45,
+                color: "var(--text-secondary)", fontSize: 12.5, fontWeight: 600, lineHeight: 1.45,
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
               }}>{a.title}</div>
-              <div style={{ color: "#64748b", fontSize: 10, marginTop: 3 }}>{a.source} · {timeAgo(a.publishedAt)}</div>
+              <div style={{ color: "var(--text-muted)", fontSize: 10, marginTop: 3 }}>{a.source} · {timeAgo(a.publishedAt)}</div>
             </div>
           </a>
         ))}
@@ -290,30 +290,30 @@ function NewsletterBox() {
   const [done, setDone] = useState(false);
   return (
     <div style={{
-      background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(251,191,36,0.06))",
-      border: "1px solid rgba(249,115,22,0.3)", borderRadius: 16, padding: "22px 24px"
+      background: "linear-gradient(135deg, var(--color-secondary-soft), var(--color-secondary-subtle))",
+      border: "1px solid var(--color-secondary-border)", borderRadius: 16, padding: "22px 24px"
     }}>
-      <div style={{ color: "#fb923c", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>📬 IT Market Digest</div>
-      <div style={{ color: "#94a3b8", fontSize: 12, marginBottom: 16, lineHeight: 1.6 }}>
+      <div style={{ color: "var(--color-secondary)", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>📬 IT Market Digest</div>
+      <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 16, lineHeight: 1.6 }}>
         Get AI-curated IT market news, salary trends & job alerts every morning.
       </div>
       {done ? (
         <div style={{
-          background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.3)",
-          borderRadius: 10, padding: "12px", textAlign: "center", color: "#34d399", fontSize: 13
+          background: "rgba(52,211,153,0.1)", border: "1px solid var(--color-success-border)",
+          borderRadius: 10, padding: "12px", textAlign: "center", color: "var(--color-success)", fontSize: 13
         }}>✓ You're subscribed! Check your inbox.</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <input value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             style={{
-              background: "rgba(15,23,42,0.8)", border: "1px solid rgba(51,65,85,0.6)",
-              borderRadius: 10, padding: "10px 14px", color: "#f1f5f9", fontSize: 13,
+              background: "var(--surface-inset)", border: "1px solid var(--border-strong)",
+              borderRadius: 10, padding: "10px 14px", color: "var(--text-primary)", fontSize: 13,
               outline: "none", width: "100%", boxSizing: "border-box"
             }} />
           <button onClick={() => email && setDone(true)} style={{
-            background: "linear-gradient(135deg, #f97316, #fbbf24)",
-            border: "none", color: "#0f172a", borderRadius: 10, padding: "10px",
+            background: "linear-gradient(135deg, var(--color-secondary), var(--color-secondary))",
+            border: "none", color: "var(--text-inverse)", borderRadius: 10, padding: "10px",
             fontSize: 13, fontWeight: 700, cursor: "pointer"
           }}>Subscribe Free →</button>
         </div>
@@ -325,11 +325,11 @@ function NewsletterBox() {
 function AboutFeed() {
   return (
     <div style={{
-      background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,0.5)",
+      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
       borderRadius: 16, padding: "18px 20px"
     }}>
-      <div style={{ color: "#f1f5f9", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>ℹ️ About this feed</div>
-      <div style={{ color: "#64748b", fontSize: 11.5, lineHeight: 1.65 }}>
+      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>ℹ️ About this feed</div>
+      <div style={{ color: "var(--text-muted)", fontSize: 11.5, lineHeight: 1.65 }}>
         Real-time tech news aggregated from global sources via NewsAPI.org and refreshed every 30 minutes. Tap any story to read the original article.
       </div>
     </div>
@@ -337,12 +337,12 @@ function AboutFeed() {
 }
 
 function LoadingSkeleton() {
-  const pulse = { background: "rgba(51,65,85,0.4)", borderRadius: 8, animation: "pulse 1.2s ease-in-out infinite" };
+  const pulse = { background: "var(--border-subtle)", borderRadius: 8, animation: "pulse 1.2s ease-in-out infinite" };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{
-        height: 190, borderRadius: 18, background: "rgba(15,23,42,0.7)",
-        border: "1px solid rgba(51,65,85,0.4)", padding: 24,
+        height: 190, borderRadius: 18, background: "var(--surface-inset)",
+        border: "1px solid var(--border-default)", padding: 24,
         display: "flex", flexDirection: "column", gap: 12
       }}>
         <div style={{ width: "35%", height: 16, ...pulse }} />
@@ -352,8 +352,8 @@ function LoadingSkeleton() {
       </div>
       {[0, 1, 2, 3].map((i) => (
         <div key={i} style={{
-          height: 88, borderRadius: 14, background: "rgba(15,23,42,0.7)",
-          border: "1px solid rgba(51,65,85,0.4)", padding: 16,
+          height: 88, borderRadius: 14, background: "var(--surface-inset)",
+          border: "1px solid var(--border-default)", padding: 16,
           display: "flex", gap: 14, alignItems: "center"
         }}>
           <div style={{ width: 56, height: 56, borderRadius: 12, ...pulse }} />
@@ -372,11 +372,11 @@ function ErrorState({ message, onRetry }) {
   return (
     <div style={{ textAlign: "center", padding: "48px 0" }}>
       <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "#f87171", marginBottom: 8 }}>Failed to load news</div>
-      <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 20, maxWidth: 420, margin: "0 auto 20px" }}>{message}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-danger)", marginBottom: 8 }}>Failed to load news</div>
+      <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 420, margin: "0 auto 20px" }}>{message}</div>
       <button onClick={onRetry} style={{
-        background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.4)",
-        color: "#fb923c", borderRadius: 10, padding: "10px 22px", fontSize: 13,
+        background: "rgba(249,115,22,0.15)", border: "1px solid var(--color-secondary-border)",
+        color: "var(--color-secondary)", borderRadius: 10, padding: "10px 22px", fontSize: 13,
         fontWeight: 600, cursor: "pointer"
       }}>↻ Try Again</button>
     </div>
@@ -385,10 +385,10 @@ function ErrorState({ message, onRetry }) {
 
 function EmptyState({ message, hint }) {
   return (
-    <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
+    <div style={{ textAlign: "center", padding: "48px 0", color: "var(--text-muted)" }}>
       <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
-      <div style={{ color: "#94a3b8", fontSize: 14 }}>{message}</div>
-      {hint && <div style={{ color: "#475569", fontSize: 12, marginTop: 6 }}>{hint}</div>}
+      <div style={{ color: "var(--text-muted)", fontSize: 14 }}>{message}</div>
+      {hint && <div style={{ color: "var(--text-disabled)", fontSize: 12, marginTop: 6 }}>{hint}</div>}
     </div>
   );
 }
@@ -463,9 +463,9 @@ export default function Itnews() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #020817 0%, #0c1628 60%, #020817 100%)",
+      background: "var(--surface-page)",
       fontFamily: "'Segoe UI', system-ui, sans-serif",
-      color: "#f1f5f9"
+      color: "var(--text-primary)"
     }}>
       <style>{`
         @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
@@ -473,8 +473,8 @@ export default function Itnews() {
         @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #020817; }
-        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: var(--surface-page); }
+        ::-webkit-scrollbar-thumb { background: var(--color-tertiary-border); border-radius: 3px; }
         input { color-scheme: dark; }
         button:hover { opacity: 0.88; }
         .in-layout { grid-template-columns: 1fr 320px; }
@@ -497,15 +497,15 @@ export default function Itnews() {
       {/* Page hero */}
       <div className="in-hero" style={{
         padding: "44px 40px 28px",
-        background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(249,115,22,0.07) 0%, transparent 65%)",
+        background: "radial-gradient(ellipse 70% 50% at 50% 0%, var(--color-secondary-soft) 0%, transparent 65%)",
         animation: "fadeIn 0.6s ease"
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 20 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{
-                background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)",
-                borderRadius: 20, padding: "5px 14px", fontSize: 11, color: "#fb923c",
+                background: "rgba(249,115,22,0.12)", border: "1px solid var(--color-secondary-border)",
+                borderRadius: 20, padding: "5px 14px", fontSize: 11, color: "var(--color-secondary)",
                 display: "flex", alignItems: "center", gap: 6, fontWeight: 600
               }}>
                 <span style={{ animation: "pulse 1.5s infinite", display: "inline-block" }}>🔴</span>
@@ -514,10 +514,10 @@ export default function Itnews() {
             </div>
             <h1 style={{
               fontSize: "clamp(26px, 4vw, 42px)", fontWeight: 900, margin: "0 0 10px",
-              background: "linear-gradient(135deg, #f1f5f9 0%, #fb923c 50%, #fbbf24 100%)",
+              background: "linear-gradient(135deg, var(--text-primary) 0%, var(--color-secondary) 50%, var(--color-secondary) 100%)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2
             }}>IT Market News</h1>
-            <p style={{ color: "#94a3b8", fontSize: 15, margin: 0 }}>
+            <p style={{ color: "var(--text-muted)", fontSize: 15, margin: 0 }}>
               Real-time tech industry news, market signals & career intelligence — built for students.
             </p>
           </div>
@@ -525,15 +525,15 @@ export default function Itnews() {
           {/* Search + refresh */}
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ position: "relative", width: "min(280px, 100%)" }}>
-              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#475569", fontSize: 14 }}>🔍</span>
+              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-disabled)", fontSize: 14 }}>🔍</span>
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search news..."
                 style={{
-                  width: "100%", background: "rgba(15,23,42,0.8)",
-                  border: "1px solid rgba(51,65,85,0.6)", borderRadius: 12,
-                  padding: "11px 16px 11px 38px", color: "#f1f5f9", fontSize: 13, outline: "none"
+                  width: "100%", background: "var(--surface-inset)",
+                  border: "1px solid var(--border-strong)", borderRadius: 12,
+                  padding: "11px 16px 11px 38px", color: "var(--text-primary)", fontSize: 13, outline: "none"
                 }}
               />
             </div>
@@ -542,9 +542,9 @@ export default function Itnews() {
               disabled={loading}
               title="Refresh news"
               style={{
-                background: "rgba(15,23,42,0.8)", border: "1px solid rgba(51,65,85,0.6)",
+                background: "var(--surface-inset)", border: "1px solid var(--border-strong)",
                 borderRadius: 12, width: 42, height: 42, cursor: loading ? "default" : "pointer",
-                color: loading ? "#475569" : "#fb923c", fontSize: 16, opacity: loading ? 0.6 : 1
+                color: loading ? "var(--text-disabled)" : "var(--color-secondary)", fontSize: 16, opacity: loading ? 0.6 : 1
               }}
             >↻</button>
           </div>
@@ -554,9 +554,9 @@ export default function Itnews() {
         <div style={{ display: "flex", gap: 8, marginTop: 24, flexWrap: "wrap" }}>
           {CATEGORIES.map((c) => (
             <button key={c} onClick={() => selectCategory(c)} style={{
-              background: activeCategory === c ? "rgba(249,115,22,0.2)" : "rgba(15,23,42,0.6)",
-              border: activeCategory === c ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(51,65,85,0.5)",
-              color: activeCategory === c ? "#fb923c" : "#64748b",
+              background: activeCategory === c ? "var(--color-secondary-soft)" : "var(--surface-inset)",
+              border: activeCategory === c ? "1px solid var(--color-secondary-border)" : "1px solid var(--border-default)",
+              color: activeCategory === c ? "var(--color-secondary)" : "var(--text-muted)",
               borderRadius: 20, padding: "7px 16px", fontSize: 12,
               cursor: "pointer", fontWeight: 600, transition: "all 0.2s"
             }}>{c}</button>
@@ -580,8 +580,8 @@ export default function Itnews() {
                 {featured.length > 0 && (
                   <>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ color: "#94a3b8", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Featured Stories</div>
-                      <div style={{ flex: 1, height: 1, background: "rgba(51,65,85,0.5)" }} />
+                      <div style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Featured Stories</div>
+                      <div style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
                     </div>
 
                     {/* Featured cards */}
@@ -597,10 +597,10 @@ export default function Itnews() {
 
                 {/* Latest label */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: featured.length ? 8 : 0 }}>
-                  <div style={{ color: "#94a3b8", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
                     Latest · {filtered.length} {filtered.length === 1 ? "story" : "stories"}
                   </div>
-                  <div style={{ flex: 1, height: 1, background: "rgba(51,65,85,0.5)" }} />
+                  <div style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
                 </div>
 
                 {/* Regular cards */}

@@ -64,37 +64,37 @@ const Home = () => {
           <div className="features-grid">
             {[
               {
-                color: '#00b4d8', bg: 'rgba(0,180,216,0.1)',
+                color: 'var(--color-primary)', bg: 'var(--color-primary-soft)',
                 title: 'AI Career Guidance',
                 desc: 'Personalized career suggestions based on your skills, interests, and goals.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00b4d8" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               },
               {
-                color: '#f77f00', bg: 'rgba(247,127,0,0.1)',
+                color: 'var(--color-secondary)', bg: 'var(--color-secondary-soft)',
                 title: 'Internship Finder',
                 desc: 'Browse and apply to the latest internship opportunities matched to your profile.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f77f00" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
               },
               {
-                color: '#22c97a', bg: 'rgba(34,201,122,0.1)',
+                color: 'var(--color-success)', bg: 'var(--color-success-soft)',
                 title: 'Study Abroad Navigator',
                 desc: 'Discover universities, scholarships, and global opportunities tailored for you.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c97a" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
               },
               {
-                color: '#a78bfa', bg: 'rgba(167,139,250,0.1)',
+                color: 'var(--color-tertiary)', bg: 'var(--color-tertiary)',
                 title: 'Skill Tracker',
                 desc: 'Add, monitor, and grow your skills with AI-driven learning recommendations.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               },
               {
-                color: '#00b4d8', bg: 'rgba(0,180,216,0.1)',
+                color: 'var(--color-primary)', bg: 'var(--color-primary-soft)',
                 title: 'Resume Builder',
                 desc: 'Build a professional resume with AI suggestions to stand out to recruiters.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00b4d8" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               },
               {
-                color: '#f77f00', bg: 'rgba(247,127,0,0.1)',
+                color: 'var(--color-secondary)', bg: 'var(--color-secondary-soft)',
                 title: 'Smart Recommendations',
                 desc: 'Get AI-curated job and internship suggestions based on your unique profile.',
                 icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f77f00" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
@@ -121,9 +121,9 @@ const Home = () => {
 
           <div className="steps-grid">
             {[
-              { num: '1', color: 'linear-gradient(135deg,#00b4d8,#0077b6)', ring: 'rgba(0,180,216,0.15)', title: 'Create your profile',       desc: 'Sign up and tell us about your background, education, and aspirations.' },
-              { num: '2', color: 'linear-gradient(135deg,#f77f00,#e05a00)', ring: 'rgba(247,127,0,0.15)',   title: 'Add skills & interests',    desc: 'Track your skills, set career interests, and let AI understand your strengths.' },
-              { num: '3', color: 'linear-gradient(135deg,#22c97a,#0f9e55)', ring: 'rgba(34,201,122,0.15)',  title: 'Get AI recommendations',   desc: 'Receive personalized career paths, internships, and opportunities instantly.' },
+              { num: '1', color: 'linear-gradient(135deg,var(--color-primary),var(--color-primary-dark))', ring: 'var(--color-primary-glow)', title: 'Create your profile',       desc: 'Sign up and tell us about your background, education, and aspirations.' },
+              { num: '2', color: 'linear-gradient(135deg,var(--color-secondary),var(--color-secondary-dark))', ring: 'var(--color-secondary-soft)',   title: 'Add skills & interests',    desc: 'Track your skills, set career interests, and let AI understand your strengths.' },
+              { num: '3', color: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))', ring: 'var(--color-success-soft)',  title: 'Get AI recommendations',   desc: 'Receive personalized career paths, internships, and opportunities instantly.' },
             ].map((s, i) => (
               <div className="step-item" key={i}>
                 <div className="step-num-wrap">
@@ -150,9 +150,9 @@ const Home = () => {
             <div className="dashboard-col">
               <div className="dash-sub-title">Skills overview</div>
               {[
-                { name: 'Python',           pct: 85, color: 'linear-gradient(90deg,#00b4d8,#0077b6)' },
-                { name: 'React',            pct: 72, color: 'linear-gradient(90deg,#00b4d8,#0077b6)' },
-                { name: 'Machine Learning', pct: 60, color: 'linear-gradient(90deg,#f77f00,#e05a00)' },
+                { name: 'Python',           pct: 85, color: 'linear-gradient(90deg,var(--color-primary),var(--color-primary-dark))' },
+                { name: 'React',            pct: 72, color: 'linear-gradient(90deg,var(--color-primary),var(--color-primary-dark))' },
+                { name: 'Machine Learning', pct: 60, color: 'linear-gradient(90deg,var(--color-secondary),var(--color-secondary-dark))' },
               ].map(s => (
                 <div className="skill-item" key={s.name}>
                   <div className="skill-meta">
@@ -166,8 +166,8 @@ const Home = () => {
 
               <div className="dash-sub-title" style={{ marginTop: '20px' }}>Suggested internships</div>
               {[
-                { role: 'Software Engineer Intern', company: 'Google · Remote',    match: '95% match', mc: '#22c97a', mb: 'rgba(34,201,122,0.1)', mbo: 'rgba(34,201,122,0.2)' },
-                { role: 'ML Research Intern',       company: 'Microsoft · Hybrid', match: '88% match', mc: '#00b4d8', mb: 'rgba(0,180,216,0.1)',   mbo: 'rgba(0,180,216,0.2)'  },
+                { role: 'Software Engineer Intern', company: 'Google · Remote',    match: '95% match', mc: 'var(--color-success)', mb: 'var(--color-success-soft)', mbo: 'var(--color-success-soft)' },
+                { role: 'ML Research Intern',       company: 'Microsoft · Hybrid', match: '88% match', mc: 'var(--color-primary)', mb: 'var(--color-primary-soft)',   mbo: 'var(--color-primary-soft)'  },
               ].map(a => (
                 <div className="app-row" key={a.role}>
                   <div>
@@ -182,9 +182,9 @@ const Home = () => {
             <div className="dashboard-col">
               <div className="dash-sub-title">Recent applications</div>
               {[
-                { role: 'Frontend Developer Intern', company: 'Zoho · Chennai',       status: 'Applied',   sc: '#00b4d8', sb: 'rgba(0,180,216,0.1)',   sbo: 'rgba(0,180,216,0.2)'   },
-                { role: 'Data Analyst Intern',       company: 'Infosys · Bangalore',  status: 'Interview', sc: '#22c97a', sb: 'rgba(34,201,122,0.1)',  sbo: 'rgba(34,201,122,0.2)'  },
-                { role: 'Backend Intern',            company: 'Razorpay · Remote',    status: 'Pending',   sc: '#f77f00', sb: 'rgba(247,127,0,0.1)',   sbo: 'rgba(247,127,0,0.2)'   },
+                { role: 'Frontend Developer Intern', company: 'Zoho · Chennai',       status: 'Applied',   sc: 'var(--color-primary)', sb: 'var(--color-primary-soft)',   sbo: 'var(--color-primary-soft)'   },
+                { role: 'Data Analyst Intern',       company: 'Infosys · Bangalore',  status: 'Interview', sc: 'var(--color-success)', sb: 'var(--color-success-soft)',  sbo: 'var(--color-success-soft)'  },
+                { role: 'Backend Intern',            company: 'Razorpay · Remote',    status: 'Pending',   sc: 'var(--color-secondary)', sb: 'var(--color-secondary-soft)',   sbo: 'var(--color-secondary-soft)'   },
               ].map(a => (
                 <div className="app-row" key={a.role}>
                   <div>
@@ -218,9 +218,9 @@ const Home = () => {
             <h3 className="split-heading">Upcoming hackathons</h3>
             <div className="trend-list">
               {[
-                { title: 'Smart India Hackathon', sub: 'Aug 15 · National',  color: '#f77f00', bg: 'rgba(247,127,0,0.1)'   },
-                { title: 'HackWithInfy 2025',     sub: 'Sep 3 · Infosys',   color: '#00b4d8', bg: 'rgba(0,180,216,0.1)'   },
-                { title: 'Google Solution Challenge', sub: 'Oct 1 · Global', color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
+                { title: 'Smart India Hackathon', sub: 'Aug 15 · National',  color: 'var(--color-secondary)', bg: 'var(--color-secondary-soft)'   },
+                { title: 'HackWithInfy 2025',     sub: 'Sep 3 · Infosys',   color: 'var(--color-primary)', bg: 'var(--color-primary-soft)'   },
+                { title: 'Google Solution Challenge', sub: 'Oct 1 · Global', color: 'var(--color-tertiary)', bg: 'var(--color-tertiary)' },
               ].map(h => (
                 <div className="trend-card" key={h.title}>
                   <div className="trend-icon" style={{ background: h.bg }}>
@@ -266,9 +266,9 @@ const Home = () => {
           </div>
           <div className="testimonials-grid">
             {[
-              { text: '"UniGuide AI helped me find my first internship at a top MNC. The AI suggestions were spot on and saved me weeks of searching!"', name: 'Arjun Ravi',    role: 'CS Student, VIT',  initials: 'AR', color: 'linear-gradient(135deg,#00b4d8,#0077b6)' },
-              { text: '"Best AI tool for career clarity. I had no idea what path to take and UniGuide gave me a complete roadmap. Highly recommend!"',  name: 'Priya Krishnan', role: 'ECE Student, SRM',  initials: 'PK', color: 'linear-gradient(135deg,#f77f00,#e05a00)' },
-              { text: '"The study abroad navigator helped me shortlist universities and apply for scholarships. Got into my dream uni in Canada!"',        name: 'Sneha Menon',   role: 'IT Student, PSG',   initials: 'SM', color: 'linear-gradient(135deg,#22c97a,#0f9e55)' },
+              { text: '"UniGuide AI helped me find my first internship at a top MNC. The AI suggestions were spot on and saved me weeks of searching!"', name: 'Arjun Ravi',    role: 'CS Student, VIT',  initials: 'AR', color: 'linear-gradient(135deg,var(--color-primary),var(--color-primary-dark))' },
+              { text: '"Best AI tool for career clarity. I had no idea what path to take and UniGuide gave me a complete roadmap. Highly recommend!"',  name: 'Priya Krishnan', role: 'ECE Student, SRM',  initials: 'PK', color: 'linear-gradient(135deg,var(--color-secondary),var(--color-secondary-dark))' },
+              { text: '"The study abroad navigator helped me shortlist universities and apply for scholarships. Got into my dream uni in Canada!"',        name: 'Sneha Menon',   role: 'IT Student, PSG',   initials: 'SM', color: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))' },
             ].map(t => (
               <div className="testimonial-card" key={t.name}>
                 <div className="stars">★★★★★</div>

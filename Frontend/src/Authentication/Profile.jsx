@@ -302,7 +302,7 @@ const Profile = () => {
     return (
       <div className="loading-screen">
         <div className="profile-spinner" role="status" aria-label="Loading" />
-        <span style={{ marginLeft: "12px", color: "#e0f0ff" }}>Connecting to UniGuide Database...</span>
+        <span style={{ marginLeft: "12px", color: "var(--text-primary)" }}>Connecting to UniGuide Database...</span>
       </div>
     );
   }
@@ -566,7 +566,7 @@ const Profile = () => {
                   <div className="app-role">{job.role}</div>
                   <div className="app-company">{job.company} · {job.location}</div>
                 </div>
-                <span className="app-status" style={{ color: '#00b4d8', background: 'rgba(0,180,216,0.12)', border: '1px solid rgba(0,180,216,0.3)' }}>
+                <span className="app-status" style={{ color: 'var(--color-primary)', background: 'var(--color-primary-soft)', border: '1px solid var(--color-primary-border)' }}>
                   Match {job.match}
                 </span>
               </div>

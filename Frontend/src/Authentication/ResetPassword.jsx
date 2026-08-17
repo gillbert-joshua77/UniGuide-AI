@@ -24,10 +24,10 @@ const ResetPassword = () => {
   const strength = (() => {
     const len = password.length
     if (len === 0) return { pct: '0%',   label: '',       color: 'transparent' }
-    if (len < 6)   return { pct: '25%',  label: 'Weak',   color: '#e24b4a'     }
-    if (len < 8)   return { pct: '50%',  label: 'Fair',   color: '#f77f00'     }
-    if (len < 12)  return { pct: '75%',  label: 'Good',   color: '#00b4d8'     }
-    return               { pct: '100%', label: 'Strong', color: '#22c97a'     }
+    if (len < 6)   return { pct: '25%',  label: 'Weak',   color: 'var(--color-danger)'    }
+    if (len < 8)   return { pct: '50%',  label: 'Fair',   color: 'var(--color-secondary)' }
+    if (len < 12)  return { pct: '75%',  label: 'Good',   color: 'var(--color-primary)'   }
+    return               { pct: '100%', label: 'Strong', color: 'var(--color-success)'   }
   })()
 
   const handleChange = (e) => {
@@ -208,7 +208,7 @@ const ResetPassword = () => {
                         stroke="#22c97a" strokeWidth="2.5" strokeLinecap="round">
                         <path d="M20 6L9 17l-5-5"/>
                       </svg>
-                      <span style={{ color: '#22c97a' }}>Passwords match</span>
+                      <span style={{ color: 'var(--color-success)' }}>Passwords match</span>
                     </>
                   ) : (
                     <>
@@ -217,7 +217,7 @@ const ResetPassword = () => {
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                       </svg>
-                      <span style={{ color: '#f77f00' }}>Passwords do not match</span>
+                      <span style={{ color: 'var(--color-secondary)' }}>Passwords do not match</span>
                     </>
                   )}
                 </div>
