@@ -1,318 +1,361 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import axiosInstance from '../Utils/axiosInstance'
 
-const nextLevelQuestion = (level) => {
-  if (level === 'Undergraduate (UG)') return 'entrance'
-  if (level === 'Postgraduate (PG)') return 'workExp'
-  if (level === 'PhD') return 'research'
-  return null
+const MODE_META = {
+  internship: { title: 'Internship', emoji: '💼' },
+  hackathon: { title: 'Hackathon', emoji: '🚀' },
+  university: { title: 'University / College', emoji: '🎓' },
 }
 
-const GUIDED_FLOWS = {
-  internship: {
-    title: 'Internship',
-    emoji: '💼',
-    start: 'role',
-    questions: {
-      role: {
-        text: 'What type of internship role are you targeting?',
-        type: 'text',
-        placeholder: 'e.g., AI Engineer, Frontend Developer, Data Analyst',
-        next: null,
-      },
-    },
-  },
-  hackathon: {
-    title: 'Hackathon',
-    emoji: '🚀',
-    start: 'domain',
-    questions: {
-      domain: {
-        text: 'Which domain interests you?',
-        type: 'select',
-        options: ['AI/ML', 'Web development', 'Mobile apps', 'Blockchain', 'IoT', 'Cybersecurity', 'Any'],
-        next: 'skills',
-      },
-      skills: {
-        text: 'What skills will you bring to the hackathon?',
-        type: 'text',
-        placeholder: 'e.g., Python, UI design, pitching',
-        next: 'technologies',
-      },
-      technologies: {
-        text: 'Which technologies do you want to use?',
-        type: 'text',
-        placeholder: 'e.g., React, Node.js, TensorFlow',
-        next: 'teamPref',
-      },
-      teamPref: {
-        text: 'Do you want to participate solo or in a team?',
-        type: 'select',
-        options: ['Team', 'Solo', 'Not sure'],
-        next: (answers) => (answers.teamPref === 'Team' ? 'teamReady' : 'location'),
-      },
-      teamReady: {
-        text: 'Do you already have a team?',
-        type: 'select',
-        options: ['Yes, we have a team', 'No, I need a team'],
-        next: 'location',
-      },
-      location: {
-        text: 'Preferred location for the hackathon?',
-        type: 'text',
-        placeholder: 'e.g., Chennai, or Anywhere',
-        next: 'format',
-      },
-      format: {
-        text: 'Online or offline?',
-        type: 'select',
-        options: ['Online', 'Offline', 'Either'],
-        next: 'experience',
-      },
-      experience: {
-        text: 'Your hackathon experience level?',
-        type: 'select',
-        options: ['None', 'Beginner', 'Intermediate', 'Advanced'],
-        next: null,
-      },
-    },
-  },
-  university: {
-    title: 'University / College',
-    emoji: '🎓',
-    start: 'degreeLevel',
-    questions: {
-      degreeLevel: {
-        text: 'Which level are you planning to study?',
-        type: 'select',
-        options: ['Undergraduate (UG)', 'Postgraduate (PG)', 'PhD'],
-        next: 'courseField',
-      },
-      courseField: {
-        text: 'Which course or field do you want to pursue?',
-        type: 'text',
-        placeholder: 'e.g., Computer Science, Business',
-        next: 'location',
-      },
-      location: {
-        text: 'Preferred country or location for study?',
-        type: 'text',
-        placeholder: 'e.g., Canada, Germany, or Any',
-        next: 'score',
-      },
-      score: {
-        text: 'What is your academic score?',
-        type: 'text',
-        placeholder: 'e.g., CGPA 8.5/10, 85%, GPA 3.7/4',
-        next: 'budget',
-      },
-      budget: {
-        text: 'What is your budget per year?',
-        type: 'text',
-        placeholder: 'e.g., $15,000/year',
-        next: 'firstDegree',
-      },
-      firstDegree: {
-        text: 'Is this your first degree?',
-        type: 'select',
-        options: ['Yes, this is my first degree', 'No, I already have a degree'],
-        next: (answers) => {
-          if (answers.firstDegree === 'No, I already have a degree') return 'prevDegree'
-          return nextLevelQuestion(answers.degreeLevel)
-        },
-      },
-      prevDegree: {
-        text: 'What was your previous degree or field?',
-        type: 'text',
-        placeholder: 'e.g., B.Com, Mechanical Engineering',
-        next: 'switchReason',
-      },
-      switchReason: {
-        text: 'Why are you pursuing another degree?',
-        type: 'text',
-        placeholder: 'e.g., career switch, upskilling',
-        next: (answers) => nextLevelQuestion(answers.degreeLevel),
-      },
-      entrance: {
-        text: 'Which entrance exams are you preparing for?',
-        type: 'text',
-        placeholder: 'e.g., JEE, SAT, CUET',
-        optional: true,
-        next: null,
-      },
-      workExp: {
-        text: 'How many years of work experience do you have?',
-        type: 'select',
-        options: ['None', '0-1 years', '1-2 years', '2+ years'],
-        next: null,
-      },
-      research: {
-        text: 'Do you have research experience or publications?',
-        type: 'select',
-        options: ['No', 'Some coursework projects', 'Published papers'],
-        next: null,
-      },
-    },
-  },
+const MODE_SUMMARY_PREFIX = {
+  internship: 'I need internship guidance.',
+  hackathon: 'I want to participate in a hackathon. Here are my details:',
+  university: 'I need help choosing a university or college. Here are my details:',
 }
 
-const GUIDED_SUMMARY = {
-  internship: {
-    prefix: 'I need internship guidance.',
-    suffix: 'Please start a guided conversation to help me find the right internship. Read my profile first and ask me any important questions before giving recommendations.',
-    fields: [
-      ['role', 'Target role'],
-    ],
-  },
-  hackathon: {
-    prefix: 'I want to participate in a hackathon. Here are my details:',
-    suffix: 'Based on my profile, suggest suitable hackathons, a project idea, and how to prepare.',
-    fields: [
-      ['domain', 'Domain'],
-      ['skills', 'Skills'],
-      ['technologies', 'Technologies'],
-      ['teamPref', 'Team preference'],
-      ['teamReady', 'Existing team'],
-      ['location', 'Location'],
-      ['format', 'Format'],
-      ['experience', 'Experience'],
-    ],
-  },
-  university: {
-    prefix: 'I need help choosing a university or college. Here are my details:',
-    suffix: 'Based on my profile, suggest suitable universities, programs, and my next steps.',
-    fields: [
-      ['degreeLevel', 'Degree level'],
-      ['courseField', 'Course / Field'],
-      ['location', 'Preferred location'],
-      ['score', 'Academic score'],
-      ['budget', 'Budget'],
-      ['firstDegree', 'First degree?'],
-      ['prevDegree', 'Previous degree'],
-      ['switchReason', 'Reason for another degree'],
-      ['entrance', 'Entrance exams'],
-      ['workExp', 'Work experience'],
-      ['research', 'Research experience'],
-    ],
-  },
+const MODE_SUMMARY_SUFFIX = {
+  internship:
+    'Please start a guided conversation to help me find the right internship. Read my profile first and ask me any important questions before giving recommendations.',
+  hackathon:
+    'Based on my profile, suggest suitable hackathons, a project idea, and how to prepare.',
+  university:
+    'Based on my profile, suggest suitable universities, programs, and my next steps.',
 }
 
-const buildGuidedPrompt = (mode, answers) => {
-  const summary = GUIDED_SUMMARY[mode]
-  const lines = summary.fields
-    .filter(([id]) => answers[id])
-    .map(([id, label]) => `${label}: ${answers[id]}`)
-  return `${summary.prefix}\n${lines.join('\n')}\n${summary.suffix}`
+const FIELD_LABELS = {
+  target_role: 'Target Role',
+  skills: 'Skills',
+  experience_level: 'Experience Level',
+  preferred_location: 'Preferred Location',
+  work_mode: 'Work Mode',
+  company_preference: 'Company Preference',
+  duration: 'Duration',
+  stipend_preference: 'Stipend Preference',
+  availability: 'Availability',
+  career_goal: 'Career Goal',
+  domain: 'Domain',
+  technologies: 'Technologies',
+  team_preference: 'Team Preference',
+  team_status: 'Team Status',
+  format: 'Format',
+  project_idea: 'Project Idea',
+  country: 'Country',
+  state_region: 'State/Region',
+  degree_level: 'Degree Level',
+  course_field: 'Course / Field',
+  academic_score: 'Academic Score',
+  budget: 'Budget',
+  budget_currency: 'Budget Currency',
+  entrance_exam: 'Entrance Exams',
+  scholarship_needed: 'Scholarship',
+  first_degree: 'First Degree',
+  previous_degree: 'Previous Degree',
+  work_experience: 'Work Experience',
+  research_experience: 'Research Experience',
+  accommodation: 'Accommodation',
+  language_proficiency: 'Language Proficiency',
+}
+
+function buildPrompt(mode, answers) {
+  const prefix = MODE_SUMMARY_PREFIX[mode] || ''
+  const suffix = MODE_SUMMARY_SUFFIX[mode] || ''
+  const lines = Object.entries(answers)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${FIELD_LABELS[k] || k}: ${v}`)
+  return `${prefix}\n${lines.join('\n')}\n${suffix}`
 }
 
 const GuidedOptionsModal = ({ mode, onClose, onComplete }) => {
   const [answers, setAnswers] = useState({})
   const [history, setHistory] = useState([])
-  const [currentId, setCurrentId] = useState(null)
+  const [currentQuestion, setCurrentQuestion] = useState(null)
   const [textValue, setTextValue] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [stepNumber, setStepNumber] = useState(0)
+  const [estimatedTotal, setEstimatedTotal] = useState(null)
+
+  const meta = MODE_META[mode]
+
+  const fetchNextQuestion = useCallback(
+    async (currentAnswers, currentHistory) => {
+      setLoading(true)
+      setError('')
+      try {
+        const askedFields = currentHistory.map((h) => h.field)
+        const res = await axiosInstance.post('uniguide/chat/guided-question/', {
+          mode,
+          answers: currentAnswers,
+          asked_fields: askedFields,
+        })
+
+        const data = res.data
+
+        if (data.status === 'complete') {
+          onComplete(buildPrompt(mode, { ...currentAnswers, ...(data.summary || {}) }))
+          return
+        }
+
+        if (data.status === 'need_more_information') {
+          setCurrentQuestion(data)
+          setStepNumber(currentHistory.length + 1)
+          if (data.estimated_remaining) {
+            setEstimatedTotal(currentHistory.length + 1 + data.estimated_remaining)
+          }
+          return
+        }
+
+        setError('Unexpected response from server')
+      } catch (err) {
+        const msg =
+          err?.response?.data?.error ||
+          'Failed to get next question. Please try again.'
+        setError(msg)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [mode, onComplete]
+  )
 
   useEffect(() => {
     if (mode) {
       setAnswers({})
       setHistory([])
+      setCurrentQuestion(null)
       setTextValue('')
-      setCurrentId(GUIDED_FLOWS[mode].start)
+      setError('')
+      setStepNumber(0)
+      setEstimatedTotal(null)
+      fetchNextQuestion({}, [])
     }
-  }, [mode])
+  }, [mode, fetchNextQuestion])
 
-  if (!mode) return null
+  if (!mode || !meta) return null
 
-  const flow = GUIDED_FLOWS[mode]
-  const question = flow.questions[currentId]
-  if (!question) return null
-
-  const stepIndex = history.length + 1
-
-  const advance = (nextAnswers) => {
-    const q = flow.questions[currentId]
-    const nextId = typeof q.next === 'function' ? q.next(nextAnswers) : q.next
-    setAnswers(nextAnswers)
+  const advance = (newAnswers, field) => {
+    const entry = { field, value: newAnswers[field] }
+    const newHistory = [...history, entry]
+    setAnswers(newAnswers)
+    setHistory(newHistory)
     setTextValue('')
-    if (nextId) {
-      setHistory((prev) => [...prev, currentId])
-      setCurrentId(nextId)
-    } else {
-      onComplete(buildGuidedPrompt(mode, nextAnswers))
-    }
+    setCurrentQuestion(null)
+    fetchNextQuestion(newAnswers, newHistory)
   }
 
   const handleSelect = (value) => {
-    advance({ ...answers, [currentId]: value })
+    if (!currentQuestion) return
+    advance({ ...answers, [currentQuestion.field]: value }, currentQuestion.field)
+  }
+
+  const handleMultiSelectToggle = (value) => {
+    if (!currentQuestion) return
+    const field = currentQuestion.field
+    const current = answers[field]
+    const arr = Array.isArray(current) ? current : current ? [current] : []
+    const next = arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value]
+    setAnswers({ ...answers, [field]: next.join(', ') })
   }
 
   const handleTextNext = () => {
+    if (!currentQuestion) return
     const value = textValue.trim()
-    if (!value && !question.optional) return
-    advance({ ...answers, [currentId]: value })
+    if (!value && !currentQuestion.optional) return
+    advance({ ...answers, [currentQuestion.field]: value }, currentQuestion.field)
+  }
+
+  const handleNumberNext = () => {
+    if (!currentQuestion) return
+    const value = textValue.trim()
+    if (!value && !currentQuestion.optional) return
+    advance({ ...answers, [currentQuestion.field]: value }, currentQuestion.field)
   }
 
   const goBack = () => {
-    const prevId = history[history.length - 1]
-    if (!prevId) return
-    setCurrentId(prevId)
-    setTextValue(answers[prevId] || '')
-    setHistory(history.slice(0, -1))
+    if (history.length === 0) return
+    const prev = history[history.length - 1]
+    const newHistory = history.slice(0, -1)
+    setHistory(newHistory)
+    setCurrentQuestion(null)
+    setTextValue(answers[prev.field] || '')
+    setStepNumber(newHistory.length)
+
+    // Re-fetch with the previous state
+    setLoading(true)
+    setError('')
+    const askedFields = newHistory.map((h) => h.field)
+    axiosInstance
+      .post('uniguide/chat/guided-question/', {
+        mode,
+        answers,
+        asked_fields: askedFields,
+      })
+      .then((res) => {
+        const data = res.data
+        if (data.status === 'complete') {
+          onComplete(buildPrompt(mode, { ...answers, ...(data.summary || {}) }))
+        } else if (data.status === 'need_more_information') {
+          setCurrentQuestion(data)
+        } else {
+          setError('Unexpected response')
+        }
+      })
+      .catch((err) => {
+        setError(err?.response?.data?.error || 'Failed to go back')
+      })
+      .finally(() => setLoading(false))
+  }
+
+  const handleSkip = () => {
+    if (!currentQuestion || !currentQuestion.optional) return
+    advance({ ...answers, [currentQuestion.field]: '' }, currentQuestion.field)
+  }
+
+  const progressLabel =
+    estimatedTotal && stepNumber
+      ? `Question ${stepNumber} of ~${estimatedTotal}`
+      : stepNumber
+      ? `Question ${stepNumber}`
+      : ''
+
+  const showNextBtn =
+    currentQuestion &&
+    !loading &&
+    !error &&
+    (currentQuestion.type === 'multi_choice' ||
+      currentQuestion.type === 'text' ||
+      currentQuestion.type === 'number')
+
+  const nextDisabled =
+    currentQuestion &&
+    (currentQuestion.type === 'text' || currentQuestion.type === 'number') &&
+    !textValue.trim() &&
+    !currentQuestion.optional
+
+  const handleNextClick = () => {
+    if (!currentQuestion) return
+    if (currentQuestion.type === 'number') handleNumberNext()
+    else handleTextNext()
   }
 
   return (
     <div className="guided-modal-overlay" onClick={onClose}>
       <div className="guided-modal" onClick={(e) => e.stopPropagation()}>
         <div className="guided-modal-header">
-          <div className="guided-modal-title">{flow.emoji} {flow.title}</div>
+          <div className="guided-modal-title">
+            {meta.emoji} {meta.title}
+          </div>
           <button className="guided-modal-close" onClick={onClose} aria-label="Close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M18 6L6 18M6 6l12 12"/>
+              <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="guided-step">Question {stepIndex}</div>
-        <div className="guided-question">{question.text}</div>
+        <div className="guided-modal-body">
+          {loading && !currentQuestion && (
+            <div className="guided-loading">
+              <div className="guided-loading-spinner" />
+              <span>Thinking...</span>
+            </div>
+          )}
 
-        {question.type === 'select' ? (
-          <div className="guided-options-list">
-            {question.options.map((option) => (
-              <button key={option} className="guided-option-chip" onClick={() => handleSelect(option)}>
-                {option}
+          {error && (
+            <div className="guided-error">
+              <span>{error}</span>
+              <button className="guided-retry-btn" onClick={() => { setError(''); fetchNextQuestion(answers, history) }}>
+                Retry
               </button>
-            ))}
-          </div>
-        ) : (
-          <input
-            className="guided-input"
-            autoFocus
-            value={textValue}
-            onChange={(e) => setTextValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleTextNext()
-              }
-            }}
-            placeholder={question.placeholder || 'Type your answer...'}
-          />
-        )}
+            </div>
+          )}
 
-        {(history.length > 0 || question.type === 'text') && (
-          <div className="guided-modal-actions">
-            {history.length > 0 && (
-              <button className="guided-back-btn" onClick={goBack}>← Back</button>
-            )}
-            {question.type === 'text' && (
-              <button
-                className="guided-next-btn"
-                onClick={handleTextNext}
-                disabled={!textValue.trim() && !question.optional}
-              >
-                Next
-              </button>
-            )}
-          </div>
-        )}
+          {!loading && !error && currentQuestion && (
+            <>
+              {progressLabel && (
+                <div className="guided-step">{progressLabel}</div>
+              )}
+
+              <div className="guided-question">{currentQuestion.question}</div>
+
+              {currentQuestion.type === 'single_choice' && currentQuestion.options && (
+                <div className={`guided-options-list ${currentQuestion.options.length > 8 ? 'guided-scrollable' : ''}`}>
+                  {currentQuestion.options.map((option) => (
+                    <button
+                      key={option}
+                      className={`guided-option-chip ${answers[currentQuestion.field] === option ? 'selected' : ''}`}
+                      onClick={() => handleSelect(option)}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {currentQuestion.type === 'multi_choice' && currentQuestion.options && (
+                <div className="guided-options-list guided-multi">
+                  {currentQuestion.options.map((option) => {
+                    const selected = (answers[currentQuestion.field] || '')
+                      .split(', ')
+                      .includes(option)
+                    return (
+                      <button
+                        key={option}
+                        className={`guided-option-chip ${selected ? 'selected' : ''}`}
+                        onClick={() => handleMultiSelectToggle(option)}
+                      >
+                        {selected && <span className="guided-check">✓</span>}
+                        {option}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {(currentQuestion.type === 'text' || currentQuestion.type === 'number') && (
+                <input
+                  className="guided-input"
+                  autoFocus
+                  type={currentQuestion.type === 'number' ? 'number' : 'text'}
+                  value={textValue}
+                  onChange={(e) => setTextValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      if (currentQuestion.type === 'number') handleNumberNext()
+                      else handleTextNext()
+                    }
+                  }}
+                  placeholder={currentQuestion.placeholder || 'Type your answer...'}
+                />
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="guided-bottom-actions">
+          {history.length > 0 && (
+            <button className="guided-back-btn" onClick={goBack}>
+              ← Back
+            </button>
+          )}
+          {currentQuestion && currentQuestion.optional && (
+            <button className="guided-skip-btn" onClick={handleSkip}>
+              Skip
+            </button>
+          )}
+          <button className="guided-cancel-btn" onClick={onClose}>
+            Cancel
+          </button>
+          {showNextBtn && (
+            <button
+              className="guided-next-btn"
+              onClick={handleNextClick}
+              disabled={nextDisabled}
+            >
+              Next
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
