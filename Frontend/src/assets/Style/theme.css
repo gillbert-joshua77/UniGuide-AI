@@ -1,380 +1,505 @@
-/* ============================================================
-   UniGuide AI — Global Light Theme
-   Applies when <html data-theme="light"> (set by ThemeProvider).
-   Dark mode is the default design; these rules flip surfaces
-   to a light navy palette while keeping accent colors.
-   ============================================================ */
+/* ═══════════════════════════════════════════════════════════════════
+   UniGuide AI — Theme Definitions
+   Maps raw brand/neutral tokens → semantic surface/text/border tokens.
+   Dark mode is the default (set by tokens.css :root).
+   This file defines the light theme overrides.
+   Applied when <html data-theme="light"> (set by ThemeProvider).
+   ═══════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME — TOKEN OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  /* ─── Surfaces ────────────────────────────────────────────────── */
+  --surface-page: #f4f8fc;
+  --surface-section: #eaf1f8;
+  --surface-card: #ffffff;
+  --surface-card-hover: #f8fafc;
+  --surface-elevated: #ffffff;
+  --surface-input: #ffffff;
+  --surface-overlay: rgba(15, 23, 42, 0.3);
+  --surface-sidebar: #ffffff;
+  --surface-header: #ffffff;
+  --surface-footer: #ffffff;
+  --surface-inset: #f6fafd;
+
+  /* ─── Text ─────────────────────────────────────────────────────── */
+  --text-primary: #0f2438;
+  --text-secondary: #16344f;
+  --text-muted: #3f6d90;
+  --text-disabled: #7d9bb3;
+  --text-inverse: #f1f5f9;
+  --text-accent: #00b4d8;
+  --text-brand: #00b4d8;
+  --text-brand-alt: #f77f00;
+
+  /* ─── Borders ──────────────────────────────────────────────────── */
+  --border-subtle: rgba(15, 60, 95, 0.12);
+  --border-default: rgba(15, 60, 95, 0.14);
+  --border-strong: rgba(15, 60, 95, 0.22);
+  --border-focus: var(--color-primary);
+
+  /* ─── Status ───────────────────────────────────────────────────── */
+  --status-success: #22c97a;
+  --status-success-soft: rgba(34, 201, 122, 0.12);
+  --status-success-border: rgba(34, 201, 122, 0.25);
+  --status-warning: #f77f00;
+  --status-warning-soft: rgba(247, 127, 0, 0.12);
+  --status-warning-border: rgba(247, 127, 0, 0.25);
+  --status-danger: #dc2626;
+  --status-danger-soft: rgba(239, 68, 68, 0.08);
+  --status-danger-border: rgba(239, 68, 68, 0.25);
+  --status-info: #00b4d8;
+  --status-info-soft: rgba(0, 180, 216, 0.08);
+  --status-info-border: rgba(0, 180, 216, 0.25);
+
+  /* ─── Interactive ──────────────────────────────────────────────── */
+  --interactive-primary: var(--color-primary);
+  --interactive-primary-hover: var(--color-primary-dark);
+  --interactive-primary-soft: rgba(0, 180, 216, 0.08);
+  --interactive-primary-subtle: rgba(0, 180, 216, 0.04);
+  --interactive-primary-border: rgba(0, 180, 216, 0.22);
+  --interactive-primary-glow: rgba(0, 180, 216, 0.12);
+
+  --interactive-ai: var(--color-ai);
+  --interactive-ai-hover: var(--color-ai-dark);
+  --interactive-ai-soft: rgba(59, 130, 246, 0.08);
+  --interactive-ai-subtle: rgba(59, 130, 246, 0.04);
+  --interactive-ai-border: rgba(59, 130, 246, 0.22);
+  --interactive-ai-glow: rgba(59, 130, 246, 0.12);
+
+  --interactive-secondary: var(--color-secondary);
+  --interactive-secondary-hover: var(--color-secondary-dark);
+  --interactive-secondary-soft: rgba(247, 127, 0, 0.08);
+  --interactive-secondary-subtle: rgba(247, 127, 0, 0.04);
+  --interactive-secondary-border: rgba(247, 127, 0, 0.22);
+
+  --interactive-danger: var(--color-danger);
+  --interactive-danger-hover: var(--color-danger-dark);
+  --interactive-danger-soft: rgba(239, 68, 68, 0.08);
+  --interactive-danger-subtle: rgba(239, 68, 68, 0.04);
+  --interactive-danger-border: rgba(239, 68, 68, 0.25);
+
+  /* ─── Brand Alpha ──────────────────────────────────────────────── */
+  --color-primary-soft: rgba(0, 180, 216, 0.08);
+  --color-primary-subtle: rgba(0, 180, 216, 0.04);
+  --color-primary-border: rgba(0, 180, 216, 0.22);
+  --color-primary-glow: rgba(0, 180, 216, 0.12);
+
+  --color-secondary-soft: rgba(247, 127, 0, 0.08);
+  --color-secondary-subtle: rgba(247, 127, 0, 0.04);
+  --color-secondary-border: rgba(247, 127, 0, 0.22);
+
+  --color-success-soft: rgba(34, 201, 122, 0.08);
+  --color-success-subtle: rgba(34, 201, 122, 0.04);
+  --color-success-border: rgba(34, 201, 122, 0.22);
+
+  --color-danger-soft: rgba(239, 68, 68, 0.08);
+  --color-danger-subtle: rgba(239, 68, 68, 0.04);
+  --color-danger-border: rgba(239, 68, 68, 0.22);
+
+  --color-ai-soft: rgba(59, 130, 246, 0.08);
+  --color-ai-subtle: rgba(59, 130, 246, 0.04);
+  --color-ai-border: rgba(59, 130, 246, 0.22);
+  --color-ai-glow: rgba(59, 130, 246, 0.12);
+
+  /* ─── Opacity ──────────────────────────────────────────────────── */
+  --opacity-backdrop: rgba(0, 0, 0, 0.3);
+  --opacity-scrim: rgba(0, 0, 0, 0.5);
+  --opacity-overlay: rgba(15, 23, 42, 0.2);
+  --opacity-hover: rgba(0, 0, 0, 0.04);
+  --opacity-hover-text: rgba(0, 0, 0, 0.08);
+  --opacity-divider: rgba(15, 60, 95, 0.18);
+
+  /* ─── Body ─────────────────────────────────────────────────────── */
+  color: var(--text-secondary);
+}
+
+/* ─── Selection ─────────────────────────────────────────────────── */
+[data-theme="light"] ::selection {
+  background: rgba(0, 180, 216, 0.15);
+  color: var(--text-primary);
+}
+
+/* ─── Links ─────────────────────────────────────────────────────── */
+[data-theme="light"] a {
+  color: var(--text-accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME — COMPONENT OVERRIDES
+   Migrated from old theme.css. All values use semantic tokens.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ---------- Body ---------- */
 [data-theme="light"] body {
-  background: #f4f8fc;
+  background: var(--surface-page);
 }
 
 /* ---------- Home ---------- */
 [data-theme="light"] .home-wrapper {
-  background: #f4f8fc;
-  color: #16344f;
+  background: var(--surface-page);
+  color: var(--text-secondary);
 }
 
 [data-theme="light"] .section-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .section-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .section-tag {
-  background: rgba(0, 180, 216, 0.08);
-  border-color: rgba(0, 180, 216, 0.25);
-  color: #0e6e9e;
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-border);
+  color: var(--text-brand);
 }
 
 [data-theme="light"] .hero-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .hero-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .stat-label {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .stat-divider {
-  background: rgba(15, 60, 95, 0.15);
+  background: var(--opacity-divider);
 }
 
 [data-theme="light"] .features-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
 [data-theme="light"] .feat-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .feat-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .feat-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .step-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .step-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .dashboard-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
 [data-theme="light"] .dashboard-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.16);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .dash-sub-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .skill-meta {
-  color: #2f5d80;
+  color: var(--text-muted);
 }
 [data-theme="light"] .skill-bar {
-  background: rgba(15, 60, 95, 0.12);
+  background: var(--border-subtle);
 }
 [data-theme="light"] .app-row {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.12);
+  background: var(--surface-inset);
+  border-color: var(--border-subtle);
 }
 [data-theme="light"] .app-role {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .app-company {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .profile-complete-card {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.12);
+  background: var(--surface-inset);
+  border-color: var(--border-subtle);
 }
 [data-theme="light"] .complete-bar-bg {
-  background: rgba(15, 60, 95, 0.12);
+  background: var(--border-subtle);
 }
 
 [data-theme="light"] .split-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .trend-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .trend-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .trend-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .skill-demand-row {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .skill-demand-name {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 
 [data-theme="light"] .testimonials-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
 [data-theme="light"] .testimonial-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .testimonial-text {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .author-name {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .author-role {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .home-footer {
-  background: #ffffff;
-  border-top-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-footer);
+  border-top-color: var(--border-default);
 }
 [data-theme="light"] .footer-brand {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .footer-copy,
 [data-theme="light"] .footer-links a {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 /* ---------- About ---------- */
 [data-theme="light"] .about-wrapper {
-  background: #f4f8fc;
-  color: #16344f;
+  background: var(--surface-page);
+  color: var(--text-secondary);
 }
 
 [data-theme="light"] .about-hero-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .about-hero-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .about-stat-box {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .about-stat-label {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .about-mission-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
 [data-theme="light"] .mission-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .mission-para {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .val-item {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .val-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .val-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .about-feat-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .about-feat-card .feat-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .about-feat-card .feat-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .about-how-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
-[data-theme="light"] .step-title {
-  color: #16344f;
+[data-theme="light"] .about-how-section .step-title {
+  color: var(--text-secondary);
 }
-[data-theme="light"] .step-desc {
-  color: #3f6d90;
+[data-theme="light"] .about-how-section .step-desc {
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .why-card {
-  background: #ffffff;
+  background: var(--surface-card);
 }
 [data-theme="light"] .why-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .why-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .about-team-section {
-  background: #eaf1f8;
+  background: var(--surface-section);
 }
 [data-theme="light"] .team-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .team-name {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .team-role {
-  color: #0e6e9e;
+  color: var(--text-brand);
 }
 [data-theme="light"] .team-desc {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .vision-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .vision-heading {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .vision-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .about-footer {
-  background: #ffffff;
-  border-top-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-footer);
+  border-top-color: var(--border-default);
 }
 
 /* ---------- Profile ---------- */
 [data-theme="light"] .profile-wrapper {
-  background: #f4f8fc;
-  color: #16344f;
+  background: var(--surface-page);
+  color: var(--text-secondary);
 }
 
 [data-theme="light"] .profile-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .profile-banner {
-  border-color: rgba(15, 60, 95, 0.12);
+  border-color: var(--border-subtle);
   border-bottom: none;
 }
 [data-theme="light"] .profile-top-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .profile-name,
 [data-theme="light"] .section-title,
 [data-theme="light"] .modal-title {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .profile-email {
-  color: #0e6e9e;
+  color: var(--text-brand);
 }
 [data-theme="light"] .badge-pill {
-  background: rgba(0, 119, 182, 0.08);
-  border-color: rgba(0, 119, 182, 0.22);
-  color: #0e6e9e;
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-border);
+  color: var(--text-brand);
 }
 [data-theme="light"] .profile-tab {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .section-subtitle,
 [data-theme="light"] .stat-label,
 [data-theme="light"] .settings-pic-hint,
 [data-theme="light"] .empty-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .stat-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .stat-number {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .detail-item span {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .detail-item strong {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .settings-pic-row {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-inset);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .linkedin-skill-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .skill-name,
 [data-theme="light"] .empty-title {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .skill-level-text {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .skill-progress-bar {
-  background: rgba(15, 60, 95, 0.12);
+  background: var(--border-subtle);
 }
 [data-theme="light"] .empty-skills-banner {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.2);
+  background: var(--surface-inset);
+  border-color: var(--border-strong);
 }
 [data-theme="light"] .app-item {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.12);
+  background: var(--surface-inset);
+  border-color: var(--border-subtle);
 }
 [data-theme="light"] .app-role {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .app-company {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .form-group label {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .form-group input[type="text"],
 [data-theme="light"] .form-group select,
 [data-theme="light"] .form-group textarea {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.2);
-  color: #16344f;
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
 }
 [data-theme="light"] .form-group input::placeholder,
 [data-theme="light"] .form-group textarea::placeholder {
-  color: #7d9bb3;
+  color: var(--text-disabled);
 }
 [data-theme="light"] .settings-save-bar {
-  border-top-color: rgba(15, 60, 95, 0.14);
+  border-top-color: var(--border-default);
 }
 
 [data-theme="light"] .modal-content {
-  background: #ffffff;
+  background: var(--surface-card);
 }
 [data-theme="light"] .modal-subtitle {
-  color: #3f6d90;
-}
-[data-theme="light"] .form-group label {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .skill-chip {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.18);
-  color: #3f6d90;
+  background: var(--surface-inset);
+  border-color: var(--border-default);
+  color: var(--text-muted);
 }
 [data-theme="light"] .level-card {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.16);
+  background: var(--surface-card);
+  border-color: var(--border-default);
 }
 [data-theme="light"] .level-name {
-  color: #16344f;
+  color: var(--text-secondary);
 }
 [data-theme="light"] .level-percent {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 /* ---------- Auth pages (Login / Register / OTP / Forgot / Reset) ---------- */
@@ -383,103 +508,103 @@
 [data-theme="light"] .otp-wrapper,
 [data-theme="light"] .forget-wrapper,
 [data-theme="light"] .reset-wrapper {
-  background: #f4f8fc;
+  background: var(--surface-page);
 }
 
 [data-theme="light"] .brand-name {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .brand-tag {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.14);
-  color: #0e6e9e;
+  background: var(--surface-card);
+  border-color: var(--border-default);
+  color: var(--text-brand);
 }
 
 [data-theme="light"] .login-card,
 [data-theme="light"] .signup-card,
 [data-theme="light"] .otp-card,
 [data-theme="light"] .reset-card {
-  background: #ffffff;
-  border: 1px solid rgba(15, 60, 95, 0.14);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
 }
 [data-theme="light"] .card-title-text {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .card-sub-text {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .custom-label {
-  color: #2f5d80;
+  color: var(--text-muted);
 }
 [data-theme="light"] .custom-input.form-control {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.22);
-  color: #16344f;
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
 }
 [data-theme="light"] .custom-input.form-control::placeholder {
-  color: #7d9bb3;
+  color: var(--text-disabled);
 }
 [data-theme="light"] .custom-input.form-control:focus {
-  background: #ffffff;
-  color: #16344f;
-  border-color: #00b4d8;
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  border-color: var(--color-primary);
 }
 
 [data-theme="light"] .forgot-link,
 [data-theme="light"] .login-link {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .divider span {
-  background: rgba(15, 60, 95, 0.18);
+  background: var(--border-default);
 }
 [data-theme="light"] .divider em {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .google-btn {
-  border-color: rgba(15, 60, 95, 0.22);
-  color: #2f5d80;
+  border-color: var(--border-strong);
+  color: var(--text-muted);
 }
 [data-theme="light"] .google-btn:hover {
-  background: #f6fafd;
-  border-color: #00b4d8;
-  color: #0e6e9e;
+  background: var(--surface-inset);
+  border-color: var(--color-primary);
+  color: var(--text-brand);
 }
 
 [data-theme="light"] .otp-input {
-  background: #ffffff;
-  border-color: rgba(15, 60, 95, 0.22);
-  color: #16344f;
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
 }
 [data-theme="light"] .resend-text {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 
 [data-theme="light"] .reset-icon-wrap {
-  background: #f6fafd;
+  background: var(--surface-inset);
 }
 [data-theme="light"] .strength-bar-bg {
-  background: rgba(15, 60, 95, 0.14);
+  background: var(--border-default);
 }
 [data-theme="light"] .strength-label {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .match-indicator {
-  background: rgba(34, 201, 122, 0.12);
-  color: #0f9e55;
+  background: var(--status-success-soft);
+  color: var(--status-success-dark);
 }
 
 [data-theme="light"] .social-popup-box {
-  background: #ffffff;
+  background: var(--surface-card);
 }
 [data-theme="light"] .social-popup-title {
-  color: #0f2438;
+  color: var(--text-primary);
 }
 [data-theme="light"] .social-popup-sub {
-  color: #3f6d90;
+  color: var(--text-muted);
 }
 [data-theme="light"] .social-provider-btn {
-  background: #f6fafd;
-  border-color: rgba(15, 60, 95, 0.16);
-  color: #16344f;
+  background: var(--surface-inset);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
 }
