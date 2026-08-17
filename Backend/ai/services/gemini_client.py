@@ -79,6 +79,49 @@ class GeminiService:
             raise GeminiError('Gemini returned an empty response. Please try again.')
         return text
 
+    def generate_guided_question(self, prompt):
+        """Send a guided-question prompt and return the raw text response.
+
+        Uses the same Gemini model but with a single-turn prompt
+        (no chat history) since each guided question is stateless.
+        """
+        if not prompt or not prompt.strip():
+            raise GeminiError('Guided question prompt cannot be empty')
+
+        request_options = {'timeout': REQUEST_TIMEOUT_SECONDS}
+
+        try:
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel(model_name=self.model_name)
+            response = model.generate_content(
+                prompt,
+                request_options=request_options,
+            )
+        except GeminiError:
+            raise
+        except Exception as exc:
+            logger.warning(
+                'Gemini guided-question request failed for model=%s error=%s:%s',
+                self.model_name,
+                type(exc).__name__,
+                exc,
+            )
+            raise GeminiError('Gemini is unavailable right now. Please try again.') from exc
+
+        try:
+            text = (response.text or '').strip()
+        except Exception as exc:
+            logger.warning(
+                'Gemini guided-question returned an unusable response error=%s:%s',
+                type(exc).__name__,
+                exc,
+            )
+            raise GeminiError('Gemini returned an empty response. Please try again.') from exc
+
+        if not text:
+            raise GeminiError('Gemini returned an empty response. Please try again.')
+        return text
+
     def generate_title(self, user_message, ai_reply):
         """Generate a short 3-5 word title for a new conversation.
 

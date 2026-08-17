@@ -69,3 +69,13 @@ class ChatSendSerializer(serializers.Serializer):
         if not value.strip():
             raise serializers.ValidationError('Message cannot be empty')
         return value.strip()
+
+
+class GuidedQuestionSerializer(serializers.Serializer):
+    mode = serializers.ChoiceField(choices=['internship', 'hackathon', 'university'])
+    answers = serializers.DictField(required=False, default=dict)
+    asked_fields = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list,
+    )

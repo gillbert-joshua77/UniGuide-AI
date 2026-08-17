@@ -19,10 +19,19 @@ from .serializers import (
     ChatSessionCreateSerializer,
     ChatRenameSerializer,
     ChatSendSerializer,
+    GuidedQuestionSerializer,
 )
-from .services.context_builder import build_system_instruction, build_chat_history
+from .services.context_builder import build_system_instruction, build_chat_history, build_student_context
 from .services.gemini_client import GeminiService, GeminiError
 from .services.rate_limit import check_chat_rate_limit, RateLimitExceeded
+from .services.adaptive_engine import (
+    build_guided_question_prompt,
+    parse_gemini_response,
+    MODE_FIELDS,
+    GEOGRAPHIC_DATA,
+    ALL_COUNTRIES,
+)
+import json
 
 logger = logging.getLogger('uniguide.ai')
 
@@ -184,6 +193,104 @@ class ChatSessionDetailView(APIView):
         session = _owned_session(request.user, session_id)
         session.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ─── ADAPTIVE QUESTION ENGINE ────────────────────────────────────────
+
+
+class GuidedQuestionView(APIView):
+    """Return the next adaptive question for a guided flow.
+
+    POST {
+        "mode": "internship" | "hackathon" | "university",
+        "answers": {"field": "value", ...},
+        "asked_fields": ["field1", "field2", ...]
+    }
+
+    Returns either a next-question object or a "complete" status.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = GuidedQuestionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        mode = serializer.validated_data['mode']
+        answers = serializer.validated_data['answers']
+        asked_fields = serializer.validated_data['asked_fields']
+
+        # Build student profile context
+        student_profile = build_student_context(request.user)
+
+        # Build the prompt for Gemini
+        prompt = build_guided_question_prompt(
+            mode=mode,
+            answers=answers,
+            asked_fields=asked_fields,
+            student_profile=student_profile,
+        )
+
+        if not prompt:
+            return Response(
+                {'error': 'Could not build guided question prompt'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Call Gemini
+        try:
+            service = GeminiService()
+            raw_response = service.generate_guided_question(prompt)
+        except GeminiError as exc:
+            return Response(
+                {'error': str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except Exception as exc:
+            logger.exception('Unexpected error in guided question')
+            return Response(
+                {'error': 'Something went wrong. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Parse the response
+        result = parse_gemini_response(raw_response)
+
+        if result.get('status') == 'error':
+            return Response(
+                {'error': result.get('error', 'Failed to generate question')},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class GuidedGeographicDataView(APIView):
+    """Return geographic data for a specific country or all countries.
+
+    Used by the frontend to get valid state/region options when
+    Gemini returns a geographic question.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        country = request.query_params.get('country')
+        if country:
+            geo = GEOGRAPHIC_DATA.get(country)
+            if geo:
+                return Response({
+                    'country': country,
+                    'requires_state': geo.get('requires_state', False),
+                    'states': geo.get('states', []),
+                })
+            return Response({
+                'country': country,
+                'requires_state': False,
+                'states': [],
+            })
+        return Response({
+            'countries': ALL_COUNTRIES,
+        })
 
 
 # ─── IT NEWS ─────────────────────────────────────────────────────────────────
