@@ -1,7 +1,7 @@
 /* ── Page background ── */
 .signup-wrapper {
   min-height: 100vh;
-  background: #040d16;
+  background: var(--surface-page);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,12 +19,12 @@
 .bg-glow-teal {
   top: -60px; left: -60px;
   width: 320px; height: 320px;
-  background: radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-soft) 0%, transparent 70%);
 }
 .bg-glow-orange {
   bottom: -80px; right: -60px;
   width: 360px; height: 360px;
-  background: radial-gradient(circle, rgba(247,127,0,0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-secondary-subtle) 0%, transparent 70%);
 }
 
 /* ── Box width ── */
@@ -43,41 +43,41 @@
 .brand-name {
   font-size: 22px;
   font-weight: 600;
-  color: #e0f0ff;
+  color: var(--text-primary);
 }
-.brand-name span { color: #f77f00; }
+.brand-name span { color: var(--color-secondary); }
 .brand-tag {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #0a1a2a;
-  border: 1px solid rgba(0,180,216,0.15);
+  background: var(--surface-input);
+  border: 1px solid var(--color-primary-glow);
   border-radius: 20px;
   padding: 3px 12px;
   font-size: 11px;
-  color: #4a9abf;
+  color: var(--text-brand);
 }
 .dot {
   display: inline-block;
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #f77f00;
+  background: var(--color-secondary);
 }
 
 /* ── Card ── */
 .signup-card {
-  background: #081420;
-  border: 1px solid rgba(26,61,92,0.4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
   border-radius: 16px;
 }
 .card-title-text {
   font-size: 18px;
   font-weight: 500;
-  color: #e0f0ff;
+  color: var(--text-primary);
 }
 .card-sub-text {
   font-size: 13px;
-  color: #4a7fa0;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -85,7 +85,7 @@
 .custom-label {
   font-size: 12px;
   font-weight: 500;
-  color: #4a9abf;
+  color: var(--text-brand);
   margin-bottom: 5px;
   display: block;
 }
@@ -103,19 +103,19 @@
 }
 .custom-input.form-control {
   padding: 11px 14px 11px 40px;
-  background: #0a1a2a;
-  border: 1.5px solid rgba(30,77,107,0.35);
+  background: var(--surface-input);
+  border: 1.5px solid var(--border-subtle);
   border-radius: 10px;
-  color: #e0f0ff;
+  color: var(--text-primary);
   font-size: 14px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
-.custom-input.form-control::placeholder { color: #4a7fa0; }
+.custom-input.form-control::placeholder { color: var(--text-muted); }
 .custom-input.form-control:focus {
-  background: #0a1a2a;
-  color: #e0f0ff;
-  border-color: #00b4d8;
-  box-shadow: 0 0 0 3px rgba(0,180,216,0.15);
+  background: var(--surface-input);
+  color: var(--text-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 /* ── Staggered field animation ── */
@@ -128,9 +128,9 @@
 
 /* ── Submit button ── */
 .signup-btn {
-  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 55%, #f77f00 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 55%, var(--color-secondary) 100%);
   background-size: 200% auto;
-  color: #fff;
+  color: var(--text-inverse);
   border: none;
   border-radius: 10px;
   padding: 13px;
@@ -140,7 +140,7 @@
 }
 .signup-btn:hover {
   background-position: right center;
-  color: #fff;
+  color: var(--text-inverse);
   transform: translateY(-1px);
 }
 .signup-btn:active { transform: scale(0.98); }
@@ -154,20 +154,20 @@
 .divider span {
   flex: 1;
   height: 1px;
-  background: rgba(30,77,107,0.4);
+  background: var(--border-default);
 }
 .divider em {
   font-size: 12px;
-  color: #2a5a78;
+  color: var(--text-disabled);
   font-style: normal;
 }
 
 /* ── Google button ── */
 .google-btn {
-  border: 1.5px solid rgba(30,77,107,0.45);
+  border: 1.5px solid var(--border-default);
   border-radius: 10px;
   background: transparent;
-  color: #aac8e0;
+  color: var(--text-secondary);
   font-size: 13px;
   padding: 10px;
   display: flex;
@@ -176,14 +176,14 @@
   transition: border-color 0.2s, background 0.2s;
 }
 .google-btn:hover {
-  border-color: #00b4d8;
-  background: #0a1a2a;
-  color: #e0f0ff;
+  border-color: var(--color-primary);
+  background: var(--surface-input);
+  color: var(--text-primary);
 }
 
 /* ── Login link ── */
-.login-link { font-size: 13px; color: #4a7fa0; }
-.login-link a { color: #00b4d8; text-decoration: none; font-weight: 500; }
+.login-link { font-size: 13px; color: var(--text-muted); }
+.login-link a { color: var(--color-primary); text-decoration: none; font-weight: 500; }
 .login-link a:hover { text-decoration: underline; }
 
 /* ── Animations ── */
@@ -200,18 +200,18 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  background: rgba(247,127,0,0.08);
-  border: 1px solid rgba(247,127,0,0.25);
+  background: var(--color-secondary-soft);
+  border: 1px solid var(--color-secondary-border);
   border-radius: 8px;
   padding: 9px 12px;
   font-size: 13px;
-  color: #f77f00;
+  color: var(--color-secondary);
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid white;
+  border: 2px solid var(--text-inverse);
   border-top: 2px solid transparent;
   border-radius: 50%;
   display: inline-block;
@@ -229,7 +229,7 @@
 .social-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--surface-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -237,7 +237,7 @@
 }
 
 .social-popup-box {
-  background: #fff;
+  background: var(--text-inverse);
   border-radius: 14px;
   padding: 1.5rem;
   width: 100%;
@@ -253,7 +253,7 @@
   border: none;
   font-size: 22px;
   cursor: pointer;
-  color: #888;
+  color: var(--text-muted);
   line-height: 1;
 }
 
@@ -265,7 +265,7 @@
 
 .social-popup-sub {
   font-size: 13px;
-  color: #888;
+  color: var(--text-muted);
   margin: 0 0 18px;
 }
 
@@ -281,17 +281,17 @@
   gap: 12px;
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--neutral-200);
   border-radius: 8px;
-  background: #fff;
+  background: var(--text-inverse);
   cursor: pointer;
   font-size: 14px;
-  color: #222;
+  color: var(--text-inverse);
   transition: background 0.15s;
 }
 
 .social-provider-btn:hover {
-  background: #f5f5f5;
+  background: var(--surface-inset);
 }
 
 @media (max-width: 360px) {
