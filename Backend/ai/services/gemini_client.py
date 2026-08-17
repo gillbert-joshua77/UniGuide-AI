@@ -13,7 +13,7 @@ import google.generativeai as genai
 
 logger = logging.getLogger('uniguide.ai')
 
-MODEL_NAME = 'gemini-2.5-flash'
+MODEL_NAME = 'gemini-3.5-flash'
 REQUEST_TIMEOUT_SECONDS = 90
 TITLE_REQUEST_TIMEOUT_SECONDS = 10
 
