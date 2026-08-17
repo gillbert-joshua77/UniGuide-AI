@@ -49,8 +49,9 @@ const Login = () => {
           email: res.data.email,
           full_name: res.data.full_name
         }));
+        const isNewSignup = localStorage.getItem("uniguide_new_signup") === "1";
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate(isNewSignup ? "/dashboard?setup=1" : "/dashboard");
         }, 1000);
       }
 

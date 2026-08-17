@@ -146,8 +146,8 @@ function FeaturedCard({ article }) {
           }}>{article.summary}</div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 8 }}>
-          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 8, flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b", flexWrap: "wrap" }}>
             <span>📰 {article.source}</span>
             <span>⏱ {article.readTime} min read</span>
           </div>
@@ -184,7 +184,7 @@ function NewsRow({ article, bookmarked, onToggleBookmark }) {
     >
       <Thumb article={article} size={56} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
           <span style={{
             background: `${meta.color}1f`, border: `1px solid ${meta.color}55`, color: meta.color,
             borderRadius: 5, padding: "2px 7px", fontSize: 9, fontWeight: 700, letterSpacing: 0.5
@@ -197,7 +197,7 @@ function NewsRow({ article, bookmarked, onToggleBookmark }) {
           marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical", overflow: "hidden"
         }}>{article.title}</div>
-        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "#64748b", alignItems: "center", flexWrap: "wrap" }}>
           <span>⏱ {article.readTime} min read</span>
           <button
             onClick={(e) => { e.stopPropagation(); onToggleBookmark(article.id); }}
@@ -477,6 +477,15 @@ export default function Itnews() {
         ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 3px; }
         input { color-scheme: dark; }
         button:hover { opacity: 0.88; }
+        .in-layout { grid-template-columns: 1fr 320px; }
+        @media (max-width: 992px) {
+          .in-layout { grid-template-columns: 1fr; }
+          .in-sidebar { position: static !important; }
+        }
+        @media (max-width: 640px) {
+          .in-hero { padding: 32px 16px 24px !important; }
+          .in-content { padding: 0 16px 40px !important; }
+        }
       `}</style>
 
       {/* Navbar Component replacing the inline nav block */}
@@ -486,7 +495,7 @@ export default function Itnews() {
       <TickerBar headlines={articles.map((a) => a.title).slice(0, 5)} />
 
       {/* Page hero */}
-      <div style={{
+      <div className="in-hero" style={{
         padding: "44px 40px 28px",
         background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(249,115,22,0.07) 0%, transparent 65%)",
         animation: "fadeIn 0.6s ease"
@@ -514,8 +523,8 @@ export default function Itnews() {
           </div>
 
           {/* Search + refresh */}
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <div style={{ position: "relative", width: 280 }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ position: "relative", width: "min(280px, 100%)" }}>
               <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#475569", fontSize: 14 }}>🔍</span>
               <input
                 value={searchQuery}
@@ -556,8 +565,8 @@ export default function Itnews() {
       </div>
 
       {/* Main content */}
-      <div style={{ padding: "0 40px 48px", maxWidth: 1300, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 28, alignItems: "start" }}>
+      <div className="in-content" style={{ padding: "0 40px 48px", maxWidth: 1300, margin: "0 auto" }}>
+        <div className="in-layout" style={{ display: "grid", gap: 28, alignItems: "start" }}>
 
           {/* LEFT COLUMN */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -576,7 +585,7 @@ export default function Itnews() {
                     </div>
 
                     {/* Featured cards */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 18 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
                       {featured.map((a) => (
                         <div key={a.id} style={{ animation: "fadeIn 0.5s ease" }}>
                           <FeaturedCard article={a} />
@@ -618,7 +627,7 @@ export default function Itnews() {
           </div>
 
           {/* RIGHT SIDEBAR */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 18, position: "sticky", top: 110 }}>
+          <div className="in-sidebar" style={{ display: "flex", flexDirection: "column", gap: 18, position: "sticky", top: 110 }}>
             {!loading && !error && articles.length > 0 && <TopSources articles={articles} />}
             {!loading && !error && articles.length > 0 && <LatestHeadlines articles={articles} />}
             <NewsletterBox />

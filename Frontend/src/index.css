@@ -49,3 +49,20 @@
     filter: invert(1) brightness(2);
   }
 }
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+img,
+svg,
+iframe,
+video {
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}

@@ -70,6 +70,10 @@ class UniGuideChatView(APIView):
         else:
             session = ChatSession.objects.create(user=request.user)
 
+        # A session still named "New Chat" gets an AI-generated title after
+        # the first exchange; manually named sessions keep their title.
+        had_default_title = session.title == 'New Chat'
+
         user_msg = ChatMessage.objects.create(
             session=session,
             role='user',
@@ -99,11 +103,26 @@ class UniGuideChatView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+        is_first_exchange = not session.chat_messages.filter(role='assistant').exists()
+
         ChatMessage.objects.create(
             session=session,
             role='assistant',
             content=reply,
         )
+
+        # Generate a short smart title on the first exchange only. Failures
+        # are logged and ignored so the chat never breaks because a title
+        # could not be generated (the truncated first message stays instead).
+        if had_default_title and is_first_exchange:
+            try:
+                smart_title = service.generate_title(message, reply)
+            except Exception as exc:
+                logger.warning('Smart title generation failed unexpectedly: %s', exc)
+                smart_title = None
+            if smart_title:
+                session.title = smart_title[:120]
+                session.save(update_fields=['title', 'updated_at'])
 
         return Response(
             {

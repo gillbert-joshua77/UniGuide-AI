@@ -15,7 +15,10 @@ class StudentProfileDetailView(APIView):
         return profile
 
     def get(self, request):
-        serializer = StudentProfileSerializer(self.get_object(request.user))
+        serializer = StudentProfileSerializer(
+            self.get_object(request.user),
+            context={'request': request},
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -23,6 +26,7 @@ class StudentProfileDetailView(APIView):
             self.get_object(request.user),
             data=request.data,
             partial=True,
+            context={'request': request},
         )
         if serializer.is_valid():
             serializer.save()

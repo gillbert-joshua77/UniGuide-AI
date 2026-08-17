@@ -1,0 +1,485 @@
+/* ============================================================
+   UniGuide AI — Global Light Theme
+   Applies when <html data-theme="light"> (set by ThemeProvider).
+   Dark mode is the default design; these rules flip surfaces
+   to a light navy palette while keeping accent colors.
+   ============================================================ */
+
+[data-theme="light"] body {
+  background: #f4f8fc;
+}
+
+/* ---------- Home ---------- */
+[data-theme="light"] .home-wrapper {
+  background: #f4f8fc;
+  color: #16344f;
+}
+
+[data-theme="light"] .section-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .section-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .section-tag {
+  background: rgba(0, 180, 216, 0.08);
+  border-color: rgba(0, 180, 216, 0.25);
+  color: #0e6e9e;
+}
+
+[data-theme="light"] .hero-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .hero-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .stat-label {
+  color: #3f6d90;
+}
+[data-theme="light"] .stat-divider {
+  background: rgba(15, 60, 95, 0.15);
+}
+
+[data-theme="light"] .features-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .feat-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .feat-title {
+  color: #16344f;
+}
+[data-theme="light"] .feat-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .step-title {
+  color: #16344f;
+}
+[data-theme="light"] .step-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .dashboard-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .dashboard-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.16);
+}
+[data-theme="light"] .dash-sub-title {
+  color: #16344f;
+}
+[data-theme="light"] .skill-meta {
+  color: #2f5d80;
+}
+[data-theme="light"] .skill-bar {
+  background: rgba(15, 60, 95, 0.12);
+}
+[data-theme="light"] .app-row {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.12);
+}
+[data-theme="light"] .app-role {
+  color: #16344f;
+}
+[data-theme="light"] .app-company {
+  color: #3f6d90;
+}
+[data-theme="light"] .profile-complete-card {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.12);
+}
+[data-theme="light"] .complete-bar-bg {
+  background: rgba(15, 60, 95, 0.12);
+}
+
+[data-theme="light"] .split-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .trend-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .trend-title {
+  color: #16344f;
+}
+[data-theme="light"] .trend-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .skill-demand-row {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .skill-demand-name {
+  color: #16344f;
+}
+
+[data-theme="light"] .testimonials-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .testimonial-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .testimonial-text {
+  color: #3f6d90;
+}
+[data-theme="light"] .author-name {
+  color: #16344f;
+}
+[data-theme="light"] .author-role {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .home-footer {
+  background: #ffffff;
+  border-top-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .footer-brand {
+  color: #16344f;
+}
+[data-theme="light"] .footer-copy,
+[data-theme="light"] .footer-links a {
+  color: #3f6d90;
+}
+
+/* ---------- About ---------- */
+[data-theme="light"] .about-wrapper {
+  background: #f4f8fc;
+  color: #16344f;
+}
+
+[data-theme="light"] .about-hero-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .about-hero-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .about-stat-box {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .about-stat-label {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .about-mission-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .mission-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .mission-para {
+  color: #3f6d90;
+}
+[data-theme="light"] .val-item {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .val-title {
+  color: #16344f;
+}
+[data-theme="light"] .val-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .about-feat-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .about-feat-card .feat-title {
+  color: #16344f;
+}
+[data-theme="light"] .about-feat-card .feat-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .about-how-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .step-title {
+  color: #16344f;
+}
+[data-theme="light"] .step-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .why-card {
+  background: #ffffff;
+}
+[data-theme="light"] .why-title {
+  color: #16344f;
+}
+[data-theme="light"] .why-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .about-team-section {
+  background: #eaf1f8;
+}
+[data-theme="light"] .team-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .team-name {
+  color: #16344f;
+}
+[data-theme="light"] .team-role {
+  color: #0e6e9e;
+}
+[data-theme="light"] .team-desc {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .vision-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .vision-heading {
+  color: #0f2438;
+}
+[data-theme="light"] .vision-sub {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .about-footer {
+  background: #ffffff;
+  border-top-color: rgba(15, 60, 95, 0.14);
+}
+
+/* ---------- Profile ---------- */
+[data-theme="light"] .profile-wrapper {
+  background: #f4f8fc;
+  color: #16344f;
+}
+
+[data-theme="light"] .profile-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .profile-banner {
+  border-color: rgba(15, 60, 95, 0.12);
+  border-bottom: none;
+}
+[data-theme="light"] .profile-top-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .profile-name,
+[data-theme="light"] .section-title,
+[data-theme="light"] .modal-title {
+  color: #0f2438;
+}
+[data-theme="light"] .profile-email {
+  color: #0e6e9e;
+}
+[data-theme="light"] .badge-pill {
+  background: rgba(0, 119, 182, 0.08);
+  border-color: rgba(0, 119, 182, 0.22);
+  color: #0e6e9e;
+}
+[data-theme="light"] .profile-tab {
+  color: #3f6d90;
+}
+[data-theme="light"] .section-subtitle,
+[data-theme="light"] .stat-label,
+[data-theme="light"] .settings-pic-hint,
+[data-theme="light"] .empty-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .stat-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .stat-number {
+  color: #0f2438;
+}
+[data-theme="light"] .detail-item span {
+  color: #3f6d90;
+}
+[data-theme="light"] .detail-item strong {
+  color: #16344f;
+}
+[data-theme="light"] .settings-pic-row {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .linkedin-skill-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .skill-name,
+[data-theme="light"] .empty-title {
+  color: #16344f;
+}
+[data-theme="light"] .skill-level-text {
+  color: #3f6d90;
+}
+[data-theme="light"] .skill-progress-bar {
+  background: rgba(15, 60, 95, 0.12);
+}
+[data-theme="light"] .empty-skills-banner {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.2);
+}
+[data-theme="light"] .app-item {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.12);
+}
+[data-theme="light"] .app-role {
+  color: #16344f;
+}
+[data-theme="light"] .app-company {
+  color: #3f6d90;
+}
+[data-theme="light"] .form-group label {
+  color: #3f6d90;
+}
+[data-theme="light"] .form-group input[type="text"],
+[data-theme="light"] .form-group select,
+[data-theme="light"] .form-group textarea {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.2);
+  color: #16344f;
+}
+[data-theme="light"] .form-group input::placeholder,
+[data-theme="light"] .form-group textarea::placeholder {
+  color: #7d9bb3;
+}
+[data-theme="light"] .settings-save-bar {
+  border-top-color: rgba(15, 60, 95, 0.14);
+}
+
+[data-theme="light"] .modal-content {
+  background: #ffffff;
+}
+[data-theme="light"] .modal-subtitle {
+  color: #3f6d90;
+}
+[data-theme="light"] .form-group label {
+  color: #3f6d90;
+}
+[data-theme="light"] .skill-chip {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.18);
+  color: #3f6d90;
+}
+[data-theme="light"] .level-card {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.16);
+}
+[data-theme="light"] .level-name {
+  color: #16344f;
+}
+[data-theme="light"] .level-percent {
+  color: #3f6d90;
+}
+
+/* ---------- Auth pages (Login / Register / OTP / Forgot / Reset) ---------- */
+[data-theme="light"] .login-wrapper,
+[data-theme="light"] .signup-wrapper,
+[data-theme="light"] .otp-wrapper,
+[data-theme="light"] .forget-wrapper,
+[data-theme="light"] .reset-wrapper {
+  background: #f4f8fc;
+}
+
+[data-theme="light"] .brand-name {
+  color: #0f2438;
+}
+[data-theme="light"] .brand-tag {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.14);
+  color: #0e6e9e;
+}
+
+[data-theme="light"] .login-card,
+[data-theme="light"] .signup-card,
+[data-theme="light"] .otp-card,
+[data-theme="light"] .reset-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .card-title-text {
+  color: #0f2438;
+}
+[data-theme="light"] .card-sub-text {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .custom-label {
+  color: #2f5d80;
+}
+[data-theme="light"] .custom-input.form-control {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.22);
+  color: #16344f;
+}
+[data-theme="light"] .custom-input.form-control::placeholder {
+  color: #7d9bb3;
+}
+[data-theme="light"] .custom-input.form-control:focus {
+  background: #ffffff;
+  color: #16344f;
+  border-color: #00b4d8;
+}
+
+[data-theme="light"] .forgot-link,
+[data-theme="light"] .login-link {
+  color: #3f6d90;
+}
+[data-theme="light"] .divider span {
+  background: rgba(15, 60, 95, 0.18);
+}
+[data-theme="light"] .divider em {
+  color: #3f6d90;
+}
+[data-theme="light"] .google-btn {
+  border-color: rgba(15, 60, 95, 0.22);
+  color: #2f5d80;
+}
+[data-theme="light"] .google-btn:hover {
+  background: #f6fafd;
+  border-color: #00b4d8;
+  color: #0e6e9e;
+}
+
+[data-theme="light"] .otp-input {
+  background: #ffffff;
+  border-color: rgba(15, 60, 95, 0.22);
+  color: #16344f;
+}
+[data-theme="light"] .resend-text {
+  color: #3f6d90;
+}
+
+[data-theme="light"] .reset-icon-wrap {
+  background: #f6fafd;
+}
+[data-theme="light"] .strength-bar-bg {
+  background: rgba(15, 60, 95, 0.14);
+}
+[data-theme="light"] .strength-label {
+  color: #3f6d90;
+}
+[data-theme="light"] .match-indicator {
+  background: rgba(34, 201, 122, 0.12);
+  color: #0f9e55;
+}
+
+[data-theme="light"] .social-popup-box {
+  background: #ffffff;
+}
+[data-theme="light"] .social-popup-title {
+  color: #0f2438;
+}
+[data-theme="light"] .social-popup-sub {
+  color: #3f6d90;
+}
+[data-theme="light"] .social-provider-btn {
+  background: #f6fafd;
+  border-color: rgba(15, 60, 95, 0.16);
+  color: #16344f;
+}

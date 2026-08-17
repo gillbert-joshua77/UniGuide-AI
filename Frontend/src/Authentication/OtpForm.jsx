@@ -68,6 +68,7 @@ const OtpForm = () => {
 
       if (response.status === 200) {
         toast.success(response.data.message)
+        localStorage.setItem("uniguide_new_signup", "1")
         navigate('/login')
       }
 

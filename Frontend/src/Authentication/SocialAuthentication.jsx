@@ -27,8 +27,9 @@ const GoogleOAuthButton = () => {
           email: res.data.email,
           full_name: res.data.full_name,
         }));
+        const isNewSignup = res.data.is_new === true;
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate(isNewSignup ? "/dashboard?setup=1" : "/dashboard");
         }, 800);
       }
     } catch (err) {

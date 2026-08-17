@@ -26,6 +26,10 @@ class StudentProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='student_profile',
     )
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/', blank=True, null=True,
+        help_text='Profile photo of the student'
+    )
     education_level = models.CharField(
         max_length=30, choices=EDUCATION_LEVEL_CHOICES, blank=True,
         help_text='Current or latest education level'

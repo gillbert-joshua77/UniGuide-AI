@@ -201,3 +201,7 @@
   padding: 8px 12px;
   border-radius: 8px;
 }
+
+@media (max-width: 360px) {
+  .login-wrapper { padding: 16px; }
+}

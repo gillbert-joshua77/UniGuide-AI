@@ -293,3 +293,7 @@
 .social-provider-btn:hover {
   background: #f5f5f5;
 }
+
+@media (max-width: 360px) {
+  .signup-wrapper { padding: 16px; }
+}

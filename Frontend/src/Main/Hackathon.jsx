@@ -137,9 +137,9 @@ function HackathonCard({ h, onRegister }) {
         }} />
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
             <span style={{
               background: sc.bg, border: `1px solid ${sc.border}`,
               color: sc.text, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 600,
@@ -174,8 +174,8 @@ function HackathonCard({ h, onRegister }) {
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-        <div style={{ display: "flex", gap: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
           <div style={{ textAlign: "center" }}>
             <div style={{ color: "#22d3ee", fontSize: 15, fontWeight: 700 }}>{h.participants.toLocaleString()}</div>
             <div style={{ color: "#64748b", fontSize: 10 }}>Participants</div>
@@ -392,12 +392,24 @@ export default function HackathonPage() {
         ::-webkit-scrollbar-track { background: #020817; }
         ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 3px; }
         input, select, textarea { color-scheme: dark; }
+        @media (max-width: 640px) {
+          .hk-hero { padding: 40px 16px 32px !important; }
+          .hk-tabs { padding: 0 16px 20px !important; }
+          .hk-content { padding: 24px 16px !important; }
+          .hk-hero-grid { max-width: 100% !important; }
+          .hk-stats-cell { padding: 12px 8px !important; }
+          .hk-bar { width: 56px !important; }
+        }
+        @media (max-width: 420px) {
+          .hk-stat-value { font-size: 18px !important; }
+          .hk-card { padding: 18px 16px !important; }
+        }
       `}</style>
 
       {/* Replaced old navbar content with Navbar component */}
       <Navbar />
 
-      <div style={{
+      <div className="hk-hero" style={{
         padding: "60px 40px 40px",
         background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%)",
         textAlign: "center", animation: "fadeIn 0.6s ease"
@@ -421,24 +433,24 @@ export default function HackathonPage() {
           Compete, build, and win. Find hackathons matched to your skills and career goals.
         </p>
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12,
+        <div className="hk-hero-grid" style={{
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12,
           maxWidth: 700, margin: "0 auto"
         }}>
           {stats.map((s) => (
-            <div key={s.label} style={{
+            <div key={s.label} className="hk-stats-cell" style={{
               background: "rgba(15,23,42,0.7)", border: "1px solid rgba(51,65,85,0.5)",
               borderRadius: 12, padding: "16px 10px"
             }}>
-              <div style={{ color: s.color, fontSize: 22, fontWeight: 800 }}>{s.value}</div>
+              <div className="hk-stat-value" style={{ color: s.color, fontSize: 22, fontWeight: 800 }}>{s.value}</div>
               <div style={{ color: "#64748b", fontSize: 11, marginTop: 4 }}>{s.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{
-        display: "flex", justifyContent: "center", gap: 4,
+      <div className="hk-tabs" style={{
+        display: "flex", justifyContent: "center", gap: 4, flexWrap: "wrap",
         padding: "0 40px 24px", borderBottom: "1px solid rgba(51,65,85,0.4)"
       }}>
         {[
@@ -456,10 +468,10 @@ export default function HackathonPage() {
         ))}
       </div>
 
-      <div style={{ padding: "32px 40px", maxWidth: 1200, margin: "0 auto" }}>
+      <div className="hk-content" style={{ padding: "32px 40px", maxWidth: 1200, margin: "0 auto" }}>
         {activeTab === "hackathons" && (
           <>
-            <div style={{ display: "flex", gap: 8, marginBottom: 28 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
               {["all", "live", "upcoming", "ended"].map((f) => (
                 <button key={f} onClick={() => setFilter(f)} style={{
                   background: filter === f ? "rgba(99,102,241,0.25)" : "rgba(15,23,42,0.6)",
@@ -471,7 +483,7 @@ export default function HackathonPage() {
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
               {filtered.map((h) => (
                 <div key={h.id} style={{ animation: "fadeIn 0.5s ease" }}>
                   <HackathonCard h={h} onRegister={setSelected} />
@@ -488,7 +500,7 @@ export default function HackathonPage() {
               <div style={{ color: "#64748b", fontSize: 13, marginTop: 6 }}>UniGuide AI BuildFest 2025 · Live Rankings</div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 16, marginBottom: 32 }}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
               {[LEADERBOARD[1], LEADERBOARD[0], LEADERBOARD[2]].map((entry, idx) => {
                 const heights = [80, 110, 65];
                 const colors = ["#94a3b8", "#fbbf24", "#cd7f32"];
@@ -497,7 +509,7 @@ export default function HackathonPage() {
                     <div style={{ fontSize: 28, marginBottom: 8, animation: idx === 1 ? "float 3s ease infinite" : "none" }}>{entry.badge}</div>
                     <div style={{ color: "#f1f5f9", fontSize: 13, fontWeight: 600 }}>{entry.team}</div>
                     <div style={{ color: "#64748b", fontSize: 11 }}>{entry.college}</div>
-                    <div style={{
+                    <div className="hk-bar" style={{
                       marginTop: 8, height: heights[idx],
                       background: `linear-gradient(to top, ${colors[idx]}30, ${colors[idx]}15)`,
                       border: `1px solid ${colors[idx]}50`,
@@ -517,7 +529,7 @@ export default function HackathonPage() {
             }}>
               {LEADERBOARD.map((entry, i) => (
                 <div key={entry.rank} style={{
-                  display: "flex", alignItems: "center", padding: "16px 24px",
+                  display: "flex", alignItems: "center", padding: "16px 24px", flexWrap: "wrap", gap: 8,
                   borderBottom: i < LEADERBOARD.length - 1 ? "1px solid rgba(51,65,85,0.3)" : "none",
                   background: i === 0 ? "rgba(251,191,36,0.04)" : "transparent",
                   transition: "background 0.2s"

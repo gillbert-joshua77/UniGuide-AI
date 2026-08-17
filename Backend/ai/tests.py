@@ -6,7 +6,14 @@ from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from .models import ChatSession, ChatMessage
+from .services.context_builder import (
+    build_chat_history,
+    build_student_context,
+    build_system_instruction,
+)
 from .services.gemini_client import GeminiError
+
+from students.models import Application, Skill
 
 User = get_user_model()
 
@@ -15,11 +22,29 @@ SESSIONS_URL = '/api/v1/uniguide/chat/sessions/'
 
 
 class FakeGeminiService:
+    last_system_instruction = None
+    title_call_count = 0
+
     def __init__(self, *args, **kwargs):
         pass
 
     def generate_reply(self, message, history, system_instruction):
+        FakeGeminiService.last_system_instruction = system_instruction
         return f'Echo: {message}'
+
+    def generate_title(self, user_message, ai_reply):
+        FakeGeminiService.title_call_count += 1
+        return 'Smart title'
+
+
+class TitleFallbackGeminiService(FakeGeminiService):
+    def generate_title(self, user_message, ai_reply):
+        return None
+
+
+class TitleRaisingGeminiService(FakeGeminiService):
+    def generate_title(self, user_message, ai_reply):
+        raise GeminiError('title generation failed')
 
 
 def fake_failing_service():
@@ -37,6 +62,7 @@ class ChatAPITests(TestCase):
 
     def setUp(self):
         cache.clear()
+        FakeGeminiService.title_call_count = 0
         self.client = APIClient()
         self.user = User.objects.create_user(
             email='student@example.com',
@@ -202,3 +228,103 @@ class ChatAPITests(TestCase):
     def test_empty_message_rejected(self):
         resp = self.client.post(CHAT_URL, {'message': '   '}, format='json')
         self.assertEqual(resp.status_code, 400)
+
+    def test_chat_sends_personalized_system_instruction(self):
+        profile = self.user.student_profile
+        profile.course = 'Data Science'
+        profile.career_goal = 'ML Engineer'
+        profile.save()
+        Skill.objects.create(user=self.user, name='Python', percentage=90)
+
+        with self._chat_patcher():
+            resp = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+        self.assertEqual(resp.status_code, 200, resp.data)
+
+        instruction = FakeGeminiService.last_system_instruction
+        self.assertIn('Data Science', instruction)
+        self.assertIn('ML Engineer', instruction)
+        self.assertIn('Python (90%)', instruction)
+
+
+class ContextBuilderTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='priya@example.com',
+            password='testpass123',
+            first_name='Priya',
+            last_name='Sharma',
+        )
+
+    def test_system_instruction_includes_profile_fields(self):
+        profile = self.user.student_profile
+        profile.education_level = 'undergraduate'
+        profile.institution = 'NIT Trichy'
+        profile.course = 'Computer Science'
+        profile.year_of_study = '2'
+        profile.academic_performance = 'CGPA 8.9/10'
+        profile.interests = 'AI, Web Development, Cybersecurity'
+        profile.career_goal = 'Software Engineer'
+        profile.preferred_location = 'Bangalore'
+        profile.preferred_country = 'Canada'
+        profile.budget = '$20,000/year'
+        profile.save()
+
+        instruction = build_system_instruction(self.user)
+
+        self.assertIn('STUDENT PROFILE', instruction)
+        self.assertIn('Priya Sharma', instruction)
+        self.assertIn('NIT Trichy', instruction)
+        self.assertIn('Computer Science', instruction)
+        self.assertIn('CGPA 8.9/10', instruction)
+        self.assertIn('Software Engineer', instruction)
+        self.assertIn('AI, Web Development, Cybersecurity', instruction)
+
+    def test_system_instruction_includes_skills_and_applications(self):
+        Skill.objects.create(user=self.user, name='Python', percentage=85)
+        Skill.objects.create(user=self.user, name='Django', percentage=70)
+        Application.objects.create(
+            user=self.user,
+            role='Software Engineer Intern',
+            company='Google',
+            status='Interview',
+            color='#22c97a',
+        )
+
+        instruction = build_system_instruction(self.user)
+
+        self.assertIn('Python (85%)', instruction)
+        self.assertIn('Django (70%)', instruction)
+        self.assertIn('Software Engineer Intern at Google (Interview)', instruction)
+
+    def test_no_profile_state(self):
+        self.user.student_profile.delete()
+        fresh_user = User.objects.get(pk=self.user.pk)
+
+        instruction = build_system_instruction(fresh_user)
+        self.assertIn('No student profile is saved yet', instruction)
+        self.assertIsNone(build_student_context(fresh_user))
+
+    def test_empty_profile_state(self):
+        instruction = build_system_instruction(self.user)
+        self.assertIn('currently empty', instruction)
+
+    def test_system_instruction_contains_today_date(self):
+        from datetime import date
+
+        instruction = build_system_instruction(self.user)
+        self.assertIn(date.today().isoformat(), instruction)
+
+    def test_chat_history_maps_roles_and_order(self):
+        session = ChatSession.objects.create(user=self.user, title='Test')
+        ChatMessage.objects.create(session=session, role='user', content='hello')
+        ChatMessage.objects.create(session=session, role='assistant', content='hi there')
+        ChatMessage.objects.create(session=session, role='user', content='more')
+
+        history = build_chat_history(session)
+
+        self.assertEqual(
+            [m['role'] for m in history],
+            ['user', 'model', 'user'],
+        )
+        self.assertEqual(history[1]['parts'], ['hi there'])

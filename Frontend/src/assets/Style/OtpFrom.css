@@ -118,6 +118,23 @@
 .login-link a { color: #4a7fa0; text-decoration: none; transition: color 0.2s; }
 .login-link a:hover { color: #00b4d8; }
 
+@media (max-width: 480px) {
+  .otp-inputs { gap: 8px; }
+  .otp-input {
+    width: 44px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .otp-wrapper { padding: 16px; }
+  .otp-input {
+    width: 40px;
+    height: 48px;
+  }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-10px); }

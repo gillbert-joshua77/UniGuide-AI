@@ -37,7 +37,7 @@ class Google():
 
 
 # Function to build the login response for a verified social user
-def login_social_user(user):
+def login_social_user(user, is_new=False):
 
   user_tokens = user.tokens()   # Generate JWT tokens
 
@@ -47,6 +47,7 @@ def login_social_user(user):
     'full_name': user.get_full_name,
     'access_token': str(user_tokens.get('access')),
     'refresh_token': str(user_tokens.get('refresh')),
+    'is_new': is_new,
   }
 
 
@@ -87,4 +88,4 @@ def register_social_user(provider, email, first_name, last_name):
     register_user.save()   # Save user
 
     # Login newly created user
-    return login_social_user(register_user)
+    return login_social_user(register_user, is_new=True)

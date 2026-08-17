@@ -2,56 +2,53 @@ import React, { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import Navbar from '../Components/Navbar'
+import GuidedOptionsModal from '../Components/GuidedOptionsModal'
 import '../assets/Style/ai.css'
 import axiosInstance from '../Utils/axiosInstance'
 
-const QUICK_PROMPTS = [
-  { label: '🎓 Study abroad',  text: 'Best universities in Canada for CS with budget under $20,000' },
-  { label: '💼 Internships',   text: 'Suggest internships for a 3rd year CS student skilled in Python and React' },
-  { label: '📄 SOP help',      text: 'How do I build a strong SOP for MS applications?' },
-  { label: '🚀 Career paths',  text: 'Top AI and ML career paths for freshers in 2025' },
-  { label: '💰 Scholarships',  text: 'List scholarships available for Indian students in Germany' },
-]
+const renderAIContent = (content) => {
+  if (!content) return null
+  const numberMatches = content.match(/\n\s*\d+\.\s/g)
+  if (!numberMatches || numberMatches.length < 2) {
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+  }
 
-const EDUCATION_LEVEL_CHOICES = [
-  { value: '', label: 'Select education level' },
-  { value: 'high_school', label: 'High School' },
-  { value: 'undergraduate', label: 'Undergraduate' },
-  { value: 'postgraduate', label: 'Postgraduate / Masters' },
-  { value: 'doctoral', label: 'Doctoral / PhD' },
-  { value: 'diploma', label: 'Diploma / Certificate' },
-  { value: 'other', label: 'Other' },
-]
+  const introLines = []
+  const cardSections = []
+  let currentCard = ''
+  let inCard = false
+  const lines = content.split('\n')
 
-const YEAR_OF_STUDY_CHOICES = [
-  { value: '', label: 'Select year' },
-  { value: '1', label: '1st Year' },
-  { value: '2', label: '2nd Year' },
-  { value: '3', label: '3rd Year' },
-  { value: '4', label: '4th Year' },
-  { value: '5', label: '5th Year or above' },
-  { value: 'graduated', label: 'Graduated' },
-]
+  for (const line of lines) {
+    const isNewCard = /^\s*\d+\.\s/.test(line)
+    if (isNewCard) {
+      if (currentCard) cardSections.push(currentCard.trim())
+      currentCard = line
+      inCard = true
+    } else if (inCard) {
+      currentCard += '\n' + line
+    } else {
+      introLines.push(line)
+    }
+  }
+  if (currentCard) cardSections.push(currentCard.trim())
 
-const EMPTY_PROFILE = {
-  full_name: '',
-  email: '',
-  education_level: '',
-  institution: '',
-  course: '',
-  year_of_study: '',
-  academic_performance: '',
-  interests: '',
-  career_goal: '',
-  preferred_location: '',
-  preferred_country: '',
-  budget: '',
-  bio: '',
+  const intro = introLines.join('\n').trim()
+
+  return (
+    <>
+      {intro && <ReactMarkdown remarkPlugins={[remarkGfm]}>{intro}</ReactMarkdown>}
+      {cardSections.map((section, i) => (
+        <div key={i} className="ai-response-card">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{section}</ReactMarkdown>
+        </div>
+      ))}
+    </>
+  )
 }
 
 const ACTIVE_SESSION_STORAGE_KEY = 'uniguide_active_session_id'
 const PINNED_SESSIONS_STORAGE_KEY = 'uniguide_pinned_session_ids'
-const THEME_STORAGE_KEY = 'uniguide_theme'
 
 const UniGuideChat = () => {
   const [messages, setMessages] = useState([])
@@ -81,21 +78,8 @@ const UniGuideChat = () => {
     y: 0,
     sessionId: null,
   })
-
-  const [showProfile, setShowProfile] = useState(false)
-  const [profile, setProfile] = useState(EMPTY_PROFILE)
-  const [profileLoading, setProfileLoading] = useState(true)
-  const [profileError, setProfileError] = useState('')
-  const [profileSaving, setProfileSaving] = useState(false)
-  const [profileSavedAt, setProfileSavedAt] = useState('')
-  const [theme, setTheme] = useState(() => {
-    try {
-      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY)
-      return savedTheme === 'light' ? 'light' : 'dark'
-    } catch {
-      return 'dark'
-    }
-  })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [guidedMode, setGuidedMode] = useState(null)
 
   const chatEndRef = useRef(null)
   const textareaRef = useRef(null)
@@ -110,7 +94,6 @@ const UniGuideChat = () => {
 
   useEffect(() => {
     fetchSessions()
-    fetchStudentProfile()
   }, [])
 
   useEffect(() => {
@@ -124,10 +107,6 @@ const UniGuideChat = () => {
   useEffect(() => {
     localStorage.setItem(PINNED_SESSIONS_STORAGE_KEY, JSON.stringify(pinnedSessionIds))
   }, [pinnedSessionIds])
-
-  useEffect(() => {
-    localStorage.setItem(THEME_STORAGE_KEY, theme)
-  }, [theme])
 
   useEffect(() => {
     const closeContextMenu = () => {
@@ -166,6 +145,21 @@ const UniGuideChat = () => {
       .join('')
   }
 
+  const formatSessionTime = (dateStr) => {
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now - d
+    const diffMin = Math.floor(diffMs / 60000)
+    const diffHr = Math.floor(diffMs / 3600000)
+    const diffDay = Math.floor(diffMs / 86400000)
+    if (diffMin < 1) return 'now'
+    if (diffMin < 60) return `${diffMin}m`
+    if (diffHr < 24) return `${diffHr}h`
+    if (diffDay < 7) return `${diffDay}d`
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
   const fetchSessions = async () => {
     setSessionsLoading(true)
     setSessionsError('')
@@ -186,19 +180,6 @@ const UniGuideChat = () => {
       setSessionsError(errMsg)
     } finally {
       setSessionsLoading(false)
-    }
-  }
-
-  const fetchStudentProfile = async () => {
-    setProfileLoading(true)
-    setProfileError('')
-    try {
-      const res = await axiosInstance.get('students/profile/')
-      setProfile({ ...EMPTY_PROFILE, ...res.data })
-    } catch {
-      setProfileError('Could not load student profile.')
-    } finally {
-      setProfileLoading(false)
     }
   }
 
@@ -316,54 +297,6 @@ const UniGuideChat = () => {
     }
   }
 
-  const onProfileChange = (e) => {
-    const { name, value } = e.target
-    setProfile((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const saveProfile = async (e) => {
-    e.preventDefault()
-    setProfileSaving(true)
-    setProfileError('')
-    setProfileSavedAt('')
-
-    try {
-      const payload = {
-        education_level: profile.education_level,
-        institution: profile.institution,
-        course: profile.course,
-        year_of_study: profile.year_of_study,
-        academic_performance: profile.academic_performance,
-        interests: profile.interests,
-        career_goal: profile.career_goal,
-        preferred_location: profile.preferred_location,
-        preferred_country: profile.preferred_country,
-        budget: profile.budget,
-        bio: profile.bio,
-      }
-
-      const res = await axiosInstance.put('students/profile/', payload)
-      setProfile((prev) => ({ ...prev, ...res.data }))
-      setProfileSavedAt('Profile saved')
-    } catch (err) {
-      const data = err?.response?.data
-      if (typeof data === 'object' && data !== null) {
-        const firstError = Object.values(data)?.[0]
-        if (Array.isArray(firstError)) {
-          setProfileError(firstError[0])
-        } else if (typeof firstError === 'string') {
-          setProfileError(firstError)
-        } else {
-          setProfileError('Could not save profile.')
-        }
-      } else {
-        setProfileError('Could not save profile.')
-      }
-    } finally {
-      setProfileSaving(false)
-    }
-  }
-
   const autoResize = () => {
     const ta = textareaRef.current
     if (!ta) return
@@ -444,14 +377,10 @@ const UniGuideChat = () => {
     }
   }
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
-  }
-
   return (
     <>
-      <Navbar theme={theme} />
-      <div className={`chat-wrapper ${theme === 'light' ? 'theme-light' : ''}`}>
+      <Navbar />
+      <div className={`chat-wrapper ${sidebarOpen ? 'sidebar-open' : ''}`}>
 
         {/* Sidebar */}
         <aside className="chat-sidebar">
@@ -471,9 +400,14 @@ const UniGuideChat = () => {
                 </div>
               </div>
             </div>
+            <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close chat menu">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
 
-          <button className="new-chat-btn" onClick={createNewChat} disabled={creatingChat}>
+          <button className="new-chat-btn" onClick={() => { createNewChat(); setSidebarOpen(false); }} disabled={creatingChat}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
@@ -497,7 +431,7 @@ const UniGuideChat = () => {
             >
               <button
                 className={`sidebar-item ${activeSessionId === session.id ? 'active' : ''}`}
-                onClick={() => openSession(session.id)}
+                onClick={() => { openSession(session.id); setSidebarOpen(false); }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
@@ -523,6 +457,7 @@ const UniGuideChat = () => {
                   <>
                     {pinnedSessionIds.includes(session.id) && <span className="session-pin-indicator">📌</span>}
                     <span className="session-title-text">{session.title || 'New Chat'}</span>
+                    <span className="session-timestamp">{formatSessionTime(session.updated_at)}</span>
                   </>
                 )}
               </button>
@@ -577,14 +512,20 @@ const UniGuideChat = () => {
           <div className="sidebar-spacer" />
 
           <div className="sidebar-user">
-            <div className="sidebar-avatar">{getInitials(user?.full_name)}</div>
+            <div className="sidebar-avatar">
+              {user?.profile_picture ? (
+                <img src={user.profile_picture} alt="Profile" className="sidebar-avatar-img" />
+              ) : (
+                getInitials(user?.full_name)
+              )}
+            </div>
             <div>
               <div className="sidebar-user-name">{user?.full_name || "Student"}</div>
-              <div className="sidebar-user-role">Pro Member</div>
             </div>
           </div>
         </aside>
 
+        {sidebarOpen && <div className="chat-backdrop" onClick={() => setSidebarOpen(false)} />}
 
         {/* Main Chat */}
         <main className="chat-main">
@@ -592,6 +533,11 @@ const UniGuideChat = () => {
           {/* Chat Header */}
           <div className="chat-header">
             <div className="chat-header-left">
+              <button className="chat-menu-btn" onClick={() => setSidebarOpen((open) => !open)} aria-label="Toggle chat menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+              </button>
               <div className="chat-header-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -600,135 +546,29 @@ const UniGuideChat = () => {
                 </svg>
               </div>
               <div>
-                <div className="chat-header-name">UniGuide AI</div>
+                <div className="chat-header-name">
+                  UniGuide AI
+                  <span className="chat-verified-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </div>
                 <div className="chat-header-status">
                   <span className="status-dot" />Ready to guide you
                 </div>
               </div>
             </div>
             <div className="chat-header-actions">
-              <button className="clear-btn" onClick={toggleTheme}>
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              <button className="clear-btn" onClick={clearCurrentChat} title="Clear conversation">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+                Clear
               </button>
-              <button className="clear-btn" onClick={() => setShowProfile((prev) => !prev)}>
-                {showProfile ? 'Hide Profile' : 'Edit Profile'}
-              </button>
-              <button className="clear-btn" onClick={clearCurrentChat}>Clear</button>
             </div>
           </div>
-
-          {showProfile && (
-            <div className="student-profile-panel">
-              <div className="profile-panel-title">Student Profile</div>
-              <div className="profile-panel-subtitle">
-                Keep this updated so UniGuide AI can tailor responses better.
-              </div>
-
-              {profileLoading ? (
-                <div className="profile-panel-note">Loading profile...</div>
-              ) : (
-                <form className="profile-form-grid" onSubmit={saveProfile}>
-                  <div className="profile-field">
-                    <label>Education Level</label>
-                    <select name="education_level" value={profile.education_level || ''} onChange={onProfileChange}>
-                      {EDUCATION_LEVEL_CHOICES.map((option) => (
-                        <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Year of Study</label>
-                    <select name="year_of_study" value={profile.year_of_study || ''} onChange={onProfileChange}>
-                      {YEAR_OF_STUDY_CHOICES.map((option) => (
-                        <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Institution</label>
-                    <input name="institution" value={profile.institution || ''} onChange={onProfileChange} placeholder="Your college/university" />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Course</label>
-                    <input name="course" value={profile.course || ''} onChange={onProfileChange} placeholder="Program or major" />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Academic Performance</label>
-                    <input
-                      name="academic_performance"
-                      value={profile.academic_performance || ''}
-                      onChange={onProfileChange}
-                      placeholder="CGPA 8.5/10 or 85%"
-                    />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Career Goal</label>
-                    <input name="career_goal" value={profile.career_goal || ''} onChange={onProfileChange} placeholder="Target role" />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Preferred Location</label>
-                    <input
-                      name="preferred_location"
-                      value={profile.preferred_location || ''}
-                      onChange={onProfileChange}
-                      placeholder="City or region"
-                    />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Preferred Country</label>
-                    <input
-                      name="preferred_country"
-                      value={profile.preferred_country || ''}
-                      onChange={onProfileChange}
-                      placeholder="Country"
-                    />
-                  </div>
-
-                  <div className="profile-field">
-                    <label>Budget</label>
-                    <input name="budget" value={profile.budget || ''} onChange={onProfileChange} placeholder="$15,000/year" />
-                  </div>
-
-                  <div className="profile-field profile-field-full">
-                    <label>Interests</label>
-                    <textarea
-                      name="interests"
-                      value={profile.interests || ''}
-                      onChange={onProfileChange}
-                      rows={2}
-                      placeholder="AI, cloud, product engineering"
-                    />
-                  </div>
-
-                  <div className="profile-field profile-field-full">
-                    <label>Bio</label>
-                    <textarea
-                      name="bio"
-                      value={profile.bio || ''}
-                      onChange={onProfileChange}
-                      rows={3}
-                      placeholder="Any extra context about your background"
-                    />
-                  </div>
-
-                  <div className="profile-form-actions profile-field-full">
-                    <button className="save-profile-btn" type="submit" disabled={profileSaving}>
-                      {profileSaving ? 'Saving...' : 'Save Profile'}
-                    </button>
-                    {profileSavedAt && <span className="profile-success-text">{profileSavedAt}</span>}
-                    {profileError && <span className="profile-error-text">{profileError}</span>}
-                  </div>
-                </form>
-              )}
-            </div>
-          )}
 
           {/* Messages */}
           <div className="chat-messages">
@@ -740,12 +580,21 @@ const UniGuideChat = () => {
                 <div className="welcome-heading">How can I guide you today? 🎓</div>
                 <div className="welcome-sub">Ask me anything about careers, internships, study abroad, or skills</div>
 
-                <div className="quick-prompts">
-                  {QUICK_PROMPTS.map(q => (
-                    <button key={q.label} className="quick-btn" onClick={() => sendMessage(q.text)}>
-                      {q.label}
+                <div className="guided-section">
+                  <div className="guided-options">
+                    <button className="guided-option" onClick={() => setGuidedMode('internship')}>
+                      <span className="guided-option-label">💼 Internship</span>
+                      <span className="guided-option-desc">Find internships that fit you</span>
                     </button>
-                  ))}
+                    <button className="guided-option" onClick={() => setGuidedMode('hackathon')}>
+                      <span className="guided-option-label">🚀 Hackathon</span>
+                      <span className="guided-option-desc">Hackathons, ideas & prep</span>
+                    </button>
+                    <button className="guided-option" onClick={() => setGuidedMode('university')}>
+                      <span className="guided-option-label">🎓 University / College</span>
+                      <span className="guided-option-desc">Pick the right program</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Welcome bot message */}
@@ -789,7 +638,7 @@ const UniGuideChat = () => {
                     {msg.role === 'user' ? (
                       msg.content
                     ) : (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || ''}</ReactMarkdown>
+                      renderAIContent(msg.content)
                     )}
                   </div>
                 </div>
@@ -834,13 +683,38 @@ const UniGuideChat = () => {
                 </svg>
               </button>
             </div>
+            {!activeSessionId && messages.length === 0 && (
+              <div className="quick-chips-row">
+                <button className="quick-chip" onClick={() => setGuidedMode('internship')}>
+                  <span className="quick-chip-icon">💼</span>Internship
+                </button>
+                <button className="quick-chip" onClick={() => setGuidedMode('hackathon')}>
+                  <span className="quick-chip-icon">🚀</span>Hackathon
+                </button>
+                <button className="quick-chip" onClick={() => setGuidedMode('university')}>
+                  <span className="quick-chip-icon">🎓</span>University / College
+                </button>
+              </div>
+            )}
             <div className="chat-footer-hint">
-              UniGuide AI · Personalized for students · Press Enter to send, Shift+Enter for new line
+              Press Enter to send, Shift+Enter for new line
+            </div>
+            <div className="chat-disclaimer">
+              UniGuide AI can make mistakes. Consider checking important information.
             </div>
           </div>
 
         </main>
       </div>
+
+      <GuidedOptionsModal
+        mode={guidedMode}
+        onClose={() => setGuidedMode(null)}
+        onComplete={(prompt) => {
+          setGuidedMode(null)
+          sendMessage(prompt)
+        }}
+      />
     </>
   )
 }
