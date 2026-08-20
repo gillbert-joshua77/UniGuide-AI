@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import Logo from '../assets/Image/UniGuide 1.png';
 import '../assets/Style/OtpFrom.css'
-import axios from 'axios';
+import axiosInstance from '../Utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -61,9 +61,9 @@ const OtpForm = () => {
     try {
       setLoading(true)
 
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/auth/verify-email/",
-        { otp: otpValue } // ✅ correct
+      const response = await axiosInstance.post(
+        "auth/verify-email/",
+        { otp: otpValue }
       )
 
       if (response.status === 200) {
@@ -73,8 +73,6 @@ const OtpForm = () => {
       }
 
     } catch (err) {
-      console.log("ERROR 👉", err.response?.data)
-
       if (err.response?.data) {
         const errors = err.response.data
         const firstError = Object.values(errors)[0]

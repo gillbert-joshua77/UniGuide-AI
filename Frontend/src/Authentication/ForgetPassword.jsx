@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Logo from '../assets/Image/UniGuide 1.png'
 import { toast } from 'react-toastify'
 import '../assets/Style/ForgetPassword.css'
-import axios from 'axios'
+import axiosInstance from '../Utils/axiosInstance'
 const ForgetPassword = () => {
   const [email, setEmail] = useState("")
   const [error, setError] = useState("")
@@ -19,7 +19,7 @@ const ForgetPassword = () => {
     }
 
     try {
-      const res = await axios.post('http://localhost:8000/api/v1/auth/password-reset/', {'email' : email})
+      const res = await axiosInstance.post('auth/password-reset/', { email })
 
       if (res.status === 200) {
         toast.success("A link to reset your password has been sent to your email")
@@ -28,7 +28,6 @@ const ForgetPassword = () => {
         setError("Something went wrong. Please try again.")
       }
     } catch (err) {
-      console.log(err)
       if (err.response && err.response.data && err.response.data.email) {
         setError(err.response.data.email[0])
       } else {

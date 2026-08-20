@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Logo from '../assets/Image/UniGuide 1.png'
 import '../assets/Style/ResetPassword.css'
 import { useNavigate, useParams } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '../Utils/axiosInstance'
 import { toast } from 'react-toastify'
 
 const ResetPassword = () => {
@@ -49,13 +49,10 @@ const ResetPassword = () => {
       "uidb64":           uid,
       "token":            token,
     }
-      console.log('UID:', uid)
-      console.log('TOKEN:', token)
-      console.log('DATA SENT:', data)
 
     try {
-      const response = await axios.patch(
-        'http://localhost:8000/api/v1/auth/set-new-password/',
+      const response = await axiosInstance.patch(
+        'auth/set-new-password/',
         data
       )
       if (response.data.status === 200 || response.status === 200) {

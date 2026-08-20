@@ -40,9 +40,7 @@ const Register = () => {
   }
 
   try {
-    setLoading(true); // 🔥 START LOADING
-
-    console.log("SENDING 👉", formData);
+    setLoading(true);
 
     const res = await axiosInstance.post(
       "auth/register/",
@@ -56,8 +54,6 @@ const Register = () => {
       navigate("/otp/verify");
     }
   } catch (err) {
-  console.log("ERROR 👉", err.response?.data);
-
   if (err.response?.data) {
     const errors = err.response.data;
 
@@ -67,7 +63,7 @@ const Register = () => {
     setError("Server error");
   }
 } finally {
-    setLoading(false); // 🔥 STOP LOADING
+    setLoading(false);
   }
 };
   return (

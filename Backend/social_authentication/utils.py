@@ -3,6 +3,9 @@ from google.oauth2 import id_token   # Used to verify Google OAuth2 tokens
 from authentication.models import User   # Import custom User model
 from django.conf import settings   # Access project settings
 from rest_framework.exceptions import AuthenticationFailed   # Exception for authentication failure
+import logging
+
+logger = logging.getLogger('uniguide.ai')
 
 # Class to handle Google token validation
 class Google():
@@ -28,10 +31,10 @@ class Google():
       if "accounts.google.com" in iss or "account.google.com" in iss:
         return id_info   # Return decoded token info
 
-      print(f"[GOOGLE AUTH ERROR] Issuer invalid: {iss}")
+      logger.warning("Google auth issuer invalid: %s", iss)
       return None
     except Exception as e:
-      print(f"[GOOGLE AUTH ERROR] Validation failed: {e}")
+      logger.error("Google auth validation failed: %s", e)
       return None   # Return None if token validation fails
 
 

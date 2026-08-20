@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://uniguide-ai-54at.onrender.com/api/v1/';
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
@@ -31,7 +31,6 @@ axiosInstance.interceptors.request.use(
       }
 
       // 4. If expired, try to refresh
-      console.log("Token expired, refreshing...");
       const res = await axios.post(`${baseURL}auth/token/refresh/`, {
         refresh: refreshToken,
       });
@@ -44,10 +43,7 @@ axiosInstance.interceptors.request.use(
         return req;
       }
     } catch (error) {
-      console.error("Token handling error:", error);
-      // Optional: Clear storage and redirect to login if refresh fails
-      // localStorage.clear();
-      // window.location.href = '/login';
+      // Token refresh failed — silently continue; backend will return 401
     }
 
     return req;
