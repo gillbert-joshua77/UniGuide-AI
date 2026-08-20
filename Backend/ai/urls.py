@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     UniGuideChatView, ChatSessionCreateView, ChatSessionDetailView,
     NewsView, GuidedQuestionView, GuidedGeographicDataView,
+    HackathonView,
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path('chat/guided-question/', GuidedQuestionView.as_view(), name='guided-question'),
     path('chat/geographic-data/', GuidedGeographicDataView.as_view(), name='guided-geographic-data'),
     path('news/', NewsView.as_view(), name='it-news'),
+    path('hackathons/', HackathonView.as_view(), name='hackathons'),
 ]

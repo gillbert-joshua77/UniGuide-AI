@@ -452,3 +452,66 @@ def _normalize_articles(raw_articles, category, label):
             "readTime": _estimate_read_time(f"{summary} {art.get('content') or ''}"),
         })
     return articles
+
+
+# ─── HACKATHONS (Devpost) ────────────────────────────────────────────
+
+HACKATHON_CACHE = {}
+HACKATHON_CACHE_TTL = 60 * 60  # 1 hour
+
+DEVPOST_API = "https://devpost.com/api/hackathons"
+
+
+class HackathonView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        status_filter = (request.query_params.get("status", "open") or "open").strip()
+        page = int(request.query_params.get("page", 1))
+
+        cache_key = f"{status_filter}:{page}"
+        cached = HACKATHON_CACHE.get(cache_key)
+        if cached and time.time() - cached[0] < HACKATHON_CACHE_TTL:
+            return Response(cached[1], status=status.HTTP_200_OK)
+
+        try:
+            resp = requests.get(
+                DEVPOST_API,
+                params={"page": page, "status": status_filter, "order": "deadline"},
+                timeout=15,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as exc:
+            if cached:
+                return Response(cached[1], status=status.HTTP_200_OK)
+            logger.exception("Failed to fetch hackathons from Devpost")
+            return Response(
+                {"error": f"Could not load hackathons: {exc}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        raw = data.get("hackathons") or []
+        hackathons = []
+        for h in raw:
+            tags = [t.get("name", "") for t in (h.get("themes") or []) if t.get("name")]
+            prize_raw = re.sub(r"<[^>]+>", "", _clean_text(h.get("prize_amount") or "")).strip()
+            hackathons.append({
+                "id": h.get("id"),
+                "title": (h.get("title") or "").strip(),
+                "url": (h.get("url") or "").strip(),
+                "organizer": (h.get("organization_name") or "").strip(),
+                "status": h.get("open_state", "open"),
+                "mode": (h.get("displayed_location") or {}).get("location", "Online"),
+                "deadline": (h.get("submission_period_dates") or "").strip(),
+                "prize": prize_raw or "TBA",
+                "participants": h.get("registrations_count", 0),
+                "tags": tags,
+                "image": (h.get("thumbnail_url") or "").strip() or None,
+                "featured": h.get("featured", False),
+            })
+
+        result = {"total": len(hackathons), "page": page, "hackathons": hackathons}
+        HACKATHON_CACHE[cache_key] = (time.time(), result)
+        return Response(result, status=status.HTTP_200_OK)
