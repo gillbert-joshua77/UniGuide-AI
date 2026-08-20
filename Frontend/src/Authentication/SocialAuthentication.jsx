@@ -35,7 +35,7 @@ const GoogleOAuthButton = () => {
     } catch (err) {
       console.error("Google Auth Error:", err);
       if (err?.code === 'ERR_NETWORK') {
-        toast.error("Cannot connect to backend. Start Django on http://127.0.0.1:8000 and try again.");
+        toast.error("Cannot connect to backend. Please try again later.");
         return;
       }
       const msg = err.response?.data?.detail || err.response?.data?.access_token || "Google authentication failed";

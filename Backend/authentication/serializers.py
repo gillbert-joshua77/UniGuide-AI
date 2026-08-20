@@ -9,6 +9,7 @@ from django.utils.http import urlsafe_base64_encode   # Encode user ID safely in
 from django.utils.encoding import smart_str ,smart_bytes   # Encoding utilities
 from django.contrib.sites.shortcuts import get_current_site   # Get current domain
 from django.urls import reverse   # Reverse URL by name
+from django.conf import settings as django_settings
 from .utils import *   # Import custom utility functions (like email sender)
 from django.utils.encoding import smart_str , force_str   # Duplicate import (not changed)
 from django.utils.http import urlsafe_base64_encode , urlsafe_base64_decode   # Encode/decode base64
@@ -115,7 +116,8 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 
             # Create reset URL
             relative_link = reverse('password-reset-confirm' ,kwargs={'uidb64' : uidb64 , 'token' : token})
-            abslink = f"http://localhost:5173/password-reset-confirm/{uidb64}/{token}/"
+            frontend_url = getattr(django_settings, 'FRONTEND_URL', 'http://localhost:5173')
+            abslink = f"{frontend_url}/password-reset-confirm/{uidb64}/{token}/"
 
             # Email content
             email_body = f"""Subject: Reset Your Password - Uniguide AI

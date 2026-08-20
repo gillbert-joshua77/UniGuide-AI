@@ -34,6 +34,5 @@ class GoogleSignInSerializers(serializers.Serializer):
         try:
             return register_social_user(provider, email, first_name, last_name)
         except Exception as e:
-            print(f"[GOOGLE AUTH ERROR] Social registration failed: {e}")
             raise serializers.ValidationError({"access_token": str(e)})
 

@@ -148,14 +148,6 @@ GEOGRAPHIC_DATA = {
             "Lausanne", "Lucerne",
         ],
     },
-    "Canada": {
-        "requires_state": False,
-        "states": [
-            "Ontario", "British Columbia", "Quebec", "Alberta",
-            "Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
-            "Newfoundland and Labrador", "Prince Edward Island",
-        ],
-    },
 }
 
 # Quick lookup of all country names

@@ -17,8 +17,6 @@ class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer   # Serializer for registration
 
     def post(self, request):
-        print("REQUEST DATA:", request.data)   # Debug: print incoming request data
-
         serializer = self.serializer_class(data=request.data)   # Initialize serializer
 
         if serializer.is_valid(raise_exception=True):   # Validate data
@@ -124,8 +122,6 @@ class PasswordResetConfirm(GenericAPIView):
         try:
             user_id= smart_str(urlsafe_base64_decode(uidb64))   # Decode user ID
             user = User.objects.get(id = user_id)   # Get user
-
-            print("PASSWORD RESET EMAIL TRIGGERED")   # Debug log
 
             # Validate token
             if not PasswordResetTokenGenerator().check_token(user , token):

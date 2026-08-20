@@ -19,7 +19,6 @@ def send_code_to_user(email):
 
   Subject = "One Time passcode for Email verification"   # Email subject
   otp_code = generateOtp()   # Generate OTP
-  print(f"[TESTING LOG] Generated OTP for {email}: {otp_code}")
 
   user = User.objects.get(email=email)   # Get user object from database
 
