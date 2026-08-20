@@ -42,7 +42,7 @@ axiosInstance.interceptors.request.use(
         req.headers.Authorization = `Bearer ${res.data.access}`;
         return req;
       }
-    } catch (error) {
+    } catch {
       // Token refresh failed — silently continue; backend will return 401
     }
 
