@@ -168,3 +168,21 @@ class LogOutUserView(GenericAPIView):
         serializers.save()   # Blacklist refresh token
 
         return Response(status= status.HTTP_200_OK)   # No content response
+
+
+# View to resend OTP
+class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'message': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+            if user.is_verified:
+                return Response({'message': 'User already verified'}, status=status.HTTP_400_BAD_REQUEST)
+            send_code_to_user(email)
+            return Response({'message': 'OTP resent successfully'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
