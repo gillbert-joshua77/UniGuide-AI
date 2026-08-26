@@ -23,7 +23,7 @@ export default function Profile() {
     const fetchData = async () => {
       try {
         const [profileRes, skillsRes] = await Promise.all([
-          axiosInstance.get('/auth/profile/').catch(() => ({ data: {} })),
+          axiosInstance.get('/students/me/').catch(() => ({ data: {} })),
           axiosInstance.get('/students/skills/').catch(() => ({ data: [] })),
         ]);
         setUser(profileRes.data);

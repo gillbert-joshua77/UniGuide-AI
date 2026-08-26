@@ -24,8 +24,8 @@ export default function Navbar() {
   const userEmail = localStorage.getItem('uniguide_user_email') || '';
 
   const handleLogout = () => {
-    localStorage.removeItem('uniguide_access_token');
-    localStorage.removeItem('uniguide_refresh_token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('uniguide_user_name');
     localStorage.removeItem('uniguide_user_email');
     navigate('/login');

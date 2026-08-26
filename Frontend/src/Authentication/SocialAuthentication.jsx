@@ -23,10 +23,8 @@ const GoogleOAuthButton = () => {
         toast.success("Google Authentication Successful 🎉");
         localStorage.setItem("accessToken", res.data.access_token);
         localStorage.setItem("refreshToken", res.data.refresh_token);
-        localStorage.setItem("user", JSON.stringify({
-          email: res.data.email,
-          full_name: res.data.full_name,
-        }));
+        localStorage.setItem('uniguide_user_name', res.data.full_name || '');
+        localStorage.setItem('uniguide_user_email', res.data.email || '');
         const isNewSignup = res.data.is_new === true;
         setTimeout(() => {
           navigate(isNewSignup ? "/dashboard?setup=1" : "/dashboard");

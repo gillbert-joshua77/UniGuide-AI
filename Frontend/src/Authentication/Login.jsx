@@ -21,10 +21,10 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await axiosInstance.post('/auth/login/', { email, password });
-      localStorage.setItem('uniguide_access_token', data.access);
-      localStorage.setItem('uniguide_refresh_token', data.refresh);
-      if (data.user?.name) localStorage.setItem('uniguide_user_name', data.user.name);
-      if (data.user?.email) localStorage.setItem('uniguide_user_email', data.user.email);
+      localStorage.setItem('accessToken', data.access_token);
+      localStorage.setItem('refreshToken', data.refresh_token);
+      if (data.full_name) localStorage.setItem('uniguide_user_name', data.full_name);
+      if (data.email) localStorage.setItem('uniguide_user_email', data.email);
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid credentials.');

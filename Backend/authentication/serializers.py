@@ -1,4 +1,4 @@
-from tokenize import TokenError   # Exception related to token errors (note: may not match JWT TokenError)
+from rest_framework_simplejwt.exceptions import TokenError
 
 from rest_framework import serializers   # DRF serializers for handling input/output data
 from .models import User   # Import custom User model

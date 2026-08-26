@@ -23,10 +23,11 @@ export default function Register() {
     setLoading(true);
     try {
       await axiosInstance.post('/auth/register/', {
-        name: form.name,
+        first_name: form.name.split(' ')[0] || form.name,
+        last_name: form.name.split(' ').slice(1).join(' ') || '',
         email: form.email,
         password: form.password,
-        password_confirm: form.password_confirm,
+        password2: form.password_confirm,
       });
       navigate('/otp/verify', { state: { email: form.email } });
     } catch (err) {

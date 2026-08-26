@@ -24,7 +24,7 @@ const AuthCallback = () => {
       toast.success('Logged in successfully!');
       navigate('/dashboard');
     }
-  }, [ ]);
+  }, [navigate, searchParams]);
 
   return <div>Completing login...</div>;
 };
