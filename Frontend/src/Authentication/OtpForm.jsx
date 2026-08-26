@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
-import { Button } from '../components/ui';
+import { Button } from '../Components/ui';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
-import { Button, Badge, Avatar, Card } from '../components/ui';
+import { Button, Badge, Avatar, Card } from '../Components/ui';
 import { fadeUp, fadeIn, staggerFast, slideInRight } from '../lib/motion';
 import '../assets/Style/ai.css';
 

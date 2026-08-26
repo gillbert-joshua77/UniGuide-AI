@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
-import GuidanceCore from '../components/three/GuidanceCore';
-import { Button, Input } from '../components/ui';
+import GuidanceCore from '../Components/three/GuidanceCore';
+import { Button, Input } from '../Components/ui';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 

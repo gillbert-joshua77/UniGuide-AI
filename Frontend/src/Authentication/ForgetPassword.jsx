@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
-import { Button, Input } from '../components/ui';
+import { Button, Input } from '../Components/ui';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 

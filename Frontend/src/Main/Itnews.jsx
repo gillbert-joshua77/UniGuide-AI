@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axiosInstance from "../Utils/axiosInstance";
-import PageLayout from '../components/layout/PageLayout';
-import { Button, Card, Badge, Input } from '../components/ui';
+import PageLayout from '../Components/layout/PageLayout';
+import { Button, Card, Badge, Input } from '../Components/ui';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Itnews.css';
 

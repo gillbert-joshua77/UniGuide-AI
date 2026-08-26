@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import PageLayout from '../components/layout/PageLayout';
-import GuidanceCore from '../components/three/GuidanceCore';
-import { Button, Card, Badge } from '../components/ui';
+import PageLayout from '../Components/layout/PageLayout';
+import GuidanceCore from '../Components/three/GuidanceCore';
+import { Button, Card, Badge } from '../Components/ui';
 import { fadeUp, staggerContainer, fadeIn, slideInLeft, slideInRight } from '../lib/motion';
 import '../assets/Style/Home.css';
 
