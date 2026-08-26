@@ -22,7 +22,10 @@ class RegisterUserView(GenericAPIView):
         if serializer.is_valid(raise_exception=True):   # Validate data
             user = serializer.save()   # Save user to database
 
-            send_code_to_user(user.email)   # Send OTP email after registration
+            try:
+                send_code_to_user(user.email)   # Send OTP email after registration
+            except Exception:
+                pass   # Don't fail registration if OTP/email fails
 
             return Response({
                 'data': serializer.data,
