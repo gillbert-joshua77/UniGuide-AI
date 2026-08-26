@@ -3,16 +3,16 @@ import { ToastContainer } from 'react-toastify';
 
 import { ThemeProvider } from './Context/ThemeContext';
 import './assets/Style/theme.css';
-import './components/ui/Button.css';
-import './components/ui/Card.css';
-import './components/ui/Badge.css';
-import './components/ui/Input.css';
-import './components/ui/Avatar.css';
-import './components/ui/Modal.css';
-import './components/ui/Tabs.css';
-import './components/ui/Progress.css';
-import './components/ui/Skeleton.css';
-import './components/ui/Tooltip.css';
+import './Components/ui/Button.css';
+import './Components/ui/Card.css';
+import './Components/ui/Badge.css';
+import './Components/ui/Input.css';
+import './Components/ui/Avatar.css';
+import './Components/ui/Modal.css';
+import './Components/ui/Tabs.css';
+import './Components/ui/Progress.css';
+import './Components/ui/Skeleton.css';
+import './Components/ui/Tooltip.css';
 
 import Register from './Authentication/Register';
 import Login from './Authentication/Login';
