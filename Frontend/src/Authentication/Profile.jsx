@@ -23,8 +23,8 @@ export default function Profile() {
     const fetchData = async () => {
       try {
         const [profileRes, skillsRes] = await Promise.all([
-          axiosInstance.get('/api/auth/profile/').catch(() => ({ data: {} })),
-          axiosInstance.get('/api/students/skills/').catch(() => ({ data: [] })),
+          axiosInstance.get('/auth/profile/').catch(() => ({ data: {} })),
+          axiosInstance.get('/students/skills/').catch(() => ({ data: [] })),
         ]);
         setUser(profileRes.data);
         setSkills(Array.isArray(skillsRes.data) ? skillsRes.data : skillsRes.data?.results || []);
@@ -37,7 +37,7 @@ export default function Profile() {
   const handleAddSkill = async () => {
     if (!newSkill.name.trim()) return;
     try {
-      const res = await axiosInstance.post('/api/students/skills/', newSkill);
+      const res = await axiosInstance.post('/students/skills/', newSkill);
       setSkills(prev => [...prev, res.data]);
       setNewSkill({ name: '', level: 'Intermediate', color: '#D4AF67' });
       setShowAddSkill(false);

@@ -18,7 +18,7 @@ export default function ForgetPassword() {
     setError('');
     setLoading(true);
     try {
-      await axiosInstance.post('/api/auth/password-reset/', { email });
+      await axiosInstance.post('/auth/password-reset/', { email });
       setSent(true);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to send reset link.');

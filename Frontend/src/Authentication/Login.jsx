@@ -20,7 +20,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await axiosInstance.post('/api/auth/login/', { email, password });
+      const { data } = await axiosInstance.post('/auth/login/', { email, password });
       localStorage.setItem('uniguide_access_token', data.access);
       localStorage.setItem('uniguide_refresh_token', data.refresh);
       if (data.user?.name) localStorage.setItem('uniguide_user_name', data.user.name);

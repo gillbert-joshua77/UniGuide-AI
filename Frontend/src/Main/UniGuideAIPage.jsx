@@ -49,7 +49,7 @@ export default function UniGuideAIPage() {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post('/api/ai/chat/', { message: text });
+      const response = await axiosInstance.post('/uniguide/chat/', { message: text });
       const aiMsg = {
         id: Date.now() + 1,
         role: 'assistant',

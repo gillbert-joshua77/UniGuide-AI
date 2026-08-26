@@ -22,7 +22,7 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      await axiosInstance.post('/api/auth/register/', {
+      await axiosInstance.post('/auth/register/', {
         name: form.name,
         email: form.email,
         password: form.password,

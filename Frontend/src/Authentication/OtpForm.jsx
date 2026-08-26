@@ -44,7 +44,7 @@ export default function OtpForm() {
     setError('');
     setLoading(true);
     try {
-      await axiosInstance.post('/api/auth/otp/verify/', { email, otp: code });
+      await axiosInstance.post('/auth/otp/verify/', { email, otp: code });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid OTP. Please try again.');
@@ -55,7 +55,7 @@ export default function OtpForm() {
 
   const handleResend = async () => {
     try {
-      await axiosInstance.post('/api/auth/otp/resend/', { email });
+      await axiosInstance.post('/auth/otp/resend/', { email });
       setResendTimer(60);
     } catch { /* silent */ }
   };

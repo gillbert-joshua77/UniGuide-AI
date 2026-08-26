@@ -22,7 +22,7 @@ export default function ResetPassword() {
     setError('');
     setLoading(true);
     try {
-      await axiosInstance.post('/api/auth/password-reset-confirm/', { uid, token, new_password: password });
+      await axiosInstance.post('/auth/password-reset-confirm/', { uid, token, new_password: password });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
