@@ -1,218 +1,96 @@
-import React from 'react'
-import Logo from '../assets/Image/UniGuide 1.png';
-import '../assets/Style/Login.css';
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import GoogleOAuthButton from './SocialAuthentication';
+import GuidanceCore from '../components/three/GuidanceCore';
+import { Button, Input } from '../components/ui';
+import { fadeUp, staggerContainer } from '../lib/motion';
+import '../assets/Style/Auth.css';
 
-const Login = () => {
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleOnChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
-    if (error) setError("");
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { email, password } = loginData;
-
-    if (!email || !password) {
-      setError("Email and password are required");
-      return;
-    }
-
+    if (!email || !password) { setError('Please fill in all fields.'); return; }
+    setError('');
+    setLoading(true);
     try {
-      setIsLoading(true);
-      setError("");
-
-      const res = await axiosInstance.post(
-        "auth/login/",
-        { email, password }
-      );
-
-      if (res.status === 200) {
-        toast.success("Login Success 🎉");
-        localStorage.setItem("accessToken", res.data.access_token);
-        localStorage.setItem("refreshToken", res.data.refresh_token);
-        localStorage.setItem("user", JSON.stringify({
-          email: res.data.email,
-          full_name: res.data.full_name
-        }));
-        const isNewSignup = localStorage.getItem("uniguide_new_signup") === "1";
-        setTimeout(() => {
-          navigate(isNewSignup ? "/dashboard?setup=1" : "/dashboard");
-        }, 1000);
-      }
-
+      const { data } = await axiosInstance.post('/api/auth/login/', { email, password });
+      localStorage.setItem('uniguide_access_token', data.access);
+      localStorage.setItem('uniguide_refresh_token', data.refresh);
+      if (data.user?.name) localStorage.setItem('uniguide_user_name', data.user.name);
+      if (data.user?.email) localStorage.setItem('uniguide_user_email', data.user.email);
+      navigate('/home');
     } catch (err) {
-      if (err.response) {
-        setError(err.response.data.detail || "Login failed");
-        toast.error(err.response.data.detail || "Invalid credentials ❌");
-      } else {
-        setError("Server error. Please try again.");
-        toast.error("Server error ⚠️");
-      }
+      setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid credentials.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
+
   return (
-    <div className="login-wrapper">
-      <div className="bg-glow bg-glow-teal" />
-      <div className="bg-glow bg-glow-orange" />
-
-      <div className="login-box">
-
-        {/* Logo */}
-        <div className="text-center mb-4 logo-area">
-          <img src={Logo} alt="UniGuide AI" className="logo-img mb-2" />
-          <h1 className="brand-name mb-1">UniGuide <span>AI</span></h1>
-          <span className="brand-tag">
-            <i className="dot me-1" />
-            AI Career &amp; Internship Navigator
-          </span>
+    <div className="auth-layout">
+      <div className="auth-left">
+        <div className="auth-left-content">
+          <GuidanceCore size={280} />
+          <h1 className="auth-left-title">Your future,<br />better guided.</h1>
+          <p className="auth-left-desc">AI-powered academic, career, and opportunity guidance for students.</p>
         </div>
+      </div>
+      <div className="auth-right">
+        <motion.form className="auth-form" onSubmit={handleSubmit} variants={staggerContainer} initial="hidden" animate="visible">
+          <motion.div variants={fadeUp} custom={0}>
+            <Link to="/" className="auth-logo">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#D4AF67" strokeWidth="1.5" />
+                <circle cx="16" cy="16" r="5" fill="#D4AF67" />
+              </svg>
+              <span>UniGuide <span className="auth-logo-ai">AI</span></span>
+            </Link>
+          </motion.div>
+          <motion.h2 className="auth-title" variants={fadeUp} custom={1}>Welcome back</motion.h2>
+          <motion.p className="auth-subtitle" variants={fadeUp} custom={2}>Sign in to continue your guidance journey.</motion.p>
 
-        {/* Card */}
-        <div className="login-card p-4">
+          {error && <motion.div className="auth-error" variants={fadeUp}>{error}</motion.div>}
 
-          {/* Heading */}
-          <div className="mb-4">
-            <h2 className="card-title-text mb-1">Welcome back</h2>
-            <p className="card-sub-text">Sign in to continue your journey</p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
-            {/* Email */}
-            <div className="mb-3 field-group">
-              <label className="custom-label">Email address</label>
-              <div className="input-wrap">
-                <svg className="input-icon" viewBox="0 0 24 24" fill="none"
-                  stroke="#00b4d8" strokeWidth="2" strokeLinecap="round">
-                  <rect x="2" y="4" width="20" height="16" rx="2" />
-                  <path d="M2 8l10 6 10-6" />
-                </svg>
-                <input
-                  type="email"
-                  name="email"
-                  className="custom-input form-control"
-                  placeholder="john@example.com"
-                  value={loginData.email}
-                  onChange={handleOnChange}
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="mb-2 field-group">
-              <label className="custom-label">Password</label>
-              <div className="input-wrap">
-                <svg className="input-icon" viewBox="0 0 24 24" fill="none"
-                  stroke="#00b4d8" strokeWidth="2" strokeLinecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" />
-                  <path d="M7 11V7a5 5 0 0110 0v4" />
-                </svg>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  className="custom-input form-control"
-                  placeholder="Enter your password"
-                  value={loginData.password}
-                  onChange={handleOnChange}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="eye-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="#4a7fa0" strokeWidth="2" strokeLinecap="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="#4a7fa0" strokeWidth="2" strokeLinecap="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="error-message mt-2 mb-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Forgot Password */}
-            <div className="text-end mb-4 mt-2">
-              <a href="/forgetpassword" className="forgot-link">Forgot password?</a>
-            </div>
-
-            {/* Login Button */}
-            <button
-              type="submit"
-              className="btn login-btn w-100 mb-3"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="btn-loading-content">
-                  <span className="spinner" />
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In →'
-              )}
-            </button>
-
-          </form>
-
-          {/* Divider */}
-          <div className="divider my-3">
-            <span /><em>or</em><span />
-          </div>
-
-          {/* Google */}
-          <div className="mb-3">
-            <GoogleOAuthButton />
-          </div>
-
-          <p className="login-link text-center mb-0">
-            Don't have an account? <a href="/">Sign up</a>
-          </p>
-
-        </div>
+          <motion.div variants={fadeUp} custom={3}>
+            <Input
+              label="Email"
+              type="email"
+              placeholder="you@university.edu"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>}
+            />
+          </motion.div>
+          <motion.div variants={fadeUp} custom={4}>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+            />
+          </motion.div>
+          <motion.div className="auth-options" variants={fadeUp} custom={5}>
+            <Link to="/forgetpassword" className="auth-link">Forgot password?</Link>
+          </motion.div>
+          <motion.div variants={fadeUp} custom={6}>
+            <Button type="submit" variant="gold" size="lg" className="auth-submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </motion.div>
+          <motion.p className="auth-switch" variants={fadeUp} custom={7}>
+            Don't have an account? <Link to="/register">Create one</Link>
+          </motion.p>
+        </motion.form>
       </div>
     </div>
   );
-};
-
-export default Login;
-
+}

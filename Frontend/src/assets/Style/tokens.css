@@ -1,227 +1,241 @@
 /* ═══════════════════════════════════════════════════════════════════
    UniGuide AI — Design Token System
-   Single source of truth for all color values.
-   Raw brand/neutral values live here.
-   Semantic mappings live in theme.css.
+   Premium light-mode design tokens.
    ═══════════════════════════════════════════════════════════════════ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 :root {
-  /* ───────────────────────────────────────────────────────────────
-     A. RAW BRAND TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --color-primary: #00b4d8;
-  --color-primary-dark: #0077b6;
-  --color-primary-deep: #005f8a;
+  /* ── Typography ──────────────────────────────────────────────────── */
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 
-  --color-secondary: #f77f00;
-  --color-secondary-dark: #e05a00;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.75rem;
+  --text-5xl: 3.5rem;
 
-  --color-success: #22c97a;
-  --color-success-dark: #0f9e55;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
 
-  --color-tertiary: #a78bfa;
-  --color-tertiary-dark: #7c3aed;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
 
-  --color-danger: #ef4444;
-  --color-danger-dark: #dc2626;
+  /* ── Surfaces ────────────────────────────────────────────────────── */
+  --surface-pearl: #FAFAF8;
+  --surface-ivory: #F6F3ED;
+  --surface-white: #FFFFFF;
+  --surface-page: #FAFAF8;
+  --surface-section: #F6F3ED;
+  --surface-card: #FFFFFF;
+  --surface-card-hover: #FAFAF8;
+  --surface-elevated: #FFFFFF;
+  --surface-input: #FFFFFF;
+  --surface-inset: #F6F3ED;
+  --surface-overlay: rgba(23, 23, 23, 0.4);
+  --surface-header: rgba(255, 255, 255, 0.92);
+  --surface-footer: #F6F3ED;
+  --surface-sidebar: #FFFFFF;
 
-  /* ───────────────────────────────────────────────────────────────
-     B. AI INTERACTION TOKENS
-     Blue is NOT a second brand — it is reserved for AI/chat UI.
-     ─────────────────────────────────────────────────────────────── */
-  --color-ai: #3B82F6;
-  --color-ai-dark: #2563EB;
-  --color-ai-light: #93C5FD;
-  --color-ai-text: #1E40AF;
-  --color-ai-user-text: #DBEAFE;
+  /* ── Gold (Primary Accent) ──────────────────────────────────────── */
+  --gold-champagne: #D4AF67;
+  --gold-soft: #E5C98A;
+  --gold-deep: #A9823B;
+  --gold-50: rgba(212, 175, 103, 0.08);
+  --gold-100: rgba(212, 175, 103, 0.12);
+  --gold-200: rgba(212, 175, 103, 0.2);
+  --gold-border: rgba(212, 175, 103, 0.3);
 
-  /* ───────────────────────────────────────────────────────────────
-     C. NEUTRAL SCALE
-     ─────────────────────────────────────────────────────────────── */
-  --neutral-50: #f8fafc;
-  --neutral-100: #f1f5f9;
-  --neutral-200: #e2e8f0;
-  --neutral-300: #cbd5e1;
-  --neutral-400: #94a3b8;
-  --neutral-500: #64748b;
-  --neutral-600: #475569;
-  --neutral-700: #334155;
-  --neutral-800: #1e293b;
-  --neutral-900: #0f172a;
-  --neutral-950: #020617;
+  /* ── Silver (Secondary) ──────────────────────────────────────────── */
+  --silver-100: #D9D9D6;
+  --silver-200: #BFC1C4;
+  --silver-300: #8E9298;
+  --silver-border: rgba(186, 188, 191, 0.35);
 
-  /* ───────────────────────────────────────────────────────────────
-     D. SEMANTIC TEXT TOKENS (raw, theme-mapped in theme.css)
-     ─────────────────────────────────────────────────────────────── */
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --text-disabled: #475569;
-  --text-inverse: #0f172a;
-  --text-accent: #00b4d8;
-  --text-brand: #00b4d8;
-  --text-brand-alt: #f77f00;
+  /* ── AI Accent ───────────────────────────────────────────────────── */
+  --ai-accent: #4F6BFF;
+  --ai-accent-hover: #3D56E0;
+  --ai-accent-soft: rgba(79, 107, 255, 0.06);
+  --ai-accent-border: rgba(79, 107, 255, 0.18);
 
-  /* ───────────────────────────────────────────────────────────────
-     E. SEMANTIC SURFACE TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --surface-page: #040d16;
-  --surface-section: rgba(6, 17, 28, 0.9);
-  --surface-card: #081420;
-  --surface-card-hover: #0a1a2a;
-  --surface-elevated: #0F172A;
-  --surface-input: #0a1a2a;
-  --surface-overlay: rgba(2, 6, 18, 0.75);
-  --surface-sidebar: #0F172A;
-  --surface-header: #0F172A;
-  --surface-footer: #06111c;
-  --surface-inset: rgba(8, 20, 32, 0.85);
+  /* ── Text ─────────────────────────────────────────────────────────── */
+  --text-primary: #171717;
+  --text-secondary: #4B4B4B;
+  --text-muted: #777777;
+  --text-disabled: #AAAAAA;
+  --text-inverse: #FFFFFF;
+  --text-gold: #A9823B;
+  --text-link: #4F6BFF;
 
-  /* ───────────────────────────────────────────────────────────────
-     F. SEMANTIC BORDER TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --border-subtle: rgba(30, 77, 107, 0.3);
-  --border-default: rgba(30, 77, 107, 0.4);
-  --border-strong: rgba(30, 77, 107, 0.5);
-  --border-focus: var(--color-primary);
+  /* ── Status ──────────────────────────────────────────────────────── */
+  --status-success: #2D8A56;
+  --status-success-soft: rgba(45, 138, 86, 0.08);
+  --status-success-border: rgba(45, 138, 86, 0.2);
+  --status-warning: #C17E2A;
+  --status-warning-soft: rgba(193, 126, 42, 0.08);
+  --status-warning-border: rgba(193, 126, 42, 0.2);
+  --status-danger: #C53030;
+  --status-danger-soft: rgba(197, 48, 48, 0.06);
+  --status-danger-border: rgba(197, 48, 48, 0.18);
+  --status-info: #4F6BFF;
+  --status-info-soft: rgba(79, 107, 255, 0.06);
+  --status-info-border: rgba(79, 107, 255, 0.18);
 
-  /* ───────────────────────────────────────────────────────────────
-     G. SEMANTIC STATUS TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --status-success: #22c97a;
-  --status-success-dark: #0f9e55;
-  --status-success-soft: rgba(34, 201, 122, 0.12);
-  --status-success-border: rgba(34, 201, 122, 0.25);
-  --status-warning: #f77f00;
-  --status-warning-soft: rgba(247, 127, 0, 0.12);
-  --status-warning-border: rgba(247, 127, 0, 0.25);
-  --status-danger: #ef4444;
-  --status-danger-soft: rgba(239, 68, 68, 0.12);
-  --status-danger-border: rgba(239, 68, 68, 0.25);
-  --status-info: #00b4d8;
-  --status-info-soft: rgba(0, 180, 216, 0.12);
-  --status-info-border: rgba(0, 180, 216, 0.25);
+  /* ── Borders ──────────────────────────────────────────────────────── */
+  --border-light: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --border-focus: #D4AF67;
 
-  /* ───────────────────────────────────────────────────────────────
-     H. INTERACTION TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --interactive-primary: var(--color-primary);
-  --interactive-primary-hover: var(--color-primary-dark);
-  --interactive-primary-soft: rgba(0, 180, 216, 0.1);
-  --interactive-primary-subtle: rgba(0, 180, 216, 0.06);
-  --interactive-primary-border: rgba(0, 180, 216, 0.25);
-  --interactive-primary-glow: rgba(0, 180, 216, 0.15);
+  /* ── Shadows ──────────────────────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-gold: 0 4px 16px rgba(212, 175, 103, 0.15);
 
-  --interactive-ai: var(--color-ai);
-  --interactive-ai-hover: var(--color-ai-dark);
-  --interactive-ai-soft: rgba(59, 130, 246, 0.1);
-  --interactive-ai-subtle: rgba(59, 130, 246, 0.06);
-  --interactive-ai-border: rgba(59, 130, 246, 0.25);
-  --interactive-ai-glow: rgba(59, 130, 246, 0.15);
+  /* ── Radius ───────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
 
-  --interactive-secondary: var(--color-secondary);
-  --interactive-secondary-hover: var(--color-secondary-dark);
-  --interactive-secondary-soft: rgba(247, 127, 0, 0.1);
-  --interactive-secondary-subtle: rgba(247, 127, 0, 0.06);
-  --interactive-secondary-border: rgba(247, 127, 0, 0.25);
-  --interactive-secondary-glow: rgba(247, 127, 0, 0.15);
+  /* ── Spacing ──────────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
 
-  --interactive-danger: var(--color-danger);
-  --interactive-danger-hover: var(--color-danger-dark);
-  --interactive-danger-soft: rgba(239, 68, 68, 0.1);
-  --interactive-danger-subtle: rgba(239, 68, 68, 0.06);
-  --interactive-danger-border: rgba(239, 68, 68, 0.25);
-  --interactive-danger-glow: rgba(239, 68, 68, 0.15);
+  /* ── Transitions ──────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 
-  /* ───────────────────────────────────────────────────────────────
-     I. BRAND ALPHA / TRANSPARENCY TOKENS
-     ─────────────────────────────────────────────────────────────── */
-  --color-primary-soft: rgba(0, 180, 216, 0.1);
-  --color-primary-subtle: rgba(0, 180, 216, 0.06);
-  --color-primary-border: rgba(0, 180, 216, 0.25);
-  --color-primary-glow: rgba(0, 180, 216, 0.15);
-
-  --color-secondary-soft: rgba(247, 127, 0, 0.1);
-  --color-secondary-subtle: rgba(247, 127, 0, 0.06);
-  --color-secondary-border: rgba(247, 127, 0, 0.25);
-
-  --color-success-soft: rgba(34, 201, 122, 0.1);
-  --color-success-subtle: rgba(34, 201, 122, 0.06);
-  --color-success-border: rgba(34, 201, 122, 0.25);
-
-  --color-tertiary-soft: rgba(167, 139, 250, 0.1);
-  --color-tertiary-subtle: rgba(167, 139, 250, 0.06);
-  --color-tertiary-border: rgba(167, 139, 250, 0.25);
-
-  --color-danger-soft: rgba(239, 68, 68, 0.1);
-  --color-danger-subtle: rgba(239, 68, 68, 0.06);
-  --color-danger-border: rgba(239, 68, 68, 0.25);
-
-  --color-ai-soft: rgba(59, 130, 246, 0.1);
-  --color-ai-subtle: rgba(59, 130, 246, 0.06);
-  --color-ai-border: rgba(59, 130, 246, 0.25);
-  --color-ai-glow: rgba(59, 130, 246, 0.15);
-
-  /* ───────────────────────────────────────────────────────────────
-     J. OPACITY LAYERS
-     ─────────────────────────────────────────────────────────────── */
-  --opacity-backdrop: rgba(0, 0, 0, 0.5);
-  --opacity-scrim: rgba(0, 0, 0, 0.75);
-  --opacity-overlay: rgba(2, 6, 18, 0.6);
-  --opacity-hover: rgba(255, 255, 255, 0.05);
-  --opacity-hover-text: rgba(255, 255, 255, 0.1);
-  --opacity-divider: rgba(30, 77, 107, 0.4);
-  --opacity-pressed: rgba(255, 255, 255, 0.12);
-  --opacity-disabled: rgba(255, 255, 255, 0.25);
-
-  /* ───────────────────────────────────────────────────────────────
-     K. Z-INDEX SCALE
-     ─────────────────────────────────────────────────────────────── */
+  /* ── Z-Index ──────────────────────────────────────────────────────── */
   --z-base: 1;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-overlay: 1000;
   --z-modal: 1100;
-  --z-drawer: 1050;
-  --z-popover: 1200;
   --z-toast: 1300;
-  --z-tooltip: 1400;
+
+  /* ── Container ────────────────────────────────────────────────────── */
+  --container-max: 1200px;
+  --container-narrow: 720px;
+  --container-wide: 1400px;
+
+  /* ── Light theme is default ──────────────────────────────────────── */
+  color-scheme: light;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    GLOBAL RESETS
    ═══════════════════════════════════════════════════════════════════ */
-
-html, body {
-  overflow-x: hidden;
-  width: 100%;
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-img, svg, iframe, video {
-  max-width: 100%;
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text-secondary);
+  background: var(--surface-page);
 }
 
 #root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Focus ring */
-:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+img, svg, iframe, video {
+  max-width: 100%;
+  display: block;
 }
 
-/* Selection */
+a {
+  color: var(--text-link);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+a:hover {
+  color: var(--ai-accent-hover);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 ::selection {
-  background: var(--color-primary-soft);
+  background: var(--gold-100);
   color: var(--text-primary);
 }
 
-/* Links */
-a {
-  color: var(--text-accent);
-  text-decoration: none;
+:focus-visible {
+  outline: 2px solid var(--gold-champagne);
+  outline-offset: 2px;
 }
-a:hover {
-  text-decoration: underline;
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
 }

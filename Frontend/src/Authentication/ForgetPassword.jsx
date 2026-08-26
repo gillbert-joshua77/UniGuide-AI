@@ -1,156 +1,87 @@
-import React, { useState } from 'react'
-import Logo from '../assets/Image/UniGuide 1.png'
-import { toast } from 'react-toastify'
-import '../assets/Style/ForgetPassword.css'
-import axiosInstance from '../Utils/axiosInstance'
-const ForgetPassword = () => {
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import axiosInstance from '../Utils/axiosInstance';
+import { Button, Input } from '../components/ui';
+import { fadeUp, staggerContainer } from '../lib/motion';
+import '../assets/Style/Auth.css';
+
+export default function ForgetPassword() {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setSuccess(false)
-
-    if (!email) {
-      setError("Please enter your email")
-      return
-    }
-
+    e.preventDefault();
+    if (!email) { setError('Please enter your email.'); return; }
+    setError('');
+    setLoading(true);
     try {
-      const res = await axiosInstance.post('auth/password-reset/', { email })
-
-      if (res.status === 200) {
-        toast.success("A link to reset your password has been sent to your email")
-        setSuccess(true)
-      } else {
-        setError("Something went wrong. Please try again.")
-      }
+      await axiosInstance.post('/api/auth/password-reset/', { email });
+      setSent(true);
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.email) {
-        setError(err.response.data.email[0])
-      } else {
-        setError("Failed to send reset link. Try again later.")
-      }
+      setError(err.response?.data?.detail || 'Failed to send reset link.');
+    } finally {
+      setLoading(false);
     }
-
-    setEmail("")
-  }
+  };
 
   return (
-    <div className="forget-wrapper">
-      <div className="bg-glow bg-glow-teal" />
-      <div className="bg-glow bg-glow-orange" />
-
-      <div className="forget-box">
-
-        {/* Logo */}
-        <div className="text-center mb-4 logo-area">
-          <img src={Logo} alt="UniGuide AI" className="logo-img mb-2" />
-          <h1 className="brand-name mb-1">UniGuide <span>AI</span></h1>
-          <span className="brand-tag">
-            <i className="dot me-1" />
-            AI Career &amp; Internship Navigator
-          </span>
-        </div>
-
-        {/* Card */}
-        <div className="forget-card p-4">
-
-          {/* Lock Icon */}
-          <div className="d-flex justify-content-center mb-3">
-            <div className="forget-icon-wrap">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-                stroke="#00b4d8" strokeWidth="1.8" strokeLinecap="round">
-                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                <path d="M7 11V7a5 5 0 0110 0v4"/>
-              </svg>
-            </div>
-          </div>
-
-          {/* Heading */}
-          <div className="text-center mb-4">
-            <h2 className="card-title-text mb-1">Forgot your password?</h2>
-            <p className="card-sub-text">
-              No worries! Enter your email and we'll<br />
-              send you a reset link.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
-            {/* Email */}
-            <div className="mb-4 field-group">
-              <label className="custom-label">Email address</label>
-              <div className="input-wrap">
-                <svg className="input-icon" viewBox="0 0 24 24" fill="none"
-                  stroke="#00b4d8" strokeWidth="2" strokeLinecap="round">
-                  <rect x="2" y="4" width="20" height="16" rx="2"/>
-                  <path d="M2 8l10 6 10-6"/>
-                </svg>
-                <input
-                  type="email"
-                  name="email"
-                  className="custom-input form-control"
-                  placeholder="john@example.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="error-msg mb-3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="#f77f00" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                {error}
-              </div>
-            )}
-
-            {/* Success */}
-            {success && (
-              <div className="success-msg mb-3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="#22c97a" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M9 12l2 2 4-4"/>
-                </svg>
-                Reset link sent! Check your inbox.
-              </div>
-            )}
-
-            {/* Submit */}
-            <button type="submit" className="btn forget-btn w-100 mb-3">
-              Send Reset Link →
-            </button>
-
-          </form>
-
-          {/* Divider */}
-          <div className="divider my-3">
-            <span /><em>or</em><span />
-          </div>
-
-          {/* Back Links */}
-          <div className="text-center">
-            <p className="login-link mb-1">
-              Remember your password? <a href="/login">Sign in</a>
-            </p>
-            <p className="login-link mb-0">
-              New here? <a href="/">Create account</a>
-            </p>
-          </div>
-
+    <div className="auth-layout">
+      <div className="auth-left">
+        <div className="auth-left-content">
+          <h1 className="auth-left-title">Reset your<br />password</h1>
+          <p className="auth-left-desc">We'll help you get back into your account securely.</p>
         </div>
       </div>
-    </div>
-  )
-}
+      <div className="auth-right">
+        <motion.form className="auth-form" onSubmit={handleSubmit} variants={staggerContainer} initial="hidden" animate="visible">
+          <motion.div variants={fadeUp} custom={0}>
+            <Link to="/" className="auth-logo">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#D4AF67" strokeWidth="1.5" />
+                <circle cx="16" cy="16" r="5" fill="#D4AF67" />
+              </svg>
+              <span>UniGuide <span className="auth-logo-ai">AI</span></span>
+            </Link>
+          </motion.div>
+          <motion.h2 className="auth-title" variants={fadeUp} custom={1}>Forgot password?</motion.h2>
+          <motion.p className="auth-subtitle" variants={fadeUp} custom={2}>
+            {sent ? 'Check your email for a reset link.' : "Enter your email and we'll send you a reset link."}
+          </motion.p>
 
-export default ForgetPassword
+          {error && <motion.div className="auth-error" variants={fadeUp}>{error}</motion.div>}
+
+          {!sent ? (
+            <>
+              <motion.div variants={fadeUp} custom={3}>
+                <Input
+                  label="Email"
+                  type="email"
+                  placeholder="you@university.edu"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>}
+                />
+              </motion.div>
+              <motion.div variants={fadeUp} custom={4}>
+                <Button type="submit" variant="gold" size="lg" className="auth-submit" disabled={loading}>
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+              </motion.div>
+            </>
+          ) : (
+            <motion.div variants={fadeUp} custom={3}>
+              <Link to="/login"><Button variant="primary" size="lg" className="auth-submit">Back to Sign In</Button></Link>
+            </motion.div>
+          )}
+
+          <motion.p className="auth-switch" variants={fadeUp} custom={5}>
+            Remember your password? <Link to="/login">Sign in</Link>
+          </motion.p>
+        </motion.form>
+      </div>
+    </div>
+  );
+}

@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
-import Navbar from "../Components/Navbar";
+import { motion } from "framer-motion";
 import axiosInstance from "../Utils/axiosInstance";
-
-// ─── DATA ────────────────────────────────────────────────────────────────────
+import PageLayout from '../components/layout/PageLayout';
+import { Button, Card, Badge, Input } from '../components/ui';
+import { fadeUp, staggerContainer } from '../lib/motion';
+import '../assets/Style/Itnews.css';
 
 const CATEGORIES = ["All", "AI", "Software", "Cybersecurity", "Cloud", "Startups", "Jobs", "Research"];
 
 const CATEGORY_META = {
-  AI: { emoji: "🤖", color: "#a78bfa" },
-  Software: { emoji: "💻", color: "#22d3ee" },
-  Cybersecurity: { emoji: "🛡️", color: "#f87171" },
-  Cloud: { emoji: "☁️", color: "#38bdf8" },
-  Startups: { emoji: "🚀", color: "#fbbf24" },
-  Jobs: { emoji: "💼", color: "#34d399" },
-  Research: { emoji: "🔬", color: "#818cf8" },
+  AI: { emoji: "🤖", color: "ai" },
+  Software: { emoji: "💻", color: "gold" },
+  Cybersecurity: { emoji: "🛡️", color: "danger" },
+  Cloud: { emoji: "☁️", color: "ai" },
+  Startups: { emoji: "🚀", color: "gold" },
+  Jobs: { emoji: "💼", color: "success" },
+  Research: { emoji: "🔬", color: "ai" },
 };
 
-const FALLBACK_META = { emoji: "📰", color: "#94a3b8" };
+const FALLBACK_META = { emoji: "📰", color: "silver" };
 
 function timeAgo(iso) {
   if (!iso) return "recent";
@@ -33,183 +35,62 @@ function timeAgo(iso) {
   return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-// ─── COMPONENTS ──────────────────────────────────────────────────────────────
-
-function TickerBar({ headlines }) {
-  const text = headlines.length ? headlines.join("     ·     ") : "Loading the latest IT news...";
-  return (
-    <div style={{
-      background: "rgba(239,68,68,0.08)", borderBottom: "1px solid var(--status-danger-border)",
-      display: "flex", alignItems: "center", overflow: "hidden", height: 36
-    }}>
-      <div style={{
-        background: "var(--color-danger)", color: "var(--text-inverse)", padding: "0 14px", fontSize: 10,
-        fontWeight: 800, letterSpacing: 2, height: "100%", display: "flex",
-        alignItems: "center", flexShrink: 0, whiteSpace: "nowrap"
-      }}>LIVE</div>
-      <div style={{ overflow: "hidden", flex: 1, position: "relative" }}>
-        <div style={{
-          display: "inline-block", whiteSpace: "nowrap",
-          color: "var(--color-danger)", fontSize: 12, fontWeight: 500, lineHeight: 1,
-          willChange: "transform", animation: "ticker 45s linear infinite", paddingTop: 12
-        }}>
-          <span>{text}</span><span>     ·     </span><span>{text}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Thumb({ article, size }) {
   const [failed, setFailed] = useState(false);
   const meta = CATEGORY_META[article.category] || FALLBACK_META;
   if (!article.image || failed) {
     return (
-      <div style={{
-        width: size, height: size, borderRadius: 12, flexShrink: 0,
-        background: `${meta.color}22`, border: `1px solid ${meta.color}44`,
-        display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.48
-      }}>{meta.emoji}</div>
+      <div className="in-thumb" style={{ width: size, height: size }}>
+        <span>{meta.emoji}</span>
+      </div>
     );
   }
-  return (
-    <img
-      src={article.image}
-      onError={() => setFailed(true)}
-      alt=""
-      loading="lazy"
-      style={{ width: size, height: size, objectFit: "cover", borderRadius: 12, flexShrink: 0 }}
-    />
-  );
+  return <img src={article.image} onError={() => setFailed(true)} alt="" loading="lazy" className="in-thumb-img" style={{ width: size, height: size }} />;
 }
 
 function FeaturedCard({ article }) {
   const meta = CATEGORY_META[article.category] || FALLBACK_META;
-  const [hovered, setHovered] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   const open = () => { if (article.url) window.open(article.url, "_blank", "noopener,noreferrer"); };
 
   return (
-    <div
-      onClick={open}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? "var(--surface-card)" : "var(--surface-inset)",
-        border: hovered ? "1px solid var(--color-tertiary)" : "1px solid var(--border-default)",
-        borderRadius: 18, overflow: "hidden", cursor: "pointer",
-        transition: "all 0.25s ease", height: "100%",
-        boxShadow: hovered ? "0 12px 48px rgba(99,102,241,0.15)" : "0 4px 16px var(--opacity-backdrop)",
-        transform: hovered ? "translateY(-4px)" : "none", display: "flex", flexDirection: "column"
-      }}
-    >
+    <Card className="in-featured" hover onClick={open}>
       {article.image && !imgFailed ? (
-        <img
-          src={article.image}
-          onError={() => setImgFailed(true)}
-          alt=""
-          loading="lazy"
-          style={{ width: "100%", height: 150, objectFit: "cover", display: "block", flexShrink: 0 }}
-        />
+        <img src={article.image} onError={() => setImgFailed(true)} alt="" loading="lazy" className="in-featured-img" />
       ) : (
-        <div style={{
-          height: 150, flexShrink: 0,
-          background: `linear-gradient(135deg, ${meta.color}2e, var(--surface-inset))`,
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 46, position: "relative"
-        }}>
-          <span style={{ opacity: 0.9 }}>{meta.emoji}</span>
-          <span style={{
-            position: "absolute", bottom: 12, left: 18, fontSize: 10, fontWeight: 700,
-            letterSpacing: 1, color: meta.color, textTransform: "uppercase"
-          }}>{article.category}</span>
-        </div>
+        <div className="in-featured-placeholder"><span>{meta.emoji}</span></div>
       )}
-
-      <div style={{ padding: "20px 24px 22px", display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{
-            background: `${meta.color}1f`, border: `1px solid ${meta.color}55`, color: meta.color,
-            borderRadius: 6, padding: "3px 9px", fontSize: 10, fontWeight: 700, letterSpacing: 0.5
-          }}>{article.category}</span>
-          <span style={{ color: "var(--text-muted)", fontSize: 11 }}>🕐 {timeAgo(article.publishedAt)}</span>
+      <div className="in-featured-body">
+        <div className="in-featured-meta">
+          <Badge color={meta.color} size="sm">{article.category}</Badge>
+          <span className="in-time">{timeAgo(article.publishedAt)}</span>
         </div>
-
-        <div style={{
-          color: "var(--text-primary)", fontSize: 17, fontWeight: 800, lineHeight: 1.4,
-          display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden"
-        }}>{article.title}</div>
-
-        {article.summary && (
-          <div style={{
-            color: "var(--text-muted)", fontSize: 12.5, lineHeight: 1.65,
-            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
-          }}>{article.summary}</div>
-        )}
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 8, flexWrap: "wrap", gap: 10 }}>
-          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-muted)", flexWrap: "wrap" }}>
-            <span>📰 {article.source}</span>
-            <span>⏱ {article.readTime} min read</span>
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); open(); }}
-            style={{
-              background: "linear-gradient(135deg, var(--color-tertiary), var(--color-tertiary-dark))", border: "none",
-              color: "var(--text-inverse)", borderRadius: 8, padding: "8px 16px", fontSize: 12,
-              fontWeight: 600, cursor: "pointer"
-            }}
-          >Read Original →</button>
+        <h3 className="in-featured-title">{article.title}</h3>
+        {article.summary && <p className="in-featured-summary">{article.summary}</p>}
+        <div className="in-featured-footer">
+          <span className="in-featured-source">{article.source} · {article.readTime} min read</span>
+          <Button variant="gold" size="sm" onClick={(e) => { e.stopPropagation(); open(); }}>Read →</Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
-function NewsRow({ article, bookmarked, onToggleBookmark }) {
+function NewsRow({ article }) {
   const meta = CATEGORY_META[article.category] || FALLBACK_META;
-  const [hovered, setHovered] = useState(false);
   const open = () => { if (article.url) window.open(article.url, "_blank", "noopener,noreferrer"); };
 
   return (
-    <div
-      onClick={open}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? "var(--surface-inset)" : "var(--surface-inset)",
-        border: hovered ? "1px solid var(--color-tertiary)" : "1px solid var(--border-default)",
-        borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, cursor: "pointer",
-        transition: "all 0.2s ease"
-      }}
-    >
+    <div className="in-row" onClick={open}>
       <Thumb article={article} size={56} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
-          <span style={{
-            background: `${meta.color}1f`, border: `1px solid ${meta.color}55`, color: meta.color,
-            borderRadius: 5, padding: "2px 7px", fontSize: 9, fontWeight: 700, letterSpacing: 0.5
-          }}>{article.category}</span>
-          <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{article.source}</span>
-          <span style={{ color: "var(--text-disabled)", fontSize: 11, marginLeft: "auto" }}>🕐 {timeAgo(article.publishedAt)}</span>
+      <div className="in-row-body">
+        <div className="in-row-meta">
+          <Badge color={meta.color} size="sm">{article.category}</Badge>
+          <span className="in-row-source">{article.source}</span>
+          <span className="in-time">{timeAgo(article.publishedAt)}</span>
         </div>
-        <div style={{
-          color: "var(--text-primary)", fontSize: 14, fontWeight: 600, lineHeight: 1.4,
-          marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical", overflow: "hidden"
-        }}>{article.title}</div>
-        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-muted)", alignItems: "center", flexWrap: "wrap" }}>
-          <span>⏱ {article.readTime} min read</span>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleBookmark(article.id); }}
-            title={bookmarked ? "Remove bookmark" : "Bookmark"}
-            style={{
-              marginLeft: "auto", background: "var(--surface-inset)", border: "1px solid var(--border-default)",
-              borderRadius: 7, width: 28, height: 28, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13
-            }}
-          >{bookmarked ? "🔖" : "📑"}</button>
-          <span style={{ color: hovered ? "var(--color-tertiary)" : "var(--text-muted)", fontWeight: 600 }}>Read Original ↗</span>
-        </div>
+        <h4 className="in-row-title">{article.title}</h4>
+        <span className="in-row-read">Read Original ↗</span>
       </div>
     </div>
   );
@@ -223,65 +104,44 @@ function TopSources({ articles }) {
   const max = top[0][1];
 
   return (
-    <div style={{
-      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
-      borderRadius: 16, padding: "22px 24px"
-    }}>
-      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>📰 Top Sources</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <Card hover={false} className="in-sidebar-card">
+      <h3 className="in-sidebar-title">Top Sources</h3>
+      <div className="in-sources">
         {top.map(([name, count]) => (
-          <div key={name}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ color: "var(--text-secondary)", fontSize: 12.5 }}>{name}</span>
-              <span style={{ color: "var(--text-muted)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}>{count}</span>
+          <div key={name} className="in-source">
+            <div className="in-source-header">
+              <span className="in-source-name">{name}</span>
+              <span className="in-source-count">{count}</span>
             </div>
-            <div style={{ height: 4, background: "var(--border-default)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: `${Math.max(6, (count / max) * 100)}%`, height: "100%", background: "linear-gradient(90deg, var(--color-tertiary), var(--color-primary))", borderRadius: 3 }} />
+            <div className="in-source-bar">
+              <div className="in-source-fill" style={{ width: `${Math.max(6, (count / max) * 100)}%` }} />
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
 function LatestHeadlines({ articles }) {
-  const latest = [...articles]
-    .sort((a, b) => (b.publishedAt || "").localeCompare(a.publishedAt || ""))
-    .slice(0, 6);
+  const latest = [...articles].sort((a, b) => (b.publishedAt || "").localeCompare(a.publishedAt || "")).slice(0, 6);
   if (!latest.length) return null;
 
   return (
-    <div style={{
-      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
-      borderRadius: 16, padding: "22px 24px"
-    }}>
-      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>⚡ Latest Headlines</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <Card hover={false} className="in-sidebar-card">
+      <h3 className="in-sidebar-title">Latest Headlines</h3>
+      <div className="in-headlines">
         {latest.map((a, i) => (
-          <a
-            key={a.id || i}
-            href={a.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "flex", gap: 10, textDecoration: "none", padding: "9px 10px",
-              borderRadius: 8, background: i === 0 ? "var(--color-tertiary-soft)" : "transparent",
-              transition: "background 0.2s"
-            }}
-          >
-            <span style={{ color: "var(--text-disabled)", fontSize: 11, fontWeight: 700, width: 16, paddingTop: 1 }}>{i + 1}</span>
+          <a key={a.id || i} href={a.url} target="_blank" rel="noopener noreferrer" className="in-headline">
+            <span className="in-headline-num">{i + 1}</span>
             <div>
-              <div style={{
-                color: "var(--text-secondary)", fontSize: 12.5, fontWeight: 600, lineHeight: 1.45,
-                display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
-              }}>{a.title}</div>
-              <div style={{ color: "var(--text-muted)", fontSize: 10, marginTop: 3 }}>{a.source} · {timeAgo(a.publishedAt)}</div>
+              <div className="in-headline-title">{a.title}</div>
+              <div className="in-headline-source">{a.source} · {timeAgo(a.publishedAt)}</div>
             </div>
           </a>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -289,111 +149,29 @@ function NewsletterBox() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   return (
-    <div style={{
-      background: "linear-gradient(135deg, var(--color-secondary-soft), var(--color-secondary-subtle))",
-      border: "1px solid var(--color-secondary-border)", borderRadius: 16, padding: "22px 24px"
-    }}>
-      <div style={{ color: "var(--color-secondary)", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>📬 IT Market Digest</div>
-      <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 16, lineHeight: 1.6 }}>
-        Get AI-curated IT market news, salary trends & job alerts every morning.
-      </div>
+    <Card hover={false} className="in-sidebar-card in-newsletter">
+      <h3 className="in-sidebar-title">IT Market Digest</h3>
+      <p className="in-newsletter-desc">Get AI-curated IT market news, salary trends & job alerts every morning.</p>
       {done ? (
-        <div style={{
-          background: "rgba(52,211,153,0.1)", border: "1px solid var(--color-success-border)",
-          borderRadius: 10, padding: "12px", textAlign: "center", color: "var(--color-success)", fontSize: 13
-        }}>✓ You're subscribed! Check your inbox.</div>
+        <div className="in-newsletter-success">✓ You're subscribed!</div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <input value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            style={{
-              background: "var(--surface-inset)", border: "1px solid var(--border-strong)",
-              borderRadius: 10, padding: "10px 14px", color: "var(--text-primary)", fontSize: 13,
-              outline: "none", width: "100%", boxSizing: "border-box"
-            }} />
-          <button onClick={() => email && setDone(true)} style={{
-            background: "linear-gradient(135deg, var(--color-secondary), var(--color-secondary))",
-            border: "none", color: "var(--text-inverse)", borderRadius: 10, padding: "10px",
-            fontSize: 13, fontWeight: 700, cursor: "pointer"
-          }}>Subscribe Free →</button>
+        <div className="in-newsletter-form">
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="in-newsletter-input" />
+          <Button variant="primary" size="sm" onClick={() => email && setDone(true)}>Subscribe Free →</Button>
         </div>
       )}
-    </div>
-  );
-}
-
-function AboutFeed() {
-  return (
-    <div style={{
-      background: "var(--surface-inset)", border: "1px solid var(--border-default)",
-      borderRadius: 16, padding: "18px 20px"
-    }}>
-      <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 13, marginBottom: 8 }}>ℹ️ About this feed</div>
-      <div style={{ color: "var(--text-muted)", fontSize: 11.5, lineHeight: 1.65 }}>
-        Real-time tech news aggregated from global sources via NewsAPI.org and refreshed every 30 minutes. Tap any story to read the original article.
-      </div>
-    </div>
+    </Card>
   );
 }
 
 function LoadingSkeleton() {
-  const pulse = { background: "var(--border-subtle)", borderRadius: 8, animation: "pulse 1.2s ease-in-out infinite" };
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{
-        height: 190, borderRadius: 18, background: "var(--surface-inset)",
-        border: "1px solid var(--border-default)", padding: 24,
-        display: "flex", flexDirection: "column", gap: 12
-      }}>
-        <div style={{ width: "35%", height: 16, ...pulse }} />
-        <div style={{ width: "90%", height: 15, ...pulse }} />
-        <div style={{ width: "75%", height: 15, ...pulse }} />
-        <div style={{ width: "50%", height: 12, ...pulse, marginTop: 8 }} />
-      </div>
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} style={{
-          height: 88, borderRadius: 14, background: "var(--surface-inset)",
-          border: "1px solid var(--border-default)", padding: 16,
-          display: "flex", gap: 14, alignItems: "center"
-        }}>
-          <div style={{ width: 56, height: 56, borderRadius: 12, ...pulse }} />
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ width: "30%", height: 11, ...pulse }} />
-            <div style={{ width: "85%", height: 13, ...pulse }} />
-            <div style={{ width: "50%", height: 11, ...pulse }} />
-          </div>
-        </div>
-      ))}
+    <div className="in-skeleton">
+      <div className="in-skeleton-featured" />
+      {[0, 1, 2, 3].map(i => <div key={i} className="in-skeleton-row" />)}
     </div>
   );
 }
-
-function ErrorState({ message, onRetry }) {
-  return (
-    <div style={{ textAlign: "center", padding: "48px 0" }}>
-      <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-danger)", marginBottom: 8 }}>Failed to load news</div>
-      <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 420, margin: "0 auto 20px" }}>{message}</div>
-      <button onClick={onRetry} style={{
-        background: "rgba(249,115,22,0.15)", border: "1px solid var(--color-secondary-border)",
-        color: "var(--color-secondary)", borderRadius: 10, padding: "10px 22px", fontSize: 13,
-        fontWeight: 600, cursor: "pointer"
-      }}>↻ Try Again</button>
-    </div>
-  );
-}
-
-function EmptyState({ message, hint }) {
-  return (
-    <div style={{ textAlign: "center", padding: "48px 0", color: "var(--text-muted)" }}>
-      <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
-      <div style={{ color: "var(--text-muted)", fontSize: 14 }}>{message}</div>
-      {hint && <div style={{ color: "var(--text-disabled)", fontSize: 12, marginTop: 6 }}>{hint}</div>}
-    </div>
-  );
-}
-
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function Itnews() {
   const [articles, setArticles] = useState([]);
@@ -402,239 +180,107 @@ export default function Itnews() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
-  const [bookmarked, setBookmarked] = useState(new Set());
 
   useEffect(() => {
     let cancelled = false;
     const categoryParam = activeCategory === "All" ? "all" : activeCategory.toLowerCase();
-
     axiosInstance.get("/uniguide/news/", { params: { category: categoryParam } })
-      .then((res) => {
-        if (!cancelled) setArticles(res.data.articles || []);
-      })
+      .then((res) => { if (!cancelled) setArticles(res.data.articles || []); })
       .catch((err) => {
         if (!cancelled) {
           setArticles([]);
-          setError(
-            err?.response?.data?.error ||
-            (err?.response ? `Server error (${err.response.status})` : "Network error. Check your connection and try again.")
-          );
+          setError(err?.response?.data?.error || "Network error. Check your connection and try again.");
         }
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [activeCategory, reloadKey]);
 
-  const selectCategory = (c) => {
-    setActiveCategory(c);
-    setLoading(true);
-    setError(null);
-  };
+  const selectCategory = (c) => { setActiveCategory(c); setLoading(true); setError(null); };
+  const refresh = () => { setLoading(true); setError(null); setReloadKey(k => k + 1); };
 
-  const refresh = () => {
-    setLoading(true);
-    setError(null);
-    setReloadKey((k) => k + 1);
-  };
-
-  const filtered = articles.filter((a) => {
+  const filtered = articles.filter(a => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return [a.title, a.summary, a.source, a.category].some((s) => (s || "").toLowerCase().includes(q));
+    return [a.title, a.summary, a.source, a.category].some(s => (s || "").toLowerCase().includes(q));
   });
 
   const featured = filtered.slice(0, 3);
   const rest = filtered.slice(3);
 
-  const toggleBookmark = (id) => {
-    setBookmarked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const today = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
-
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "var(--surface-page)",
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
-      color: "var(--text-primary)"
-    }}>
-      <style>{`
-        @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: var(--surface-page); }
-        ::-webkit-scrollbar-thumb { background: var(--color-tertiary-border); border-radius: 3px; }
-        input { color-scheme: dark; }
-        button:hover { opacity: 0.88; }
-        .in-layout { grid-template-columns: 1fr 320px; }
-        @media (max-width: 992px) {
-          .in-layout { grid-template-columns: 1fr; }
-          .in-sidebar { position: static !important; }
-        }
-        @media (max-width: 640px) {
-          .in-hero { padding: 32px 16px 24px !important; }
-          .in-content { padding: 0 16px 40px !important; }
-        }
-      `}</style>
-
-      {/* Navbar Component replacing the inline nav block */}
-      <Navbar />
-
-      {/* Breaking ticker */}
-      <TickerBar headlines={articles.map((a) => a.title).slice(0, 5)} />
-
-      {/* Page hero */}
-      <div className="in-hero" style={{
-        padding: "44px 40px 28px",
-        background: "radial-gradient(ellipse 70% 50% at 50% 0%, var(--color-secondary-soft) 0%, transparent 65%)",
-        animation: "fadeIn 0.6s ease"
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 20 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{
-                background: "rgba(249,115,22,0.12)", border: "1px solid var(--color-secondary-border)",
-                borderRadius: 20, padding: "5px 14px", fontSize: 11, color: "var(--color-secondary)",
-                display: "flex", alignItems: "center", gap: 6, fontWeight: 600
-              }}>
-                <span style={{ animation: "pulse 1.5s infinite", display: "inline-block" }}>🔴</span>
-                Live Updates · {today}
-              </div>
-            </div>
-            <h1 style={{
-              fontSize: "clamp(26px, 4vw, 42px)", fontWeight: 900, margin: "0 0 10px",
-              background: "linear-gradient(135deg, var(--text-primary) 0%, var(--color-secondary) 50%, var(--color-secondary) 100%)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2
-            }}>IT Market News</h1>
-            <p style={{ color: "var(--text-muted)", fontSize: 15, margin: 0 }}>
+    <PageLayout>
+      {/* Hero */}
+      <section className="in-hero">
+        <div className="ug-container">
+          <motion.div className="in-hero-inner" variants={staggerContainer} initial="hidden" animate="visible">
+            <motion.div variants={fadeUp} custom={0}>
+              <Badge color="gold" size="sm">TECHNOLOGY INTELLIGENCE</Badge>
+            </motion.div>
+            <motion.h1 className="in-hero-title" variants={fadeUp} custom={1}>IT Market News</motion.h1>
+            <motion.p className="in-hero-desc" variants={fadeUp} custom={2}>
               Real-time tech industry news, market signals & career intelligence — built for students.
-            </p>
-          </div>
-
-          {/* Search + refresh */}
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ position: "relative", width: "min(280px, 100%)" }}>
-              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-disabled)", fontSize: 14 }}>🔍</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search news..."
-                style={{
-                  width: "100%", background: "var(--surface-inset)",
-                  border: "1px solid var(--border-strong)", borderRadius: 12,
-                  padding: "11px 16px 11px 38px", color: "var(--text-primary)", fontSize: 13, outline: "none"
-                }}
-              />
-            </div>
-            <button
-              onClick={refresh}
-              disabled={loading}
-              title="Refresh news"
-              style={{
-                background: "var(--surface-inset)", border: "1px solid var(--border-strong)",
-                borderRadius: 12, width: 42, height: 42, cursor: loading ? "default" : "pointer",
-                color: loading ? "var(--text-disabled)" : "var(--color-secondary)", fontSize: 16, opacity: loading ? 0.6 : 1
-              }}
-            >↻</button>
-          </div>
+            </motion.p>
+            <motion.div className="in-hero-search" variants={fadeUp} custom={3}>
+              <div className="in-search-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search news..." className="in-search-input" />
+              </div>
+              <Button variant="secondary" size="sm" onClick={refresh} disabled={loading}>↻ Refresh</Button>
+            </motion.div>
+          </motion.div>
         </div>
+      </section>
 
-        {/* Category pills */}
-        <div style={{ display: "flex", gap: 8, marginTop: 24, flexWrap: "wrap" }}>
-          {CATEGORIES.map((c) => (
-            <button key={c} onClick={() => selectCategory(c)} style={{
-              background: activeCategory === c ? "var(--color-secondary-soft)" : "var(--surface-inset)",
-              border: activeCategory === c ? "1px solid var(--color-secondary-border)" : "1px solid var(--border-default)",
-              color: activeCategory === c ? "var(--color-secondary)" : "var(--text-muted)",
-              borderRadius: 20, padding: "7px 16px", fontSize: 12,
-              cursor: "pointer", fontWeight: 600, transition: "all 0.2s"
-            }}>{c}</button>
+      {/* Categories */}
+      <div className="ug-container">
+        <div className="in-categories">
+          {CATEGORIES.map(c => (
+            <button key={c} className={`in-category ${activeCategory === c ? 'in-category-active' : ''}`} onClick={() => selectCategory(c)}>
+              {c}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="in-content" style={{ padding: "0 40px 48px", maxWidth: 1300, margin: "0 auto" }}>
-        <div className="in-layout" style={{ display: "grid", gap: 28, alignItems: "start" }}>
-
-          {/* LEFT COLUMN */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {loading ? (
-              <LoadingSkeleton />
-            ) : error ? (
-              <ErrorState message={error} onRetry={refresh} />
+      {/* Content */}
+      <section className="ug-container in-content">
+        <div className="in-layout">
+          <div className="in-main">
+            {loading ? <LoadingSkeleton /> : error ? (
+              <Card hover={false} className="in-error">
+                <h3>Failed to load news</h3>
+                <p>{error}</p>
+                <Button variant="secondary" size="sm" onClick={refresh}>Try Again</Button>
+              </Card>
             ) : (
               <>
-                {/* Featured label */}
                 {featured.length > 0 && (
-                  <>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Featured Stories</div>
-                      <div style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
-                    </div>
-
-                    {/* Featured cards */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
-                      {featured.map((a) => (
-                        <div key={a.id} style={{ animation: "fadeIn 0.5s ease" }}>
-                          <FeaturedCard article={a} />
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <div className="in-featured-grid">
+                    {featured.map(a => <FeaturedCard key={a.id} article={a} />)}
+                  </div>
                 )}
-
-                {/* Latest label */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: featured.length ? 8 : 0 }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
-                    Latest · {filtered.length} {filtered.length === 1 ? "story" : "stories"}
+                {rest.length > 0 && (
+                  <div className="in-rows">
+                    {rest.map((a, i) => <NewsRow key={a.id} article={a} />)}
                   </div>
-                  <div style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
-                </div>
-
-                {/* Regular cards */}
-                {rest.length === 0 ? (
-                  filtered.length === 0 ? (
-                    <EmptyState
-                      message={searchQuery ? `No articles match "${searchQuery}"` : "No news available in this category right now."}
-                      hint={searchQuery ? "Try a different search term or category." : "Try another category or refresh in a few minutes."}
-                    />
-                  ) : (
-                    <EmptyState message="You've reached the latest stories." hint="Try another category or search to explore more." />
-                  )
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    {rest.map((a, i) => (
-                      <div key={a.id} style={{ animation: `fadeIn 0.4s ${i * 0.05}s both ease` }}>
-                        <NewsRow article={a} bookmarked={bookmarked.has(a.id)} onToggleBookmark={toggleBookmark} />
-                      </div>
-                    ))}
-                  </div>
+                )}
+                {filtered.length === 0 && (
+                  <Card hover={false} className="in-empty">
+                    <p>{searchQuery ? `No articles match "${searchQuery}"` : "No news available right now."}</p>
+                  </Card>
                 )}
               </>
             )}
           </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div className="in-sidebar" style={{ display: "flex", flexDirection: "column", gap: 18, position: "sticky", top: 110 }}>
+          <div className="in-sidebar">
             {!loading && !error && articles.length > 0 && <TopSources articles={articles} />}
             {!loading && !error && articles.length > 0 && <LatestHeadlines articles={articles} />}
             <NewsletterBox />
-            <AboutFeed />
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </PageLayout>
   );
 }

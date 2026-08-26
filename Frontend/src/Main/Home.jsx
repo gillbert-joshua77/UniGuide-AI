@@ -1,322 +1,156 @@
-import React, { useState, useEffect } from 'react'
-import Navbar from '../Components/Navbar'
-import axiosInstance from '../Utils/axiosInstance'
-import '../assets/Style/Home.css'
-import { useNavigate } from 'react-router-dom'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import PageLayout from '../components/layout/PageLayout';
+import GuidanceCore from '../components/three/GuidanceCore';
+import { Button, Card, Badge } from '../components/ui';
+import { fadeUp, staggerContainer, fadeIn, slideInLeft, slideInRight } from '../lib/motion';
+import '../assets/Style/Home.css';
 
-const Home = () => {
-  const navigate = useNavigate();
+const features = [
+  { icon: '🎯', title: 'AI Career Matching', desc: 'Get personalized career recommendations based on your skills, interests, and goals.' },
+  { icon: '📊', title: 'Skills Intelligence', desc: 'Discover which skills to develop next with AI-powered market analysis.' },
+  { icon: '🎓', title: 'Academic Guidance', desc: 'Navigate your educational journey with data-driven course and university suggestions.' },
+  { icon: '💼', title: 'Opportunity Discovery', desc: 'Find internships, hackathons, and scholarships matched to your profile.' },
+  { icon: '📈', title: 'Progress Tracking', desc: 'Monitor your growth with visual dashboards and achievement milestones.' },
+  { icon: '🤖', title: 'AI Advisor', desc: 'Chat with your personal guidance AI that understands your unique journey.' },
+];
 
-  const [data, setData] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [loading, setLoading] = useState(true);
+const steps = [
+  { num: '01', title: 'Create Your Profile', desc: 'Tell us about your education, skills, interests, and career aspirations.' },
+  { num: '02', title: 'AI Analyzes', desc: 'Our AI processes your information against market data and academic trends.' },
+  { num: '03', title: 'Get Guidance', desc: 'Receive personalized recommendations, matched opportunities, and clear next steps.' },
+];
 
-  useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        const res = await axiosInstance.get("/students/me/");
-        setData(res.data);
-      } catch (err) {
-        console.error("Home data fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchHomeData();
-  }, []);
+const stats = [
+  { value: '10K+', label: 'Students Guided' },
+  { value: '94%', label: 'Match Accuracy' },
+  { value: '500+', label: 'Opportunities' },
+  { value: '24/7', label: 'AI Available' },
+];
 
-  const calculateCompletion = () => {
-    if (!data) return 0;
-    let score = 40;
-    if (data.skills?.length > 0) score += 30;
-    if (data.applications?.length > 0) score += 30;
-    return score > 100 ? 100 : score;
-  };
-
-  const handlechat = () => {
-    navigate("/ai");
-  };
-
+export default function Home() {
   return (
-    <>
-      <Navbar />
-      <div className="home-wrapper">
+    <PageLayout>
+      {/* Hero */}
+      <section className="home-hero">
+        <div className="ug-container home-hero-inner">
+          <motion.div className="home-hero-text" variants={staggerContainer} initial="hidden" animate="visible">
+            <motion.div variants={fadeUp} custom={0}>
+              <Badge color="gold" size="sm">AI-POWERED STUDENT GUIDANCE</Badge>
+            </motion.div>
+            <motion.h1 className="home-hero-title" variants={fadeUp} custom={1}>
+              Your future,<br /><span className="home-hero-highlight">better guided.</span>
+            </motion.h1>
+            <motion.p className="home-hero-desc" variants={fadeUp} custom={2}>
+              Personalized academic, career, and opportunity guidance powered by artificial intelligence.
+            </motion.p>
+            <motion.div className="home-hero-actions" variants={fadeUp} custom={3}>
+              <Link to="/register"><Button variant="primary" size="lg">Start Your Journey</Button></Link>
+              <Link to="/about"><Button variant="secondary" size="lg">Explore UniGuide</Button></Link>
+            </motion.div>
+          </motion.div>
 
-        {/* Hero Section */}
-        <section className="hero-section">
-          <div className="hero-glow-center" />
-          <div className="hero-glow-right" />
-
-          <div className="section-tag fade1">
-            <span className="tag-dot orange" />
-            AI-Powered Career Navigator
-          </div>
-
-          <h1 className="hero-heading fade2">
-            Navigate your career<br />
-            <span className="teal">with AI</span>
-          </h1>
-
-          <p className="hero-sub fade3">
-            Find the right career path, internships, and global opportunities
-            with personalized AI guidance built for students and freshers.
-          </p>
-
-          <div className="hero-btns fade4">
-            <button onClick={handlechat} className="cta-primary">Get Started →</button>
-            <button className="cta-outline">Explore Features</button>
-          </div>
-
-          <div className="hero-stats fade5">
-            <div className="hero-stat">
-              <div className="stat-num teal">AI Chat</div>
-              <div className="stat-label">24/7 Guidance</div>
-            </div>
-            <div className="stat-divider" />
-            <div className="hero-stat">
-              <div className="stat-num orange">Skill</div>
-              <div className="stat-label">Tracking & Growth</div>
-            </div>
-            <div className="stat-divider" />
-            <div className="hero-stat">
-              <div className="stat-num green">Profile</div>
-              <div className="stat-label">Personalized Insights</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="features-section">
-          <div className="section-center-head">
-            <div className="section-tag" style={{ display: 'inline-flex' }}>
-              <span className="tag-dot teal-dot" />Features
-            </div>
-            <h2 className="section-heading">Everything you need to succeed</h2>
-            <p className="section-sub">Powered by AI, built for students</p>
-          </div>
-
-          <div className="features-grid">
-            {[
-              {
-                color: '#00b4d8', bg: 'var(--color-primary-soft)',
-                title: 'UniGuide AI Chat',
-                desc: 'Have real-time conversations with AI to get personalized career guidance, internship tips, and study abroad advice.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00b4d8" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              },
-              {
-                color: '#f77f00', bg: 'var(--color-secondary-soft)',
-                title: 'Internship Finder',
-                desc: 'Browse and apply to the latest internship opportunities matched to your profile.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f77f00" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
-                comingSoon: true
-              },
-              {
-                color: '#22c97a', bg: 'var(--color-success-soft)',
-                title: 'Study Abroad Navigator',
-                desc: 'Discover universities, scholarships, and global opportunities tailored for you.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c97a" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>,
-                comingSoon: true
-              },
-              {
-                color: '#a78bfa', bg: 'var(--color-tertiary)',
-                title: 'Skill Tracker',
-                desc: 'Add, monitor, and grow your skills with percentage-based progress tracking.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              },
-              {
-                color: '#00b4d8', bg: 'var(--color-primary-soft)',
-                title: 'Resume Builder',
-                desc: 'Build a professional resume with AI suggestions to stand out to recruiters.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00b4d8" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-                comingSoon: true
-              },
-              {
-                color: '#f77f00', bg: 'var(--color-secondary-soft)',
-                title: 'Smart Recommendations',
-                desc: 'Get AI-curated job and internship suggestions based on your unique profile.',
-                icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f77f00" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>,
-                comingSoon: true
-              },
-            ].map((f, i) => (
-              <div className="feat-card" key={i}>
-                <div className="icon-wrap" style={{ background: f.bg }}>{f.icon}</div>
-                <div className="feat-title">
-                  {f.title}
-                  {f.comingSoon && <span className="coming-soon-badge">Coming Soon</span>}
-                </div>
-                <div className="feat-desc">{f.desc}</div>
+          <motion.div
+            className="home-hero-visual"
+            variants={slideInRight}
+            initial="hidden"
+            animate="visible"
+          >
+            <GuidanceCore size={380} />
+            <motion.div className="home-hero-card home-hero-card-1" animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+              <span className="home-hero-card-icon">🎯</span>
+              <div>
+                <div className="home-hero-card-title">AI Recommendation</div>
+                <div className="home-hero-card-sub">Data Analyst — 94% Match</div>
               </div>
+            </motion.div>
+            <motion.div className="home-hero-card home-hero-card-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}>
+              <span className="home-hero-card-icon">💼</span>
+              <div>
+                <div className="home-hero-card-title">Career Match</div>
+                <div className="home-hero-card-sub">3 new opportunities</div>
+              </div>
+            </motion.div>
+            <motion.div className="home-hero-card home-hero-card-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}>
+              <span className="home-hero-card-icon">📈</span>
+              <div>
+                <div className="home-hero-card-title">Skills to Learn</div>
+                <div className="home-hero-card-sub">Python, SQL, Analytics</div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="home-stats">
+        <div className="ug-container">
+          <motion.div className="home-stats-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}>
+            {stats.map((s, i) => (
+              <motion.div key={i} className="home-stat" variants={fadeUp} custom={i}>
+                <span className="home-stat-value">{s.value}</span>
+                <span className="home-stat-label">{s.label}</span>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* How It Works */}
-        <section className="how-section">
-          <div className="section-center-head">
-            <div className="section-tag" style={{ display: 'inline-flex' }}>
-              <span className="tag-dot green-dot" />How it works
-            </div>
-            <h2 className="section-heading">Three steps to your dream career</h2>
-            <p className="section-sub">Simple, fast, and AI-powered</p>
-          </div>
-
-          <div className="steps-grid">
-            {[
-              { num: '1', color: 'linear-gradient(135deg,var(--color-primary),var(--color-primary-dark))', ring: 'var(--color-primary-glow)', title: 'Create your profile', desc: 'Sign up and complete your student profile with education, interests, and career goals.' },
-              { num: '2', color: 'linear-gradient(135deg,var(--color-secondary),var(--color-secondary-dark))', ring: 'var(--color-secondary-soft)', title: 'Add skills & interests', desc: 'Track your skills with progress percentages and set your career interests.' },
-              { num: '3', color: 'linear-gradient(135deg,var(--color-success),var(--color-success-dark))', ring: 'var(--color-success-soft)', title: 'Get AI guidance', desc: 'Chat with UniGuide AI for personalized career paths, internship advice, and study abroad guidance.' },
-            ].map((s, i) => (
-              <div className="step-item" key={i}>
-                <div className="step-num-wrap">
-                  <div className="step-ring" style={{ background: s.ring }} />
-                  <div className="step-num" style={{ background: s.color }}>{s.num}</div>
-                </div>
-                <div className="step-title">{s.title}</div>
-                <div className="step-desc">{s.desc}</div>
-              </div>
+      {/* Features */}
+      <section className="home-features">
+        <div className="ug-container">
+          <motion.div className="home-section-header" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}>
+            <motion.div variants={fadeUp} custom={0}>
+              <Badge color="silver" size="sm">CAPABILITIES</Badge>
+            </motion.div>
+            <motion.h2 className="home-section-title" variants={fadeUp} custom={1}>Everything you need to navigate your future</motion.h2>
+          </motion.div>
+          <motion.div className="home-features-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-40px' }}>
+            {features.map((f, i) => (
+              <motion.div key={i} variants={fadeUp} custom={i}>
+                <Card className="home-feature-card" hover>
+                  <span className="home-feature-icon">{f.icon}</span>
+                  <h3 className="home-feature-title">{f.title}</h3>
+                  <p className="home-feature-desc">{f.desc}</p>
+                </Card>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Dashboard Preview Section */}
-        <section className="dashboard-section">
-          <div className="section-center-head">
-            <div className="section-tag" style={{ display: 'inline-flex' }}>
-              <span className="tag-dot purple-dot" />Dashboard preview
-            </div>
-            <h2 className="section-heading">Your personalized dashboard</h2>
-          </div>
+      {/* How it works */}
+      <section className="home-steps">
+        <div className="ug-container">
+          <motion.div className="home-section-header" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}>
+            <motion.div variants={fadeUp} custom={0}>
+              <Badge color="gold" size="sm">HOW IT WORKS</Badge>
+            </motion.div>
+            <motion.h2 className="home-section-title" variants={fadeUp} custom={1}>Guided in three simple steps</motion.h2>
+          </motion.div>
+          <motion.div className="home-steps-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-40px' }}>
+            {steps.map((s, i) => (
+              <motion.div key={i} className="home-step" variants={fadeUp} custom={i}>
+                <span className="home-step-num">{s.num}</span>
+                <h3 className="home-step-title">{s.title}</h3>
+                <p className="home-step-desc">{s.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
-          <div className="dashboard-card">
-            <div className="dashboard-col">
-              <div className="dash-sub-title">Skills overview</div>
-              {data?.skills?.length > 0 ? (
-                data.skills.map((s, i) => (
-                  <div className="skill-item" key={i}>
-                    <div className="skill-meta">
-                      <span>{s.name}</span><span>{s.percentage}%</span>
-                    </div>
-                    <div className="skill-bar">
-                      <div className="skill-fill" style={{ width: `${s.percentage}%`, background: s.color || 'linear-gradient(90deg,var(--color-primary),var(--color-primary-dark))' }} />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <p>No skills added yet. Add skills from your profile to track your progress.</p>
-                </div>
-              )}
-
-              <div className="dash-sub-title" style={{ marginTop: '20px' }}>Profile info</div>
-              {data?.full_name ? (
-                <div className="profile-info-list">
-                  <div className="profile-info-row">
-                    <span className="profile-info-label">Name</span>
-                    <span className="profile-info-value">{data.full_name}</span>
-                  </div>
-                  <div className="profile-info-row">
-                    <span className="profile-info-label">Email</span>
-                    <span className="profile-info-value">{data.email}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <p>Complete your profile to see your information here.</p>
-                </div>
-              )}
-            </div>
-
-            <div className="dashboard-col">
-              <div className="dash-sub-title">Recent applications</div>
-              {data?.applications?.length > 0 ? (
-                data.applications.map((app, i) => (
-                  <div className="app-row" key={i}>
-                    <div>
-                      <div className="app-role">{app.role}</div>
-                      <div className="app-company">{app.company}</div>
-                    </div>
-                    <span className="app-badge" style={{
-                      color: app.status === 'Applied' ? 'var(--color-primary)' : app.status === 'Interview' ? 'var(--color-success)' : 'var(--color-secondary)',
-                      background: 'var(--opacity-hover)',
-                      border: '1px solid var(--opacity-hover-text)'
-                    }}>{app.status}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <p>No applications yet. Track your applications from your profile.</p>
-                </div>
-              )}
-
-              <div className="profile-complete-card">
-                <div className="dash-sub-title" style={{ marginBottom: '8px' }}>Profile completion</div>
-                <div className="complete-bar-row">
-                  <div className="complete-bar-bg">
-                    <div className="complete-bar-fill" style={{ width: `${calculateCompletion()}%` }} />
-                  </div>
-                  <span className="complete-pct">{calculateCompletion()}%</span>
-                </div>
-                <div className="complete-hint">Add skills and applications to increase your completion</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Hackathons + Skills */}
-        <section className="split-section">
-          <div className="split-col">
-            <div className="section-tag" style={{ display: 'inline-flex' }}>
-              <span className="tag-dot orange" />Hackathons & events
-            </div>
-            <h3 className="split-heading">Hackathon Hub</h3>
-            <div className="coming-soon-block">
-              <div className="coming-soon-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f77f00" strokeWidth="1.5" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <div className="coming-soon-title">Hackathon Hub Coming Soon</div>
-              <p className="coming-soon-desc">
-                Discover and register for hackathons matched to your skills.
-                Use the AI Chat guided mode to get personalized hackathon recommendations now.
-              </p>
-            </div>
-          </div>
-
-          <div className="split-col">
-            <div className="section-tag" style={{ display: 'inline-flex' }}>
-              <span className="tag-dot green-dot" />Popular skills
-            </div>
-            <h3 className="split-heading">Trending in tech</h3>
-            <p className="section-sub" style={{ marginBottom: '16px' }}>Illustrative insights based on industry trends</p>
-            <div className="skill-demand-list">
-              {[
-                { name: 'Generative AI / LLMs',      growth: 'High Demand' },
-                { name: 'Full-stack Development',    growth: 'High Demand' },
-                { name: 'Cloud & DevOps',            growth: 'High Demand' },
-                { name: 'Data Science & Analytics',  growth: 'High Demand' },
-              ].map(s => (
-                <div className="skill-demand-row" key={s.name}>
-                  <span className="skill-demand-name">{s.name}</span>
-                  <span className="skill-demand-badge">{s.growth}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="home-footer">
-          <div className="footer-brand">UniGuide <span>AI</span></div>
-          <div className="footer-copy">© 2025 UniGuide AI. All rights reserved.</div>
-          <div className="footer-links">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Contact</a>
-          </div>
-        </footer>
-
-      </div>
-    </>
-  )
+      {/* CTA */}
+      <section className="home-cta">
+        <div className="ug-container">
+          <motion.div className="home-cta-card" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+            <h2 className="home-cta-title">Ready to discover your path?</h2>
+            <p className="home-cta-desc">Join thousands of students making informed decisions about their future.</p>
+            <Link to="/register"><Button variant="gold" size="lg">Get Started Free</Button></Link>
+          </motion.div>
+        </div>
+      </section>
+    </PageLayout>
+  );
 }
-
-export default Home

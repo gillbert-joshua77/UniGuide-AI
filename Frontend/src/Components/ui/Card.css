@@ -1,0 +1,24 @@
+.ug-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.ug-card-hover:hover {
+  border-color: var(--border-default);
+}
+
+.ug-card-accent {
+  border-color: var(--gold-border);
+}
+
+.ug-card-accent:hover {
+  border-color: var(--gold-champagne);
+}
+
+.ug-card-inset {
+  background: var(--surface-inset);
+  border: none;
+}

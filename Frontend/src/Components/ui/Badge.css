@@ -1,0 +1,59 @@
+.ug-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.ug-badge-sm { padding: 2px 8px; font-size: 0.6875rem; }
+.ug-badge-lg { padding: 6px 14px; font-size: var(--text-sm); }
+
+.ug-badge-gold {
+  background: var(--gold-50);
+  color: var(--gold-deep);
+  border: 1px solid var(--gold-border);
+}
+.ug-badge-silver {
+  background: var(--surface-inset);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+.ug-badge-ai {
+  background: var(--ai-accent-soft);
+  color: var(--ai-accent);
+  border: 1px solid var(--ai-accent-border);
+}
+.ug-badge-success {
+  background: var(--status-success-soft);
+  color: var(--status-success);
+  border: 1px solid var(--status-success-border);
+}
+.ug-badge-warning {
+  background: var(--status-warning-soft);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning-border);
+}
+.ug-badge-danger {
+  background: var(--status-danger-soft);
+  color: var(--status-danger);
+  border: 1px solid var(--status-danger-border);
+}
+.ug-badge-muted {
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+.ug-badge-dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}

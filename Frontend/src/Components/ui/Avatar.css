@@ -1,0 +1,36 @@
+.ug-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-ivory);
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border-light);
+}
+
+.ug-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ug-avatar span {
+  font-size: 0.7em;
+  letter-spacing: 0.04em;
+}
+
+.ug-avatar-xs { width: 28px; height: 28px; font-size: 10px; }
+.ug-avatar-sm { width: 34px; height: 34px; font-size: 12px; }
+.ug-avatar-md { width: 40px; height: 40px; font-size: 14px; }
+.ug-avatar-lg { width: 52px; height: 52px; font-size: 17px; }
+.ug-avatar-xl { width: 72px; height: 72px; font-size: 22px; }
+
+.ug-avatar-gold {
+  background: linear-gradient(135deg, var(--gold-champagne), var(--gold-soft));
+  color: #FFFFFF;
+  border-color: var(--gold-champagne);
+}
