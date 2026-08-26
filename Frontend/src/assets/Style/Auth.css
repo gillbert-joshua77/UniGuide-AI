@@ -150,6 +150,12 @@
   background: var(--border-light);
 }
 
+.auth-social {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .auth-mobile-link {
   display: none;
 }
