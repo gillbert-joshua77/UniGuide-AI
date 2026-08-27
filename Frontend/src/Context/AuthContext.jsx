@@ -148,7 +148,7 @@ export function AuthProvider({ children }) {
     loading,
     error,
     ready,
-    isAuthenticated: hasToken(),
+    isAuthenticated: Boolean(localStorage.getItem("accessToken")),
     loadProfile,
     updateProfile,
     addSkill,

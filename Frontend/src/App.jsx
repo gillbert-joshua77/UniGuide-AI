@@ -22,6 +22,7 @@ import Settings from './Authentication/Settings';
 import OtpForm from './Authentication/OtpForm';
 import ForgetPassword from './Authentication/ForgetPassword';
 import ResetPassword from './Authentication/ResetPassword';
+import AuthCallback from './Authentication/AuthCallback';
 import Home from './Main/Home';
 import About from './Main/About';
 import UniGuideChat from './Main/UniGuideAIPage';
@@ -44,6 +45,7 @@ const App = () => {
             <Route path='/forgetpassword' element={<ForgetPassword />} />
             <Route path='/about' element={<About />} />
             <Route path='/password-reset-confirm/:uid/:token' element={<ResetPassword />} />
+            <Route path='/auth/callback' element={<AuthCallback />} />
 
             <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />

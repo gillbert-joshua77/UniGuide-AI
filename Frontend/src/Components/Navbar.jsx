@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTheme } from '../Context/ThemeContext'
+import { useAuth } from '../Context/AuthContext'
 import '../assets/Style/Navbar.css'
 import Logo from '../assets/Image/UniGuide 1.png'
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme()
+  const { user } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
 
   const closeMenu = () => setMenuOpen(false)
@@ -20,14 +22,6 @@ const Navbar = () => {
       .join("");
   };
 
-  let user = null;
-  try {
-    const stored = localStorage.getItem("user");
-    user = stored ? JSON.parse(stored) : null;
-  } catch {
-    user = null;
-  }
-
   return (
     <nav className={`navbar-wrapper ${theme === 'light' ? 'navbar-light' : ''}`}>
 
@@ -41,9 +35,9 @@ const Navbar = () => {
       <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
         <NavLink to="/home"        className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>Home</NavLink>
         <NavLink to="/about"       className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>About</NavLink>
-        <NavLink to="/ai"          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>UniGuide AI</NavLink>
+        <NavLink to="/guidance"    className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>UniGuide AI</NavLink>
         <NavLink to="/hackathon"   className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>Hackathon</NavLink>
-        <NavLink to="/itnews"      className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>IT Market News</NavLink>
+        <NavLink to="/news"        className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} onClick={closeMenu}>IT Market News</NavLink>
       </div>
 
       {/* Mobile menu toggle */}
@@ -78,7 +72,7 @@ const Navbar = () => {
       </button>
 
       {/* Profile Button */}
-        <NavLink to={user ? "/home" : "/login"} className="profile-btn">
+        <NavLink to={user ? "/profile" : "/login"} className="profile-btn">
         <div className="nav-avatar">
           {user?.profile_picture ? (
             <img src={user.profile_picture} alt="Profile" className="nav-avatar-img" />

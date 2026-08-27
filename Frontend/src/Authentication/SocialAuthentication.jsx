@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/axiosInstance';
+import { useAuth } from '../Context/AuthContext';
 
 const GoogleOAuthButton = () => {
   const navigate = useNavigate();
   const btnContainerRef = useRef(null);
+  const { loadProfile } = useAuth();
 
   const handleSignWithGoogle = async (response) => {
     try {
@@ -25,6 +27,7 @@ const GoogleOAuthButton = () => {
         localStorage.setItem("refreshToken", res.data.refresh_token);
         localStorage.setItem('uniguide_user_name', res.data.full_name || '');
         localStorage.setItem('uniguide_user_email', res.data.email || '');
+        await loadProfile().catch(() => {});
         const isNewSignup = res.data.is_new === true;
         setTimeout(() => {
           navigate(isNewSignup ? "/home?setup=1" : "/home");

@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../Context/AuthContext';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { loadProfile } = useAuth();
 
   useEffect(() => {
     const access = searchParams.get('access');
@@ -18,13 +20,13 @@ const AuthCallback = () => {
     }
 
     if (access && refresh) {
-      // Save tokens — now user is logged in
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       toast.success('Logged in successfully!');
+      loadProfile().catch(() => {});
       navigate('/home');
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, loadProfile]);
 
   return <div>Completing login...</div>;
 };

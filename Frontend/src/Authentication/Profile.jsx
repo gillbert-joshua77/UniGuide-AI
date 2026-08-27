@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/axiosInstance';
@@ -43,7 +44,7 @@ function Field({ label, value, emptyText = 'Not added yet' }) {
 
 export default function Profile() {
   const {
-    profile, skills, loading, error, loadProfile,
+    profile, skills, loading, error, loadProfile, isAuthenticated,
     updateProfile, addSkill, deleteSkill,
   } = useAuth();
 
@@ -165,6 +166,7 @@ export default function Profile() {
   }
 
   if (error && !profile) {
+    if (!isAuthenticated) return <Navigate to="/login" />;
     return (
       <PageLayout>
         <div className="ug-container">
