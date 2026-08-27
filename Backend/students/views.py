@@ -2,13 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+import os
+from django.conf import settings
 from .serializers import (
     SkillSerializer, AppSerializer, StudentProfileSerializer,
     SavedOpportunitySerializer, calculate_profile_completion,
 )
 from .models import Skill, StudentProfile, SavedOpportunity, Application
-
-from django.conf import settings
 
 
 # ─── Profile (single source of truth) ────────────────────────────────
@@ -28,6 +28,7 @@ class StudentProfileDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'profile_pictures'), exist_ok=True)
         serializer = StudentProfileSerializer(
             self.get_object(request.user),
             data=request.data,
