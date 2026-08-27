@@ -4,8 +4,8 @@
 
 .ug-ai-layout {
   display: grid;
-  grid-template-columns: 240px 1fr 260px;
-  height: calc(100vh - 56px);
+  grid-template-columns: 240px 1fr 280px;
+  height: calc(100vh - 60px);
   overflow: hidden;
 }
 
@@ -322,14 +322,14 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
-  background: var(--gold-champagne);
+  background: var(--gold-deep);
   color: #FFFFFF;
   flex-shrink: 0;
   transition: all var(--duration-fast) var(--ease-out);
 }
 
 .ug-ai-send:hover:not(:disabled) {
-  background: var(--gold-deep);
+  background: var(--gold-champagne);
   box-shadow: var(--shadow-gold);
 }
 
@@ -394,22 +394,60 @@
   color: var(--text-secondary);
 }
 
+.ug-ai-context-empty {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.ug-ai-context-toggle {
+  display: none;
+  margin-left: auto;
+  padding: 6px 14px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--gold-deep);
+  background: var(--gold-50);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.ug-ai-sidebar-empty {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+}
+
 /* Mobile overlay */
 .ug-ai-mobile-overlay {
   display: none;
 }
 
 /* Responsive */
+.ug-ai-context-mobile { display: none; }
+
 @media (max-width: 1024px) {
-  .ug-ai-layout { grid-template-columns: 1fr; }
+  .ug-ai-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: calc(100vh - 60px);
+  }
   .ug-ai-context { display: none; }
+  .ug-ai-context-mobile {
+    display: block;
+    overflow: hidden;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+  .ug-ai-context-toggle { display: inline-flex; align-items: center; }
 }
 
 @media (max-width: 768px) {
   .ug-ai-sidebar {
     position: fixed;
     inset: 0;
-    top: 56px;
+    top: 60px;
     z-index: var(--z-overlay);
     transform: translateX(-100%);
     transition: transform 0.3s var(--ease-out);
@@ -419,7 +457,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    top: 56px;
+    top: 60px;
     background: var(--surface-overlay);
     z-index: calc(var(--z-overlay) - 1);
   }

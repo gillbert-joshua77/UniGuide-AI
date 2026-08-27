@@ -22,13 +22,6 @@ const steps = [
   { num: '03', title: 'Get Guidance', desc: 'Receive personalized recommendations, matched opportunities, and clear next steps.' },
 ];
 
-const stats = [
-  { value: '10K+', label: 'Students Guided' },
-  { value: '94%', label: 'Match Accuracy' },
-  { value: '500+', label: 'Opportunities' },
-  { value: '24/7', label: 'AI Available' },
-];
-
 export default function Home() {
   return (
     <PageLayout>
@@ -46,7 +39,7 @@ export default function Home() {
               Personalized academic, career, and opportunity guidance powered by artificial intelligence.
             </motion.p>
             <motion.div className="home-hero-actions" variants={fadeUp} custom={3}>
-              <Link to="/register"><Button variant="primary" size="lg">Start Your Journey</Button></Link>
+              <Link to="/guidance"><Button variant="primary" size="lg">Talk to UniGuide AI</Button></Link>
               <Link to="/about"><Button variant="secondary" size="lg">Explore UniGuide</Button></Link>
             </motion.div>
           </motion.div>
@@ -58,41 +51,6 @@ export default function Home() {
             animate="visible"
           >
             <GuidanceCore size={380} />
-            <motion.div className="home-hero-card home-hero-card-1" animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-              <span className="home-hero-card-icon">🎯</span>
-              <div>
-                <div className="home-hero-card-title">AI Recommendation</div>
-                <div className="home-hero-card-sub">Data Analyst — 94% Match</div>
-              </div>
-            </motion.div>
-            <motion.div className="home-hero-card home-hero-card-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}>
-              <span className="home-hero-card-icon">💼</span>
-              <div>
-                <div className="home-hero-card-title">Career Match</div>
-                <div className="home-hero-card-sub">3 new opportunities</div>
-              </div>
-            </motion.div>
-            <motion.div className="home-hero-card home-hero-card-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}>
-              <span className="home-hero-card-icon">📈</span>
-              <div>
-                <div className="home-hero-card-title">Skills to Learn</div>
-                <div className="home-hero-card-sub">Python, SQL, Analytics</div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="home-stats">
-        <div className="ug-container">
-          <motion.div className="home-stats-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}>
-            {stats.map((s, i) => (
-              <motion.div key={i} className="home-stat" variants={fadeUp} custom={i}>
-                <span className="home-stat-value">{s.value}</span>
-                <span className="home-stat-label">{s.label}</span>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </section>

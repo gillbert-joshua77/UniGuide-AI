@@ -5,6 +5,7 @@ import axiosInstance from '../Utils/axiosInstance';
 import GuidanceCore from '../Components/three/GuidanceCore';
 import GoogleOAuthButton from './SocialAuthentication';
 import { Button, Input } from '../Components/ui';
+import { useAuth } from '../Context/AuthContext';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 
@@ -14,6 +15,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { loadProfile } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +26,8 @@ export default function Login() {
       const { data } = await axiosInstance.post('/auth/login/', { email, password });
       localStorage.setItem('accessToken', data.access_token);
       localStorage.setItem('refreshToken', data.refresh_token);
-      if (data.full_name) localStorage.setItem('uniguide_user_name', data.full_name);
-      if (data.email) localStorage.setItem('uniguide_user_email', data.email);
+      // Load the authenticated user's real profile before navigating.
+      await loadProfile().catch(() => {});
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid credentials.');

@@ -1,0 +1,11 @@
+/* Opportunities page — reuses Hackathon.css component styles,
+   plus a few page-specific layout tweaks. */
+
+.hk-grid {
+  max-width: var(--container-wide);
+  margin: 0 auto;
+}
+
+.hk-content {
+  padding-top: var(--space-6);
+}

@@ -251,7 +251,7 @@
 
 .in-time {
   font-size: var(--text-xs);
-  color: var(--text-disabled);
+  color: var(--text-muted);
   margin-left: auto;
 }
 

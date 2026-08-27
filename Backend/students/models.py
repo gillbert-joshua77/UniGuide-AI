@@ -94,6 +94,47 @@ class Application(models.Model):
     company = models.CharField(max_length=100)
     status = models.CharField(max_length=50) # e.g., "Interview", "Applied"
     color = models.CharField(max_length=20)   # For the frontend badge
-    
+
     def __str__(self):
         return f"{self.role} at {self.company}"
+
+
+class SavedOpportunity(models.Model):
+    """A hackathon/opportunity the student saved from the Opportunities page.
+
+    The opportunity itself lives in an external source (Devpost); we store a
+    snapshot of the fields the UI needs so the saved list survives even if the
+    external record changes.
+    """
+
+    SOURCE_CHOICES = [
+        ('hackathon', 'Hackathon'),
+        ('other', 'Other'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='saved_opportunities',
+    )
+    opportunity_id = models.CharField(max_length=100, help_text='External id of the opportunity')
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='hackathon')
+    title = models.CharField(max_length=300)
+    url = models.URLField(max_length=1000, blank=True, default='')
+    organizer = models.CharField(max_length=300, blank=True, default='')
+    location = models.CharField(max_length=200, blank=True, default='')
+    deadline = models.CharField(max_length=200, blank=True, default='')
+    prize = models.CharField(max_length=200, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'opportunity_id'],
+                name='unique_saved_opportunity_per_user',
+            )
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} saved by {self.user.email}"

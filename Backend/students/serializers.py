@@ -1,6 +1,6 @@
 # students/serializers.py
 from rest_framework import serializers
-from .models import Skill, Application, StudentProfile
+from .models import Skill, Application, StudentProfile, SavedOpportunity
 
 
 class ProfilePictureField(serializers.ImageField):
@@ -25,12 +25,46 @@ class ProfilePictureField(serializers.ImageField):
         return url
 
 
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ['id', 'name', 'percentage', 'color']
+
+    def validate_name(self, value):
+        name = value.strip()
+        if not name:
+            raise serializers.ValidationError('Skill name cannot be empty')
+        return name
+
+    def validate(self, attrs):
+        # Auto-assign a pleasant color if the client did not provide one.
+        if not attrs.get('color'):
+            palette = ['#D4AF67', '#4F6BFF', '#2D8A56', '#C17E2A', '#8E5BD6', '#0EA5A4']
+            name = attrs.get('name', '')
+            attrs['color'] = palette[hash(name.lower()) % len(palette)]
+        attrs['color'] = attrs['color'].strip()
+        if attrs.get('percentage') is None:
+            attrs['percentage'] = 0
+        return attrs
+
+
+class AppSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Application
+        fields = ['role', 'company', 'status', 'color']
+
+
 class StudentProfileSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     profile_picture = ProfilePictureField(required=False, allow_null=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
+
+    # Read-only related data so the frontend has one source of truth.
+    skills = SkillSerializer(many=True, read_only=True)
+    applications = AppSerializer(many=True, read_only=True)
+    profile_completion = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentProfile
@@ -40,6 +74,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             'course', 'year_of_study', 'academic_performance',
             'interests', 'career_goal', 'preferred_location',
             'preferred_country', 'budget', 'bio', 'updated_at',
+            'skills', 'applications', 'profile_completion',
         ]
         read_only_fields = ['updated_at']
 
@@ -48,6 +83,9 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     def get_email(self, obj):
         return obj.user.email
+
+    def get_profile_completion(self, obj):
+        return calculate_profile_completion(obj)
 
     def update(self, instance, validated_data):
         first_name = validated_data.pop('first_name', None)
@@ -83,13 +121,57 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class SkillSerializer(serializers.ModelSerializer):
+class SavedOpportunitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Skill
-        fields = ['id', 'name', 'percentage', 'color']
+        model = SavedOpportunity
+        fields = [
+            'id', 'opportunity_id', 'source', 'title', 'url',
+            'organizer', 'location', 'deadline', 'prize', 'created_at',
+        ]
+        read_only_fields = ['id', 'user', 'created_at']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
-class AppSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Application
-        fields = ['role', 'company', 'status', 'color']
+# ─── Profile completion ──────────────────────────────────────────────
+# A single, deterministic definition of "how complete is this profile".
+# Used by the serializer, the journey endpoint and the frontend so the
+# percentage is never hardcoded.
+
+_PROFILE_FIELDS = [
+    'education_level', 'institution', 'course', 'year_of_study',
+    'academic_performance', 'interests', 'career_goal',
+    'preferred_location', 'preferred_country', 'budget', 'bio',
+]
+
+
+def calculate_profile_completion(profile):
+    """Return an integer 0-100 reflecting how complete the profile is.
+
+    Counts the filled StudentProfile text/choice fields, the user's first and
+    last name, and whether at least one skill exists.
+    """
+    if not profile:
+        return 0
+
+    user = profile.user
+    checks = []
+
+    for field in _PROFILE_FIELDS:
+        value = getattr(profile, field, None)
+        checks.append(bool(value and str(value).strip()))
+
+    # Name is stored on the User model.
+    checks.append(bool(user.first_name and user.first_name.strip()))
+    checks.append(bool(user.last_name and user.last_name.strip()))
+
+    # At least one skill is expected for a useful profile.
+    checks.append(profile.user.skills.exists())
+
+    filled = sum(1 for c in checks if c)
+    total = len(checks)
+    if total == 0:
+        return 0
+    return round((filled / total) * 100)

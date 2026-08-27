@@ -7,48 +7,105 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 const axiosInstance = axios.create({
   baseURL: baseURL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-axiosInstance.interceptors.request.use(
-  async (req) => {
-    // 1. Always get the latest token from storage inside the interceptor
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
+let isRefreshing = false;
+let pendingSubscribers = [];
 
-    // 2. If no token exists, just send the request (let backend handle 401)
-    if (!accessToken) return req;
+function subscribeTokenRefresh(cb) {
+  pendingSubscribers.push(cb);
+}
 
-    try {
-      // 3. Decode the token (Now we know it's a string)
-      const user = jwtDecode(accessToken);
-      const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
+function onTokenRefreshed(token) {
+  pendingSubscribers.forEach((cb) => cb(token));
+  pendingSubscribers = [];
+}
 
-      if (!isExpired) {
-        req.headers.Authorization = `Bearer ${accessToken}`;
-        return req;
-      }
+function clearAuth() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("uniguide_user_name");
+  localStorage.removeItem("uniguide_user_email");
+  if (window.location.pathname !== "/login") {
+    window.location.assign("/login");
+  }
+}
 
-      // 4. If expired, try to refresh
-      const res = await axios.post(`${baseURL}auth/token/refresh/`, {
-        refresh: refreshToken,
-      });
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) {
+    clearAuth();
+    return null;
+  }
+  try {
+    const res = await axios.post(`${baseURL}auth/token/refresh/`, {
+      refresh: refreshToken,
+    });
+    const newAccess = res.data.access;
+    localStorage.setItem("accessToken", newAccess);
+    return newAccess;
+  } catch {
+    clearAuth();
+    return null;
+  }
+}
 
-      if (res.status === 200) {
-        // ✅ Fix: Don't use JSON.stringify for tokens (they are already strings)
-        // ✅ Fix: Make sure the key matches "accessToken"
-        localStorage.setItem("accessToken", res.data.access);
-        req.headers.Authorization = `Bearer ${res.data.access}`;
-        return req;
-      }
-    } catch {
-      // Token refresh failed — silently continue; backend will return 401
+// ─── Request interceptor: attach a valid access token ───────────────
+axiosInstance.interceptors.request.use(async (req) => {
+  const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) return req;
+
+  try {
+    const decoded = jwtDecode(accessToken);
+    const isExpired = dayjs.unix(decoded.exp).diff(dayjs()) < 1;
+    if (!isExpired) {
+      req.headers.Authorization = `Bearer ${accessToken}`;
+      return req;
     }
+    // Expired: try to refresh before sending.
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const newAccess = await refreshAccessToken();
+      isRefreshing = false;
+      onTokenRefreshed(newAccess);
+    }
+    const token = await new Promise((resolve) => {
+      subscribeTokenRefresh((t) => resolve(t));
+    });
+    if (token) req.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // Ignore — backend will respond 401 and the response interceptor handles it.
+  }
+  return req;
+});
 
-    return req;
-  },
-  (error) => {
+// ─── Response interceptor: retry once after refresh ─────────────────
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    const status = error.response?.status;
+
+    // Only attempt recovery for auth failures and avoid infinite loops.
+    if (status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      if (!isRefreshing) {
+        isRefreshing = true;
+        const newAccess = await refreshAccessToken();
+        isRefreshing = false;
+        onTokenRefreshed(newAccess);
+      } else {
+        await new Promise((resolve) => subscribeTokenRefresh(() => resolve()));
+      }
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return axiosInstance(originalRequest);
+      }
+      clearAuth();
+    }
     return Promise.reject(error);
   }
 );
