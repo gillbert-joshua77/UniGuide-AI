@@ -95,25 +95,24 @@ export default function Profile() {
   // ── Edit profile ─────────────────────────────────────────────
   const [form, setForm] = useState({});
   useEffect(() => {
-    if (profile && showEdit) {
-      const names = (profile.full_name || '').split(' ');
-      setForm({
-        first_name: profile.first_name || names[0] || '',
-        last_name: profile.last_name || names.slice(1).join(' ') || '',
-        profile_picture: null,
-        education_level: profile.education_level || '',
-        institution: profile.institution || '',
-        course: profile.course || '',
-        year_of_study: profile.year_of_study || '',
-        academic_performance: profile.academic_performance || '',
-        interests: profile.interests || '',
-        career_goal: profile.career_goal || '',
-        preferred_location: profile.preferred_location || '',
-        preferred_country: profile.preferred_country || '',
-        budget: profile.budget || '',
-        bio: profile.bio || '',
-      });
-    }
+    if (!profile) return;
+    const names = (profile.full_name || '').split(' ');
+    setForm({
+      first_name: profile.first_name || names[0] || '',
+      last_name: profile.last_name || names.slice(1).join(' ') || '',
+      profile_picture: null,
+      education_level: profile.education_level || '',
+      institution: profile.institution || '',
+      course: profile.course || '',
+      year_of_study: profile.year_of_study || '',
+      academic_performance: profile.academic_performance || '',
+      interests: profile.interests || '',
+      career_goal: profile.career_goal || '',
+      preferred_location: profile.preferred_location || '',
+      preferred_country: profile.preferred_country || '',
+      budget: profile.budget || '',
+      bio: profile.bio || '',
+    });
   }, [profile, showEdit]);
 
   const handleSaveProfile = async () => {

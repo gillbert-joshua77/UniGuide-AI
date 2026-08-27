@@ -5,6 +5,7 @@
 .ug-ai-layout {
   display: grid;
   grid-template-columns: 240px 1fr 280px;
+  grid-template-rows: minmax(0, 1fr);
   height: calc(100vh - 60px);
   overflow: hidden;
 }
@@ -18,6 +19,7 @@
   padding: var(--space-4);
   gap: var(--space-3);
   overflow-y: auto;
+  min-height: 0;
 }
 
 .ug-ai-sidebar-header {
@@ -93,6 +95,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   background: var(--surface-page);
 }
 
@@ -135,6 +138,7 @@
 /* Messages */
 .ug-ai-messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: var(--space-5);
 }
@@ -352,6 +356,7 @@
   background: var(--surface-sidebar);
   border-left: 1px solid var(--border-light);
   overflow-y: auto;
+  min-height: 0;
 }
 
 .ug-ai-context-header {
