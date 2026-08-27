@@ -8,6 +8,16 @@ import { Button, Input } from '../Components/ui';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 
+function extractApiError(data) {
+  if (!data) return 'Registration failed.';
+  if (typeof data === 'string') return data;
+  if (data.detail) return data.detail;
+  if (data.error) return data.error;
+  if (data.non_field_errors) return Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
+  const first = Object.values(data)[0];
+  return Array.isArray(first) ? first[0] : (first || 'Registration failed.');
+}
+
 export default function Register() {
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', password: '', password_confirm: '' });
   const [error, setError] = useState('');
@@ -33,7 +43,7 @@ export default function Register() {
       navigate('/otp/verify', { state: { email: form.email } });
     } catch (err) {
       const data = err.response?.data;
-      setError(data?.detail || data?.error || Object.values(data?.errors || {})[0]?.[0] || 'Registration failed.');
+      setError(extractApiError(data));
     } finally {
       setLoading(false);
     }
