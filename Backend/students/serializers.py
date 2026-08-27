@@ -62,8 +62,10 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(required=False, allow_blank=True)
 
     # Read-only related data so the frontend has one source of truth.
-    skills = SkillSerializer(many=True, read_only=True)
-    applications = AppSerializer(many=True, read_only=True)
+    # Skills/Applications are owned by the User, not the StudentProfile, so we
+    # source them from the reverse relations explicitly.
+    skills = SkillSerializer(many=True, read_only=True, source='user.skills')
+    applications = AppSerializer(many=True, read_only=True, source='user.applications')
     profile_completion = serializers.SerializerMethodField()
 
     class Meta:
