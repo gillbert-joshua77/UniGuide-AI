@@ -27,7 +27,7 @@ const GoogleOAuthButton = () => {
         localStorage.setItem('uniguide_user_email', res.data.email || '');
         const isNewSignup = res.data.is_new === true;
         setTimeout(() => {
-          navigate(isNewSignup ? "/dashboard?setup=1" : "/dashboard");
+          navigate(isNewSignup ? "/home?setup=1" : "/home");
         }, 800);
       }
     } catch (err) {

@@ -78,7 +78,7 @@ const Navbar = () => {
       </button>
 
       {/* Profile Button */}
-      <NavLink to={user ? "/dashboard" : "/login"} className="profile-btn">
+        <NavLink to={user ? "/home" : "/login"} className="profile-btn">
         <div className="nav-avatar">
           {user?.profile_picture ? (
             <img src={user.profile_picture} alt="Profile" className="nav-avatar-img" />

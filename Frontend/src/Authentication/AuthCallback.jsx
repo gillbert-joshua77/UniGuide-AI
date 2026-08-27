@@ -13,7 +13,7 @@ const AuthCallback = () => {
 
     if (error) {
       toast.error('Login failed: ' + error);
-      navigate('/register');
+      navigate('/');
       return;
     }
 
@@ -22,7 +22,7 @@ const AuthCallback = () => {
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       toast.success('Logged in successfully!');
-      navigate('/dashboard');
+      navigate('/home');
     }
   }, [navigate, searchParams]);
 

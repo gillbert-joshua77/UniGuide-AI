@@ -99,7 +99,7 @@ export default function Login() {
             <GoogleOAuthButton />
           </motion.div>
           <motion.p className="auth-switch" variants={fadeUp} custom={9}>
-            Don't have an account? <Link to="/register">Create one</Link>
+            Don't have an account? <Link to="/">Create one</Link>
           </motion.p>
         </motion.div>
       </div>
