@@ -9,7 +9,7 @@ import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Auth.css';
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', password_confirm: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', password: '', password_confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,14 +18,14 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password) { setError('Please fill in all fields.'); return; }
+    if (!form.first_name || !form.last_name || !form.email || !form.password) { setError('Please fill in all fields.'); return; }
     if (form.password !== form.password_confirm) { setError('Passwords do not match.'); return; }
     setError('');
     setLoading(true);
     try {
       await axiosInstance.post('/auth/register/', {
-        first_name: form.name.split(' ')[0] || form.name,
-        last_name: form.name.split(' ').slice(1).join(' ') || '',
+        first_name: form.first_name,
+        last_name: form.last_name,
         email: form.email,
         password: form.password,
         password2: form.password_confirm,
@@ -66,7 +66,10 @@ export default function Register() {
             {error && <motion.div className="auth-error" variants={fadeUp}>{error}</motion.div>}
 
             <motion.div variants={fadeUp} custom={3}>
-              <Input label="Full Name" placeholder="Your name" value={form.name} onChange={update('name')} icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
+              <div className="auth-field-row">
+                <Input label="First Name" placeholder="Your first name" value={form.first_name} onChange={update('first_name')} icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
+                <Input label="Last Name" placeholder="Your last name" value={form.last_name} onChange={update('last_name')} icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
+              </div>
             </motion.div>
             <motion.div variants={fadeUp} custom={4}>
               <Input label="Email" type="email" placeholder="you@university.edu" value={form.email} onChange={update('email')} icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} />

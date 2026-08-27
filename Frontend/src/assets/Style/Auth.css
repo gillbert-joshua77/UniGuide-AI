@@ -8,6 +8,17 @@
   min-height: 100vh;
 }
 
+/* Side-by-side name fields on the auth form */
+.auth-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .auth-field-row { grid-template-columns: 1fr; }
+}
+
 /* Left panel */
 .auth-left {
   display: flex;
