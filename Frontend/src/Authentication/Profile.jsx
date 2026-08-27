@@ -123,8 +123,11 @@ export default function Profile() {
       if (hasFile) {
         const fd = new FormData();
         Object.entries(form).forEach(([k, v]) => {
-          if (k === 'profile_picture') fd.append('profile_picture', v);
-          else if (v != null) fd.append(k, v);
+          if (k === 'profile_picture') {
+            fd.append('profile_picture', v);
+          } else if (v != null && v !== '') {
+            fd.append(k, v);
+          }
         });
         await axiosInstance.put('/students/profile/', fd);
       } else {

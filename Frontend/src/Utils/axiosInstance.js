@@ -54,6 +54,11 @@ async function refreshAccessToken() {
 
 // ─── Request interceptor: attach a valid access token ───────────────
 axiosInstance.interceptors.request.use(async (req) => {
+  // Let the browser set Content-Type with the correct boundary for file uploads.
+  if (req.data instanceof FormData) {
+    delete req.headers['Content-Type'];
+  }
+
   const accessToken = localStorage.getItem("accessToken");
   if (!accessToken) return req;
 
