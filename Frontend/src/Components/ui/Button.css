@@ -88,3 +88,9 @@
   box-shadow: var(--shadow-gold);
   filter: brightness(1.05);
 }
+
+/* ── Dark theme ─────────────────────────────────────────────────────
+   Secondary (ivory) buttons keep their light surface in dark mode,
+   so their text uses dark ink for readability. */
+[data-theme="dark"] .ug-btn-secondary { color: var(--on-light-text); }
+[data-theme="dark"] .ug-btn-secondary:hover:not(:disabled) { color: var(--on-light-text); }

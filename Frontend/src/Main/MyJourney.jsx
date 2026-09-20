@@ -14,6 +14,39 @@ function splitList(text) {
   return text.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
 }
 
+const SKILL_DESCRIPTIONS = {
+  'Python': 'Versatile language for data, AI and automation.',
+  'SQL': 'Query and manage data for analytics and products.',
+  'Statistics': 'Foundation for data analysis and machine learning.',
+  'Pandas / NumPy': 'Core Python libraries for data manipulation.',
+  'HTML / CSS': 'Structure and style for the web.',
+  'JavaScript': 'Adds interactivity to the web.',
+  'React': 'Build modern interactive user interfaces.',
+  'Node.js': 'Run JavaScript on the server.',
+  'Dart': 'Language behind Flutter cross-platform apps.',
+  'Kotlin': 'Modern language for Android apps.',
+  'Swift': 'Language for iOS and macOS apps.',
+  'React Native': 'Cross-platform mobile with JavaScript.',
+  'Excel': 'Spreadsheet analysis and reporting.',
+  'Power BI': 'Dashboards and data visualization.',
+  'Linux': 'Essential for servers and cloud development.',
+  'Docker': 'Package apps into portable containers.',
+  'Kubernetes': 'Orchestrate containers in production.',
+  'CI/CD': 'Automate build, test and deployment pipelines.',
+  'Networking': 'Understand how systems and data connect.',
+  'Cryptography': 'Secure data and communications.',
+  'Figma': 'Design and prototype user interfaces.',
+  'Design Systems': 'Reusable UI patterns and guidelines.',
+  'User Research': 'Understand users to inform design.',
+  'Agile': 'Iterative planning and team collaboration.',
+  'Roadmapping': 'Turn goals into phased product plans.',
+  'Stakeholder Comm.': 'Align teams and stakeholders on decisions.',
+  'C#': 'Core language for .NET and Unity.',
+  'Unity': 'Build 2D and 3D games.',
+  '3D Math': 'Math behind 3D graphics and transforms.',
+  'Shader Basics': 'Control how surfaces render on screen.',
+};
+
 export default function MyJourney() {
   const { profile, savedOpportunities, saveOpportunity, removeOpportunity } = useAuth();
   const [journey, setJourney] = useState(null);
@@ -21,6 +54,7 @@ export default function MyJourney() {
   const [error, setError] = useState(null);
   const [hackathons, setHackathons] = useState([]);
   const [savingId, setSavingId] = useState(null);
+  const [showReadinessInfo, setShowReadinessInfo] = useState(false);
 
   const interests = useMemo(() => splitList(profile?.interests), [profile?.interests]);
 
@@ -116,7 +150,7 @@ export default function MyJourney() {
   return (
     <PageLayout>
       <div className="ug-container journey-page">
-        <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+        <motion.div className="journey-sections" variants={staggerContainer} initial="hidden" animate="visible">
           <motion.div variants={fadeUp} custom={0} className="journey-header">
             <div>
               <h1 className="journey-title">My Journey</h1>
@@ -125,18 +159,33 @@ export default function MyJourney() {
             <Link to="/guidance"><Button variant="primary" size="sm">Ask AI Guide</Button></Link>
           </motion.div>
 
-          {/* Readiness + completion */}
-          <motion.div variants={fadeUp} custom={1} className="journey-grid journey-grid-2">
-            <Card hover={false} className="journey-readiness">
-              <span className="journey-card-label">Career Readiness</span>
+          {/* Current status — readiness (primary) + completion (secondary) */}
+          <motion.div variants={fadeUp} custom={1} className="journey-status">
+            <Card hover={false} className="journey-readiness journey-readiness-primary">
+              <div className="journey-readiness-top">
+                <span className="journey-card-label">Career Readiness</span>
+                <button
+                  type="button"
+                  className="journey-readiness-how"
+                  onClick={() => setShowReadinessInfo((v) => !v)}
+                  aria-expanded={showReadinessInfo}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  How is this scored?
+                </button>
+              </div>
               <div className="journey-readiness-value">{journey.career_readiness}%</div>
               <Progress value={journey.career_readiness} showValue={false} color="gold" />
-              <p className="journey-card-note">Computed from your profile, skills and goals.</p>
+              {showReadinessInfo && (
+                <p className="journey-readiness-info">
+                  UniGuide AI blends your profile completeness, skills, career goal, and application activity into a directional 0–100 signal. It&apos;s a starting point for guidance, not an exact measurement.
+                </p>
+              )}
             </Card>
-            <Card hover={false} className="journey-readiness">
+            <Card hover={false} className="journey-readiness journey-readiness-secondary">
               <span className="journey-card-label">Profile Completion</span>
-              <div className="journey-readiness-value">{journey.profile_completion}%</div>
-              <Progress value={journey.profile_completion} showValue={false} color="ai" />
+              <div className="journey-readiness-value journey-readiness-value-sm">{journey.profile_completion}%</div>
+              <Progress value={journey.profile_completion} showValue={false} color="gold" size="sm" />
               <p className="journey-card-note">{journey.skills_count} skill{journey.skills_count === 1 ? '' : 's'} added.</p>
             </Card>
           </motion.div>
@@ -158,11 +207,11 @@ export default function MyJourney() {
             <Card hover={false} className="journey-section">
               <h3 className="journey-section-title">Skills to Develop</h3>
               {journey.skills_to_develop.length ? (
-                <div className="journey-skill-dev">
+                <div className="journey-skills-grid">
                   {journey.skills_to_develop.map((s) => (
-                    <div key={s.name} className="journey-skill-dev-item">
-                      <Badge color="gold" size="sm">{s.name}</Badge>
-                      <span className="journey-skill-dev-reason">{s.reason}</span>
+                    <div key={s.name} className="journey-skill-item">
+                      <span className="journey-skill-name">{s.name}</span>
+                      <p className="journey-skill-desc">{SKILL_DESCRIPTIONS[s.name] || 'Recommended to strengthen your journey.'}</p>
                     </div>
                   ))}
                 </div>
@@ -172,12 +221,19 @@ export default function MyJourney() {
             </Card>
           </motion.div>
 
-          {/* AI Insights */}
+          {/* AI guidance — recommended next action */}
           <motion.div variants={fadeUp} custom={4}>
             <Card hover={false} className="journey-ai-insight">
-              <Badge color="gold" size="sm">AI INSIGHT</Badge>
+              <div className="journey-ai-head">
+                <span className="journey-ai-label">AI Guidance</span>
+                <span className="journey-ai-note">Recommended next step · not a score</span>
+              </div>
               <p>{journey.ai_insight}</p>
-              <Link to="/guidance"><Button variant="ghost" size="sm">Talk to AI Guide →</Button></Link>
+              <div className="journey-ai-actions">
+                <Link to="/guidance">
+                  <Button variant="primary" size="sm">Ask AI Guide <span className="journey-arrow" aria-hidden="true">→</span></Button>
+                </Link>
+              </div>
             </Card>
           </motion.div>
 

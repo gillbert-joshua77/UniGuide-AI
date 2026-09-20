@@ -140,7 +140,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-5);
+  padding: var(--space-5) var(--space-6);
 }
 
 .ug-ai-empty {
@@ -212,8 +212,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .ug-ai-msg {
@@ -238,11 +237,14 @@
 }
 
 .ug-ai-msg-bubble {
-  max-width: 520px;
-  padding: var(--space-3) var(--space-4);
+  max-width: min(84%, 880px);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .ug-ai-msg-assistant .ug-ai-msg-bubble {
@@ -278,6 +280,151 @@
 @keyframes ug-typing {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
   30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Streaming / typewriter caret */
+.ug-ai-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--gold-champagne);
+  border-radius: 2px;
+  animation: ug-caret-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ug-caret-blink {
+  to { visibility: hidden; }
+}
+
+/* Markdown content inside chat bubbles */
+.ug-ai-msg-bubble > *:first-child { margin-top: 0 !important; }
+.ug-ai-msg-bubble > *:last-child { margin-bottom: 0 !important; }
+
+.ug-ai-msg-bubble p {
+  margin: 0 0 var(--space-3);
+  white-space: normal;
+}
+
+.ug-ai-msg-bubble h1,
+.ug-ai-msg-bubble h2,
+.ug-ai-msg-bubble h3,
+.ug-ai-msg-bubble h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.ug-ai-msg-bubble h1 { font-size: var(--text-lg); }
+.ug-ai-msg-bubble h2 { font-size: var(--text-lg); }
+.ug-ai-msg-bubble h3 { font-size: var(--text-md); }
+.ug-ai-msg-bubble h4 { font-size: var(--text-md); }
+
+.ug-ai-msg-bubble ul,
+.ug-ai-msg-bubble ol {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ug-ai-msg-bubble li {
+  margin: 0;
+  white-space: normal;
+}
+
+.ug-ai-msg-bubble li > ul,
+.ug-ai-msg-bubble li > ol {
+  margin-top: var(--space-1);
+  margin-bottom: 0;
+}
+
+.ug-ai-msg-bubble strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.ug-ai-msg-bubble em {
+  font-style: italic;
+}
+
+.ug-ai-msg-bubble a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ug-ai-msg-bubble a:hover {
+  color: var(--gold-champagne);
+}
+
+.ug-ai-msg-bubble code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.ug-ai-msg-bubble pre {
+  margin: 0 0 var(--space-3);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--gold-champagne);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+}
+
+.ug-ai-msg-bubble pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.ug-ai-msg-bubble blockquote {
+  margin: 0 0 var(--space-3);
+  padding: 2px var(--space-3);
+  border-left: 3px solid var(--gold-border);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.ug-ai-msg-bubble hr {
+  margin: var(--space-4) 0;
+  border: none;
+  border-top: 1px solid var(--border-light);
+}
+
+.ug-ai-msg-bubble table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.ug-ai-msg-bubble th,
+.ug-ai-msg-bubble td {
+  border: 1px solid var(--border-light);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ug-ai-msg-bubble th {
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 /* Input area */

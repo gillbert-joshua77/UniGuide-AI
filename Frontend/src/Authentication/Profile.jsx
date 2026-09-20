@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -33,14 +33,40 @@ function splitList(text) {
   return text.split(',').map((t) => t.trim()).filter(Boolean);
 }
 
+function formatYear(year) {
+  if (!year) return '';
+  if (year === 'graduated') return 'Graduated';
+  const suffix =
+    year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th';
+  return `${year}${['1', '2', '3', '4', '5'].includes(year) ? `${suffix} Year` : ''}`;
+}
+
 function Field({ label, value, emptyText = 'Not added yet' }) {
   return (
     <div className="profile-field">
       <span className="profile-field-label">{label}</span>
-      <span className="profile-field-value">{value && String(value).trim() ? value : <em className="profile-empty-value">{emptyText}</em>}</span>
+      <span className="profile-field-value">
+        {value && String(value).trim() ? value : <em className="profile-empty-value">{emptyText}</em>}
+      </span>
     </div>
   );
 }
+
+const PROFILE_FIELDS = [
+  { key: 'first_name', label: 'First name' },
+  { key: 'last_name', label: 'Last name' },
+  { key: 'education_level', label: 'Education level' },
+  { key: 'institution', label: 'University / Institution' },
+  { key: 'course', label: 'Program / Course' },
+  { key: 'year_of_study', label: 'Year of study' },
+  { key: 'academic_performance', label: 'Academic performance' },
+  { key: 'preferred_location', label: 'Preferred location' },
+  { key: 'preferred_country', label: 'Preferred country' },
+  { key: 'budget', label: 'Budget' },
+  { key: 'interests', label: 'Interests' },
+  { key: 'career_goal', label: 'Career goal' },
+  { key: 'bio', label: 'Bio' },
+];
 
 export default function Profile() {
   const {
@@ -50,20 +76,43 @@ export default function Profile() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [showAddSkill, setShowAddSkill] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newSkill, setNewSkill] = useState({ name: '', level: 'Intermediate' });
+  const contentRef = useRef(null);
 
   const name = profile?.full_name || 'Student';
   const email = profile?.email || '';
   const completion = profile?.profile_completion ?? 0;
 
   const interests = useMemo(() => splitList(profile?.interests), [profile?.interests]);
+
   const educationSummary = [
     profile?.education_level ? profile.education_level.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : null,
     profile?.course,
-    profile?.year_of_study ? `${profile.year_of_study}${profile.year_of_study === 'graduated' ? '' : (['1','2','3','4','5'].includes(profile.year_of_study) ? (profile.year_of_study === '1' ? 'st Year' : profile.year_of_study === '2' ? 'nd Year' : profile.year_of_study === '3' ? 'rd Year' : 'th Year') : '')}` : null,
+    formatYear(profile?.year_of_study),
   ].filter(Boolean).join(' · ');
+
+  const missingFields = useMemo(() => {
+    if (!profile) return [];
+    return PROFILE_FIELDS.filter((f) => {
+      const v = profile[f.key];
+      return v === null || v === undefined || String(v).trim() === '';
+    }).slice(0, 4);
+  }, [profile]);
+
+  const detailsFilled = profile
+    ? PROFILE_FIELDS.filter((f) => {
+        const v = profile[f.key];
+        return v !== null && v !== undefined && String(v).trim() !== '';
+      }).length
+    : 0;
+
+  const goToSettings = () => {
+    setActiveTab('settings');
+    requestAnimationFrame(() => {
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   // ── Add skill ────────────────────────────────────────────────
   const handleAddSkill = async () => {
@@ -93,7 +142,7 @@ export default function Profile() {
     }
   };
 
-  // ── Edit profile ─────────────────────────────────────────────
+  // ── Edit profile (inline settings) ───────────────────────────
   const [form, setForm] = useState({});
   useEffect(() => {
     if (!profile) return;
@@ -114,7 +163,7 @@ export default function Profile() {
       budget: profile.budget || '',
       bio: profile.bio || '',
     });
-  }, [profile, showEdit]);
+  }, [profile]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -135,8 +184,9 @@ export default function Profile() {
         await updateProfile(json);
       }
       toast.success('Profile updated successfully');
-      setShowEdit(false);
       await loadProfile();
+      setActiveTab('overview');
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
       const data = e?.response?.data;
       const msg = typeof data === 'object' ? Object.values(data).flat()[0] : 'Could not save profile';
@@ -191,14 +241,12 @@ export default function Profile() {
 
   return (
     <PageLayout>
-      {/* Banner */}
+      {/* Decorative banner */}
       <div className="profile-banner">
-        <div className="ug-container">
-          <div className="profile-banner-content" />
-        </div>
+        <div className="profile-banner-glow" />
       </div>
 
-      <div className="ug-container">
+      <div className="ug-container" ref={contentRef}>
         {/* Identity header */}
         <motion.div className="profile-identity" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
           <Avatar src={profile?.profile_picture} name={name} size="xl" gold />
@@ -211,23 +259,52 @@ export default function Profile() {
             {educationSummary && <p className="profile-identity-education">{educationSummary}</p>}
           </div>
           <div className="profile-identity-actions">
-            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>Edit Profile</Button>
+            <Button variant="outline" size="sm" onClick={goToSettings}>Edit Profile</Button>
           </div>
         </motion.div>
 
-        {/* Completion */}
-        <Card hover={false} className="profile-completion-card">
-          <div className="profile-completion-head">
-            <span className="profile-completion-title">Profile Completion</span>
-            <span className="profile-completion-value">{completion}%</span>
-          </div>
-          <Progress value={completion} showValue={false} color="gold" />
-          <p className="profile-completion-hint">
-            {completion < 100
-              ? 'Complete your profile so UniGuide AI can personalize guidance.'
-              : 'Your profile is complete. Great job!'}
-          </p>
-        </Card>
+        {/* Stats row */}
+        <motion.div className="profile-stats" variants={staggerContainer} initial="hidden" animate="visible">
+          <motion.div variants={fadeUp} custom={0}>
+            <Card hover={false} className="profile-stat-card">
+              <span className="profile-stat-label">Profile Completion</span>
+              <div className="profile-stat-value-row">
+                <strong className="profile-stat-value">{completion}%</strong>
+                {completion === 100 && <Badge color="success" size="sm">Complete</Badge>}
+              </div>
+              <Progress value={completion} showValue={false} color="gold" size="sm" />
+              {completion < 100 ? (
+                <p className="profile-stat-hint">
+                  {missingFields.length
+                    ? `Incomplete — add ${missingFields.slice(0, 3).map((f) => f.label.toLowerCase()).join(', ')}${missingFields.length > 3 ? '…' : ''}.`
+                    : 'A few details will refine your guidance.'}
+                </p>
+              ) : (
+                <p className="profile-stat-hint">All set — your profile is ready to power personalized guidance.</p>
+              )}
+            </Card>
+          </motion.div>
+          <motion.div variants={fadeUp} custom={1}>
+            <Card hover={false} className="profile-stat-card">
+              <span className="profile-stat-label">Skills Added</span>
+              <strong className="profile-stat-value">{skills.length}</strong>
+              <p className="profile-stat-hint">
+                {skills.length ? 'Well done — keep growing your profile.' : 'Add your first skill to get started.'}
+              </p>
+            </Card>
+          </motion.div>
+          <motion.div variants={fadeUp} custom={2}>
+            <Card hover={false} className="profile-stat-card">
+              <span className="profile-stat-label">Profile Details</span>
+              <strong className="profile-stat-value">{detailsFilled}/{PROFILE_FIELDS.length}</strong>
+              <p className="profile-stat-hint">
+                {missingFields.length
+                  ? `Next: add ${missingFields[0].label.toLowerCase()}.`
+                  : 'All details added. Great job!'}
+              </p>
+            </Card>
+          </motion.div>
+        </motion.div>
 
         {/* Tabs */}
         <div className="profile-tabs-wrap">
@@ -237,70 +314,124 @@ export default function Profile() {
         <motion.div className="profile-content" variants={staggerContainer} initial="hidden" animate="visible">
           {activeTab === 'overview' && (
             <>
-              <motion.div variants={fadeUp} custom={0}>
-                <Card hover={false} className="profile-section">
-                  <div className="profile-section-head">
-                    <h3 className="profile-section-title">About</h3>
-                  </div>
-                  {profile?.bio && profile.bio.trim() ? (
-                    <p className="profile-about-text">{profile.bio}</p>
-                  ) : (
-                    <p className="profile-empty-value">Not added yet — tell us about yourself.</p>
-                  )}
-                </Card>
-              </motion.div>
+              {missingFields.length > 0 && (
+                <motion.div variants={fadeUp} custom={0}>
+                  <Card hover={false} className="profile-checklist">
+                    <div className="profile-checklist-head">
+                      <div>
+                        <h3 className="profile-section-title">Complete your profile</h3>
+                        <p className="profile-section-sub">Add these details so UniGuide AI can personalize your guidance.</p>
+                      </div>
+                      <Button variant="primary" size="sm" onClick={goToSettings}>Complete Now</Button>
+                    </div>
+                    <div className="profile-checklist-items">
+                      {missingFields.map((f) => (
+                        <div key={f.key} className="profile-checklist-item">
+                          <span className="profile-checklist-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M20 6L9 17l-5-5" /></svg>
+                          </span>
+                          <span className="profile-checklist-label">{f.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
 
-              <motion.div variants={fadeUp} custom={1}>
-                <Card hover={false} className="profile-section">
-                  <h3 className="profile-section-title">Education</h3>
-                  <div className="profile-fields">
-                    <Field label="University / Institution" value={profile?.institution} />
-                    <Field label="Program / Course" value={profile?.course} />
-                    <Field label="Year of Study" value={profile?.year_of_study ? (profile.year_of_study === 'graduated' ? 'Graduated' : `${profile.year_of_study}${['1','2','3','4','5'].includes(profile.year_of_study) ? (profile.year_of_study==='1'?'st':profile.year_of_study==='2'?'nd':profile.year_of_study==='3'?'rd':'th') + ' Year' : ''}`) : ''} />
-                    <Field label="Academic Performance" value={profile?.academic_performance} />
-                  </div>
-                </Card>
-              </motion.div>
+              <div className="profile-overview-grid">
+                <motion.div variants={fadeUp} custom={1}>
+                  <Card hover={false} className="profile-section">
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">About</h3>
+                      <Button variant="ghost" size="sm" onClick={goToSettings}>Edit</Button>
+                    </div>
+                    {profile?.bio && profile.bio.trim() ? (
+                      <p className="profile-about-text">{profile.bio}</p>
+                    ) : (
+                      <div className="profile-empty-action">
+                        <p className="profile-empty-value">No bio yet — add a short introduction about yourself.</p>
+                        <Button variant="ghost" size="sm" onClick={goToSettings}>Add Bio</Button>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
 
-              <div className="profile-two-col">
                 <motion.div variants={fadeUp} custom={2}>
                   <Card hover={false} className="profile-section">
-                    <h3 className="profile-section-title">Interests</h3>
-                    {interests.length ? (
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">Skills</h3>
+                      <Button variant="ghost" size="sm" onClick={() => setActiveTab('skills')}>Manage</Button>
+                    </div>
+                    {skills.length ? (
                       <div className="profile-chips">
-                        {interests.map((i) => <Badge key={i} color="ai" size="sm">{i}</Badge>)}
+                        {skills.map((s) => (
+                          <Badge key={s.id} color="gold" size="sm">{s.name} · {levelFromPercentage(s.percentage)}</Badge>
+                        ))}
                       </div>
-                    ) : <p className="profile-empty-value">Not added yet</p>}
+                    ) : (
+                      <div className="profile-empty-action">
+                        <p className="profile-empty-value">No skills added yet — show off what you know.</p>
+                        <Button variant="ghost" size="sm" onClick={() => setShowAddSkill(true)}>Add Skill</Button>
+                      </div>
+                    )}
                   </Card>
                 </motion.div>
 
                 <motion.div variants={fadeUp} custom={3}>
                   <Card hover={false} className="profile-section">
-                    <h3 className="profile-section-title">Career Goals</h3>
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">Education</h3>
+                      <Button variant="ghost" size="sm" onClick={goToSettings}>Edit</Button>
+                    </div>
+                    <div className="profile-fields">
+                      <Field label="University / Institution" value={profile?.institution} />
+                      <Field label="Program / Course" value={profile?.course} />
+                      <Field label="Year of Study" value={formatYear(profile?.year_of_study)} />
+                      <Field label="Academic Performance" value={profile?.academic_performance} />
+                    </div>
+                  </Card>
+                </motion.div>
+
+                <motion.div variants={fadeUp} custom={4}>
+                  <Card hover={false} className="profile-section">
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">Preferences</h3>
+                      <Button variant="ghost" size="sm" onClick={goToSettings}>Edit</Button>
+                    </div>
+                    <div className="profile-fields">
+                      <Field label="Preferred Location" value={profile?.preferred_location} />
+                      <Field label="Preferred Country" value={profile?.preferred_country} />
+                      <Field label="Budget" value={profile?.budget} />
+                    </div>
+                  </Card>
+                </motion.div>
+
+                <motion.div variants={fadeUp} custom={5}>
+                  <Card hover={false} className="profile-section">
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">Interests</h3>
+                      <Button variant="ghost" size="sm" onClick={goToSettings}>Edit</Button>
+                    </div>
+                    {interests.length ? (
+                      <div className="profile-chips">
+                        {interests.map((i) => <Badge key={i} color="ai" size="sm">{i}</Badge>)}
+                      </div>
+                    ) : <p className="profile-empty-value">Add your interests to get personalized guidance.</p>}
+                  </Card>
+                </motion.div>
+
+                <motion.div variants={fadeUp} custom={6}>
+                  <Card hover={false} className="profile-section">
+                    <div className="profile-section-head">
+                      <h3 className="profile-section-title">Career Goals</h3>
+                      <Button variant="ghost" size="sm" onClick={goToSettings}>Edit</Button>
+                    </div>
                     {profile?.career_goal && profile.career_goal.trim() ? (
                       <p className="profile-goal-text">{profile.career_goal}</p>
                     ) : <p className="profile-empty-value">Not added yet</p>}
                   </Card>
                 </motion.div>
               </div>
-
-              <motion.div variants={fadeUp} custom={4}>
-                <Card hover={false} className="profile-section">
-                  <div className="profile-section-head">
-                    <h3 className="profile-section-title">Skills</h3>
-                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('skills')}>Manage</Button>
-                  </div>
-                  {skills.length ? (
-                    <div className="profile-chips">
-                      {skills.map((s) => (
-                        <Badge key={s.id} color="gold" size="sm">{s.name} · {levelFromPercentage(s.percentage)}</Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="profile-empty-value">No skills added yet.</p>
-                  )}
-                </Card>
-              </motion.div>
             </>
           )}
 
@@ -319,13 +450,19 @@ export default function Profile() {
                         <Badge color="gold" size="sm">{levelFromPercentage(skill.percentage)}</Badge>
                       </div>
                       <Progress value={skill.percentage || 0} showValue={false} size="sm" color="gold" />
-                      <button className="profile-skill-remove" onClick={() => handleDeleteSkill(skill.id)}>Remove</button>
+                      <button className="profile-skill-remove" onClick={() => handleDeleteSkill(skill.id)} aria-label={`Remove ${skill.name}`}>Remove</button>
                     </Card>
                   </motion.div>
                 ))}
                 {skills.length === 0 && (
                   <Card hover={false} className="profile-empty">
+                    <div className="profile-empty-icon">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6-6.3 4.6L8 14 2 9.4h7.6z" />
+                      </svg>
+                    </div>
                     <p>No skills added yet. Add your first skill to get started.</p>
+                    <Button variant="primary" size="sm" onClick={() => setShowAddSkill(true)}>Add a Skill</Button>
                   </Card>
                 )}
               </motion.div>
@@ -335,19 +472,81 @@ export default function Profile() {
           {activeTab === 'settings' && (
             <motion.div variants={fadeUp} custom={0}>
               <Card hover={false} className="profile-section">
-                <h3 className="profile-section-title">Account Settings</h3>
-                <p className="profile-section-sub">Manage your personal information and account details.</p>
+                <h3 className="profile-section-title">Edit Profile</h3>
+                <p className="profile-section-sub">Update your personal information so UniGuide AI can guide you better.</p>
+
                 <div className="profile-settings">
-                  <Input label="First Name" value={form.first_name || ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
-                  <Input label="Last Name" value={form.last_name || ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-                  <Input label="Email" value={email} disabled />
+                  <div className="profile-settings-group">
+                    <h4 className="profile-settings-title">Personal</h4>
+                    <div className="profile-edit-grid">
+                      <Input label="First Name" value={form.first_name || ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+                      <Input label="Last Name" value={form.last_name || ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+                      <div className="profile-edit-full">
+                        <label className="ug-input-label">Email</label>
+                        <Input type="email" value={email} disabled />
+                      </div>
+                      <div className="profile-edit-full">
+                        <label className="ug-input-label">Profile Photo</label>
+                        <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, profile_picture: e.target.files?.[0] || null })} className="profile-file-input" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="profile-settings-group">
+                    <h4 className="profile-settings-title">Education</h4>
+                    <div className="profile-edit-grid">
+                      <div className="profile-edit-full profile-edit-inline">
+                        <div className="profile-edit-half">
+                          <label className="ug-input-label">Education Level</label>
+                          <select className="ug-input" value={form.education_level || ''} onChange={(e) => setForm({ ...form, education_level: e.target.value })}>
+                            <option value="">Select…</option>
+                            {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
+                          </select>
+                        </div>
+                        <div className="profile-edit-half">
+                          <label className="ug-input-label">Year of Study</label>
+                          <select className="ug-input" value={form.year_of_study || ''} onChange={(e) => setForm({ ...form, year_of_study: e.target.value })}>
+                            <option value="">Select…</option>
+                            {YEARS.map((y) => <option key={y} value={y}>{y === 'graduated' ? 'Graduated' : formatYear(y)}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <Input label="Institution / University" value={form.institution || ''} onChange={(e) => setForm({ ...form, institution: e.target.value })} />
+                      <Input label="Program / Course" value={form.course || ''} onChange={(e) => setForm({ ...form, course: e.target.value })} />
+                      <Input label="Academic Performance" placeholder="e.g. CGPA 8.5/10" value={form.academic_performance || ''} onChange={(e) => setForm({ ...form, academic_performance: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="profile-settings-group">
+                    <h4 className="profile-settings-title">Preferences</h4>
+                    <div className="profile-edit-grid">
+                      <Input label="Preferred Location" value={form.preferred_location || ''} onChange={(e) => setForm({ ...form, preferred_location: e.target.value })} />
+                      <Input label="Preferred Country" value={form.preferred_country || ''} onChange={(e) => setForm({ ...form, preferred_country: e.target.value })} />
+                      <Input label="Budget" placeholder="e.g. $15,000/year" value={form.budget || ''} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="profile-settings-group">
+                    <h4 className="profile-settings-title">About You</h4>
+                    <div className="profile-edit-grid">
+                      <div className="profile-edit-full">
+                        <Textarea label="Interests" placeholder="Comma separated, e.g. AI, Web Development, Design" value={form.interests || ''} onChange={(e) => setForm({ ...form, interests: e.target.value })} />
+                      </div>
+                      <div className="profile-edit-full">
+                        <Textarea label="Career Goal" placeholder="e.g. Become a Machine Learning Engineer" value={form.career_goal || ''} onChange={(e) => setForm({ ...form, career_goal: e.target.value })} />
+                      </div>
+                      <div className="profile-edit-full">
+                        <Textarea label="Bio" placeholder="A short introduction about yourself" value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="profile-settings-actions">
-                    <Button variant="primary" size="sm" onClick={handleSaveProfile} disabled={saving}>
+                    <Button variant="primary" onClick={handleSaveProfile} disabled={saving}>
                       {saving ? 'Saving…' : 'Save Changes'}
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setActiveTab('overview')}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setActiveTab('overview')}>Cancel</Button>
                   </div>
-                  <p className="profile-settings-note">For the full editing experience including education, interests and bio, use the <button className="profile-link-btn" onClick={() => setShowEdit(true)}>Edit Profile</button> button.</p>
                 </div>
               </Card>
             </motion.div>
@@ -380,57 +579,6 @@ export default function Profile() {
             </div>
           </div>
           <Button variant="primary" onClick={handleAddSkill}>Add Skill</Button>
-        </div>
-      </Modal>
-
-      {/* Edit Profile Modal */}
-      <Modal isOpen={showEdit} onClose={() => setShowEdit(false)} title="Edit Profile" className="profile-edit-modal">
-        <div className="profile-edit-form">
-          <div className="profile-edit-grid">
-            <Input label="First Name" value={form.first_name || ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
-            <Input label="Last Name" value={form.last_name || ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-            <div className="profile-edit-full">
-              <label className="ug-input-label">Profile Photo</label>
-              <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, profile_picture: e.target.files?.[0] || null })} className="profile-file-input" />
-            </div>
-            <div className="profile-edit-full profile-edit-inline">
-              <div className="profile-edit-half">
-                <label className="ug-input-label">Education Level</label>
-                <select className="ug-input" value={form.education_level || ''} onChange={(e) => setForm({ ...form, education_level: e.target.value })}>
-                  <option value="">Select…</option>
-                  {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
-                </select>
-              </div>
-              <div className="profile-edit-half">
-                <label className="ug-input-label">Year of Study</label>
-                <select className="ug-input" value={form.year_of_study || ''} onChange={(e) => setForm({ ...form, year_of_study: e.target.value })}>
-                  <option value="">Select…</option>
-                  {YEARS.map((y) => <option key={y} value={y}>{y === 'graduated' ? 'Graduated' : `${y}${y==='1'?'st':y==='2'?'nd':y==='3'?'rd':'th'} Year`}</option>)}
-                </select>
-              </div>
-            </div>
-            <Input label="Institution / University" value={form.institution || ''} onChange={(e) => setForm({ ...form, institution: e.target.value })} />
-            <Input label="Program / Course" value={form.course || ''} onChange={(e) => setForm({ ...form, course: e.target.value })} />
-            <Input label="Academic Performance" placeholder="e.g. CGPA 8.5/10" value={form.academic_performance || ''} onChange={(e) => setForm({ ...form, academic_performance: e.target.value })} />
-            <Input label="Preferred Location" value={form.preferred_location || ''} onChange={(e) => setForm({ ...form, preferred_location: e.target.value })} />
-            <Input label="Preferred Country" value={form.preferred_country || ''} onChange={(e) => setForm({ ...form, preferred_country: e.target.value })} />
-            <Input label="Budget" placeholder="e.g. $15,000/year" value={form.budget || ''} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
-            <div className="profile-edit-full">
-              <Textarea label="Interests" placeholder="Comma separated, e.g. AI, Web Development, Design" value={form.interests || ''} onChange={(e) => setForm({ ...form, interests: e.target.value })} />
-            </div>
-            <div className="profile-edit-full">
-              <Textarea label="Career Goal" placeholder="e.g. Become a Machine Learning Engineer" value={form.career_goal || ''} onChange={(e) => setForm({ ...form, career_goal: e.target.value })} />
-            </div>
-            <div className="profile-edit-full">
-              <Textarea label="Bio" placeholder="A short introduction about yourself" value={form.bio || ''} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-            </div>
-          </div>
-          <div className="profile-edit-actions">
-            <Button variant="primary" onClick={handleSaveProfile} disabled={saving}>
-              {saving ? 'Saving…' : 'Save Changes'}
-            </Button>
-            <Button variant="ghost" onClick={() => setShowEdit(false)}>Cancel</Button>
-          </div>
         </div>
       </Modal>
     </PageLayout>

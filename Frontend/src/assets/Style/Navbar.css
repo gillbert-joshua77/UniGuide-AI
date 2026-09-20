@@ -206,6 +206,20 @@
   color: var(--status-danger);
 }
 
+/* ── Dark theme contrast adjustments ────────────────────────────────
+   Ivory surfaces stay light in dark mode, so text/icons on them need
+   dark ink; inactive links and raised text get a slightly brighter tone. */
+[data-theme="dark"] .nav-link { color: var(--text-emphasis); }
+[data-theme="dark"] .nav-link:hover { color: var(--on-light-text); }
+[data-theme="dark"] .nav-link.active,
+[data-theme="dark"] .nav-link.active:hover { color: var(--text-primary); }
+[data-theme="dark"] .nav-username { color: var(--on-light-text); }
+[data-theme="dark"] .nav-theme-toggle { color: var(--on-light-text); }
+[data-theme="dark"] .nav-theme-toggle:hover { color: var(--on-light-text-muted); }
+[data-theme="dark"] .nav-menu-toggle span { background: var(--on-light-text); }
+[data-theme="dark"] .nav-menu-toggle:hover span { background: var(--on-light-text); }
+[data-theme="dark"] .nav-dropdown-item:hover { color: var(--on-light-text); }
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-4px); }

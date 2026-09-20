@@ -7,7 +7,7 @@ import Logo from '../../assets/Image/UniGuide 1.png'
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme()
-  const { user, logout } = useAuth()
+  const { user, logout, openAuthModal } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef(null)
@@ -15,6 +15,14 @@ const Navbar = () => {
   const navigate = useNavigate()
 
   const closeMenu = () => setMenuOpen(false)
+
+  const handleProfileClick = () => {
+    if (!user) {
+      openAuthModal(location.pathname)
+      return
+    }
+    setUserMenuOpen(o => !o)
+  }
 
   useEffect(() => {
     const onClick = (e) => {
@@ -37,7 +45,8 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { to: '/home', label: 'Home' },
+    { to: '/', label: 'Home' },
+    { to: '/about', label: 'About' },
     { to: '/guidance', label: 'Guidance' },
     { to: '/opportunities', label: 'Opportunities' },
     { to: '/news', label: 'News' },
@@ -104,7 +113,7 @@ const Navbar = () => {
       <div className="nav-user-menu" ref={userMenuRef}>
         <button
           className="profile-btn"
-          onClick={() => setUserMenuOpen(o => !o)}
+          onClick={handleProfileClick}
           aria-haspopup="menu"
           aria-expanded={userMenuOpen}
         >

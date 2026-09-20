@@ -4,10 +4,10 @@ import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/axiosInstance';
 import { useAuth } from '../Context/AuthContext';
 
-const GoogleOAuthButton = () => {
+const GoogleOAuthButton = ({ redirectPath = '/' }) => {
   const navigate = useNavigate();
   const btnContainerRef = useRef(null);
-  const { loadProfile } = useAuth();
+  const { login } = useAuth();
 
   const handleSignWithGoogle = async (response) => {
     try {
@@ -23,14 +23,12 @@ const GoogleOAuthButton = () => {
 
       if (res.status === 200) {
         toast.success("Google Authentication Successful 🎉");
-        localStorage.setItem("accessToken", res.data.access_token);
-        localStorage.setItem("refreshToken", res.data.refresh_token);
-        localStorage.setItem('uniguide_user_name', res.data.full_name || '');
-        localStorage.setItem('uniguide_user_email', res.data.email || '');
-        await loadProfile().catch(() => {});
-        const isNewSignup = res.data.is_new === true;
+        await login({
+          access_token: res.data.access_token,
+          refresh_token: res.data.refresh_token,
+        }).catch(() => {});
         setTimeout(() => {
-          navigate(isNewSignup ? "/home?setup=1" : "/home");
+          navigate(redirectPath || '/');
         }, 800);
       }
     } catch (err) {

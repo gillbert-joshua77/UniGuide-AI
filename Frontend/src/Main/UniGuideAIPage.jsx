@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import axiosInstance from '../Utils/axiosInstance';
 import { useAuth } from '../Context/AuthContext';
 import Navbar from '../Components/navigation/Navbar';
@@ -18,6 +20,21 @@ const quickActions = [
 function splitList(text) {
   if (!text) return [];
   return text.split(',').map((t) => t.trim()).filter(Boolean);
+}
+
+function MarkdownMessage({ content }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        a: ({ children, href }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 }
 
 function ContextPanel({ profile }) {
@@ -70,13 +87,57 @@ export default function UniGuideAIPage() {
   const [mobileContextOpen, setMobileContextOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const streamTimerRef = useRef(null);
+  const streamIndexRef = useRef(0);
+  const streamStepRef = useRef(4);
+  const [streamingId, setStreamingId] = useState(null);
+  const [shownLength, setShownLength] = useState(0);
 
   const userName = profile?.full_name || 'Student';
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [messages, shownLength, scrollToBottom]);
+
+  // Cancel any active typewriter when the component unmounts.
+  useEffect(() => () => {
+    if (streamTimerRef.current) clearTimeout(streamTimerRef.current);
+  }, []);
+
+  const stopStreaming = useCallback(() => {
+    if (streamTimerRef.current) {
+      clearTimeout(streamTimerRef.current);
+      streamTimerRef.current = null;
+    }
+    setStreamingId(null);
+    setShownLength(0);
+  }, []);
+
+  // Simulated typing: reveal the reply progressively instead of all at once.
+  // Chunk size and speed scale with length so short replies feel like typing
+  // while long replies still finish in a few seconds.
+  const startStreaming = useCallback((id, text) => {
+    stopStreaming();
+    const len = text.length;
+    setStreamingId(id);
+    setShownLength(0);
+    streamIndexRef.current = 0;
+    streamStepRef.current = len > 2500 ? 24 : len > 1200 ? 12 : 4;
+    const delay = len > 1200 ? 12 : 16;
+
+    const tick = () => {
+      streamIndexRef.current = Math.min(len, streamIndexRef.current + streamStepRef.current);
+      setShownLength(streamIndexRef.current);
+      if (streamIndexRef.current >= len) {
+        streamTimerRef.current = null;
+        setStreamingId(null);
+      } else {
+        streamTimerRef.current = setTimeout(tick, delay);
+      }
+    };
+    streamTimerRef.current = setTimeout(tick, delay);
+  }, [stopStreaming]);
 
   // Load existing chat sessions for the sidebar.
   useEffect(() => {
@@ -87,6 +148,7 @@ export default function UniGuideAIPage() {
 
   const loadSession = async (id) => {
     try {
+      stopStreaming();
       const { data } = await axiosInstance.get(`/uniguide/chat/sessions/${id}/`);
       setActiveSessionId(id);
       setMessages(
@@ -101,6 +163,7 @@ export default function UniGuideAIPage() {
   };
 
   const createNewConversation = () => {
+    stopStreaming();
     setActiveSessionId(null);
     setMessages([]);
     setSidebarOpen(false);
@@ -108,7 +171,7 @@ export default function UniGuideAIPage() {
   };
 
   const sendMessage = async (text = input) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || streamingId) return;
     const userMsg = { id: Date.now(), role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
@@ -121,7 +184,9 @@ export default function UniGuideAIPage() {
       });
       const reply = response.data?.reply || "I'm sorry, I couldn't generate a response. Please try again.";
       if (response.data?.session_id) setActiveSessionId(response.data.session_id);
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: reply }]);
+      const replyId = Date.now() + 1;
+      setMessages(prev => [...prev, { id: replyId, role: 'assistant', content: reply }]);
+      startStreaming(replyId, reply);
       // Refresh session list so the new session appears.
       axiosInstance.get('/uniguide/chat/')
         .then((res) => setSessions(Array.isArray(res.data) ? res.data : []))
@@ -233,26 +298,39 @@ export default function UniGuideAIPage() {
               </motion.div>
             ) : (
               <div className="ug-ai-messages-list">
-                {messages.map((msg) => (
-                  <motion.div
-                    key={msg.id}
-                    className={`ug-ai-msg ${msg.role === 'user' ? 'ug-ai-msg-user' : 'ug-ai-msg-assistant'}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    {msg.role === 'assistant' && (
-                      <div className="ug-ai-msg-avatar">
-                        <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
-                          <circle cx="16" cy="16" r="14" stroke="#D4AF67" strokeWidth="1" />
-                          <circle cx="16" cy="16" r="4" fill="#D4AF67" />
-                        </svg>
-                      </div>
-                    )}
-                    <div className="ug-ai-msg-bubble">{msg.content}</div>
-                    {msg.role === 'user' && <Avatar name={userName} size="sm" />}
-                  </motion.div>
-                ))}
+                {messages.map((msg) => {
+                    const isStreaming = msg.role === 'assistant' && streamingId === msg.id;
+                    const bubbleClass = `ug-ai-msg-bubble ${isStreaming ? 'ug-ai-msg-bubble-streaming' : ''}`;
+                    return (
+                      <motion.div
+                        key={msg.id}
+                        className={`ug-ai-msg ${msg.role === 'user' ? 'ug-ai-msg-user' : 'ug-ai-msg-assistant'}`}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        {msg.role === 'assistant' && (
+                          <div className="ug-ai-msg-avatar">
+                            <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+                              <circle cx="16" cy="16" r="14" stroke="#D4AF67" strokeWidth="1" />
+                              <circle cx="16" cy="16" r="4" fill="#D4AF67" />
+                            </svg>
+                          </div>
+                        )}
+                        <div className={bubbleClass}>
+                          {msg.role === 'assistant' ? (
+                            <>
+                              <MarkdownMessage content={isStreaming ? msg.content.slice(0, shownLength) : msg.content} />
+                              {isStreaming && <span className="ug-ai-caret" />}
+                            </>
+                          ) : (
+                            msg.content
+                          )}
+                        </div>
+                        {msg.role === 'user' && <Avatar name={userName} size="sm" />}
+                      </motion.div>
+                    );
+                  })}
                 {loading && (
                   <motion.div className="ug-ai-msg ug-ai-msg-assistant" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     <div className="ug-ai-msg-avatar">
@@ -285,7 +363,7 @@ export default function UniGuideAIPage() {
               <button
                 className="ug-ai-send"
                 onClick={() => sendMessage()}
-                disabled={!input.trim() || loading}
+                disabled={!input.trim() || loading || !!streamingId}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>

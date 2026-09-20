@@ -8,6 +8,12 @@
   margin: 0 auto;
 }
 
+.journey-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
 .journey-header {
   display: flex;
   align-items: flex-end;
@@ -35,8 +41,12 @@
   gap: var(--space-5);
 }
 
-.journey-grid-2 {
-  grid-template-columns: 1fr 1fr;
+/* Status — readiness is the featured (primary) metric */
+.journey-status {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: var(--space-5);
+  align-items: stretch;
 }
 
 .journey-section {
@@ -75,6 +85,21 @@
 /* Readiness */
 .journey-readiness {
   padding: var(--space-5) !important;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.journey-readiness-primary {
+  border-color: var(--gold-border) !important;
+}
+
+.journey-readiness-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .journey-card-label {
@@ -90,13 +115,53 @@
   font-size: var(--text-3xl);
   font-weight: 800;
   color: var(--gold-deep);
-  margin: var(--space-2) 0;
+  margin: var(--space-1) 0;
+}
+
+.journey-readiness-value-sm {
+  font-size: var(--text-2xl);
+}
+
+.journey-readiness-how {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--gold-deep);
+  cursor: pointer;
+  padding: 2px 0;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.journey-readiness-how:hover {
+  color: var(--gold-champagne);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.journey-readiness-how:focus-visible {
+  outline: 2px solid var(--gold-champagne);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.journey-readiness-info {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+  background: var(--surface-inset);
+  border-left: 3px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .journey-card-note {
   font-size: var(--text-xs);
   color: var(--text-muted);
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 /* Goals */
@@ -112,36 +177,101 @@
 }
 
 /* Skills to develop */
-.journey-skill-dev {
+.journey-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-3);
+}
+
+.journey-skill-item {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.journey-skill-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.journey-skill-name::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-champagne);
+  flex-shrink: 0;
+}
+
+.journey-skill-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* AI guidance callout */
+.journey-ai-insight {
+  background: linear-gradient(180deg, var(--surface-card) 0%, var(--gold-50) 100%) !important;
+  border-color: var(--gold-border) !important;
+  border-left: 4px solid var(--gold-champagne) !important;
+  padding: var(--space-5) !important;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.journey-skill-dev-item {
+.journey-ai-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
   flex-wrap: wrap;
 }
 
-.journey-skill-dev-reason {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+.journey-ai-label {
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gold-deep);
 }
 
-/* AI insight */
-.journey-ai-insight {
-  background: linear-gradient(135deg, var(--surface-card) 0%, var(--gold-50) 100%) !important;
-  border-color: var(--gold-border) !important;
-  padding: var(--space-5) !important;
+.journey-ai-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
 }
 
 .journey-ai-insight p {
   font-size: var(--text-sm);
   color: var(--text-secondary);
-  margin: var(--space-3) 0;
+  margin: 0;
   line-height: var(--leading-relaxed);
+}
+
+.journey-ai-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.journey-arrow {
+  display: inline-block;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.journey-ai-actions .ug-btn:hover .journey-arrow,
+.journey-ai-actions .ug-btn:focus-visible .journey-arrow {
+  transform: translateX(3px);
 }
 
 /* Opportunities */
@@ -241,7 +371,7 @@
 }
 
 @media (max-width: 768px) {
-  .journey-grid-2 { grid-template-columns: 1fr; }
+  .journey-status { grid-template-columns: 1fr; }
   .journey-header { flex-direction: column; align-items: flex-start; }
   .journey-page { padding: var(--space-6) var(--space-4); }
 }

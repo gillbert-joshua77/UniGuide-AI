@@ -27,7 +27,7 @@ export default function PageLayout({ children, className = '' }) {
           <div className="ug-footer-copy">&copy; {new Date().getFullYear()} UniGuide AI. All rights reserved.</div>
           <div className="ug-footer-links">
             <a href="/about">About</a>
-            <a href="/home">Home</a>
+            <a href="/">Home</a>
           </div>
         </div>
       </footer>

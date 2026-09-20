@@ -15,11 +15,30 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ready, setReady] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(() =>
+    Boolean(localStorage.getItem("accessToken"))
+  );
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTarget, setAuthModalTarget] = useState(null);
 
   const hasToken = useCallback(
     () => Boolean(localStorage.getItem("accessToken")),
     []
   );
+
+  const openAuthModal = useCallback(
+    (target) => {
+      if (isAuthed) return;
+      setAuthModalTarget(target || null);
+      setAuthModalOpen(true);
+    },
+    [isAuthed]
+  );
+
+  const closeAuthModal = useCallback(() => {
+    setAuthModalOpen(false);
+    setAuthModalTarget(null);
+  }, []);
 
   const loadSaved = useCallback(async () => {
     try {
@@ -48,6 +67,7 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // Never fall back to fake/demo data — surface the error instead.
       setProfile(null);
+      setIsAuthed(false);
       setError(
         e?.response?.data?.detail ||
           e?.response?.data?.error ||
@@ -64,6 +84,16 @@ export function AuthProvider({ children }) {
     loadProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const login = useCallback(
+    async (tokens) => {
+      localStorage.setItem("accessToken", tokens.access_token);
+      localStorage.setItem("refreshToken", tokens.refresh_token);
+      setIsAuthed(true);
+      await loadProfile().catch(() => {});
+    },
+    [loadProfile]
+  );
 
   const updateProfile = useCallback(
     async (payload) => {
@@ -131,7 +161,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("uniguide_user_email");
     setProfile(null);
     setSavedOpportunities([]);
-    window.location.assign("/login");
+    setIsAuthed(false);
+    window.location.assign("/");
   }, []);
 
   const value = {
@@ -148,7 +179,12 @@ export function AuthProvider({ children }) {
     loading,
     error,
     ready,
-    isAuthenticated: Boolean(localStorage.getItem("accessToken")),
+    isAuthenticated: isAuthed,
+    login,
+    authModalOpen,
+    authModalTarget,
+    openAuthModal,
+    closeAuthModal,
     loadProfile,
     updateProfile,
     addSkill,

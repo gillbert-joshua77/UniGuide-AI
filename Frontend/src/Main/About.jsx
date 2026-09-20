@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PageLayout from '../Components/layout/PageLayout';
 import GuidanceCore from '../Components/three/GuidanceCore';
 import { Button, Card, Badge } from '../Components/ui';
+import { useAuth } from '../Context/AuthContext';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/About.css';
 
@@ -23,6 +23,8 @@ const team = [
 ];
 
 export default function About() {
+  const { openAuthModal } = useAuth();
+
   return (
     <PageLayout>
       {/* Hero */}
@@ -122,7 +124,7 @@ export default function About() {
           <motion.div className="home-cta-card" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
             <h2 className="home-cta-title">Start your guided journey today</h2>
             <p className="home-cta-desc">Experience the future of student guidance.</p>
-            <Link to="/"><Button variant="gold" size="lg">Get Started</Button></Link>
+            <Button variant="gold" size="lg" onClick={() => openAuthModal('/guidance')}>Get Started</Button>
           </motion.div>
         </div>
       </section>

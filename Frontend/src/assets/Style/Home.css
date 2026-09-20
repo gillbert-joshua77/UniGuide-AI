@@ -52,6 +52,9 @@
   padding-top: var(--space-2);
 }
 
+/* Dark theme — hero paragraph contrast */
+[data-theme="dark"] .home-hero-desc { color: var(--text-emphasis); }
+
 /* Hero visual */
 .home-hero-visual {
   position: relative;

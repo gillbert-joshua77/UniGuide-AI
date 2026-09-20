@@ -1,0 +1,64 @@
+.ug-auth-modal {
+  max-width: 440px;
+}
+
+.ug-auth-modal-head {
+  text-align: center;
+  padding-bottom: var(--space-4);
+}
+
+.ug-auth-modal-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.ug-auth-modal-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ug-auth-modal-subtitle {
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.ug-auth-modal-tabs {
+  margin-bottom: var(--space-5);
+}
+
+.ug-auth-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ug-auth-modal-terms {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  margin-top: var(--space-4);
+}
+
+.ug-auth-modal-terms a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: var(--text-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.auth-link-btn:hover {
+  text-decoration: underline;
+}

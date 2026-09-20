@@ -6,7 +6,7 @@ import { useAuth } from '../Context/AuthContext';
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { loadProfile } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const access = searchParams.get('access');
@@ -20,13 +20,11 @@ const AuthCallback = () => {
     }
 
     if (access && refresh) {
-      localStorage.setItem('accessToken', access);
-      localStorage.setItem('refreshToken', refresh);
       toast.success('Logged in successfully!');
-      loadProfile().catch(() => {});
-      navigate('/home');
+      login({ access_token: access, refresh_token: refresh }).catch(() => {});
+      navigate('/');
     }
-  }, [navigate, searchParams, loadProfile]);
+  }, [navigate, searchParams, login]);
 
   return <div>Completing login...</div>;
 };

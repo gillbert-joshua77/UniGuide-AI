@@ -1,0 +1,49 @@
+.ug-require {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.ug-require-card {
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-8) var(--space-6);
+}
+
+.ug-require-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--gold-border);
+  color: var(--gold-champagne);
+  margin-bottom: var(--space-4);
+}
+
+.ug-require-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ug-require-desc {
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  line-height: var(--leading-normal);
+}
+
+.ug-require-actions {
+  margin-top: var(--space-5);
+  display: flex;
+  justify-content: center;
+}

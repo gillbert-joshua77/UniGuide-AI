@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
 import { ThemeProvider } from './Context/ThemeContext';
@@ -30,7 +30,8 @@ import Opportunities from './Main/Opportunities';
 import Hackathon from './Main/Hackathon';
 import Itnews from './Main/Itnews';
 import MyJourney from './Main/MyJourney';
-import ProtectedRoute from './Authentication/ProtectRoute';
+import RequireAuth from './Authentication/RequireAuth';
+import AuthModal from './Components/AuthModal';
 
 const App = () => {
   return (
@@ -38,8 +39,11 @@ const App = () => {
       <AuthProvider>
         <Router>
           <ToastContainer />
+          <AuthModal />
           <Routes>
-            <Route path='/' element={<Register />} />
+            <Route path='/' element={<Home />} />
+            <Route path='/home' element={<Navigate to="/" replace />} />
+            <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
             <Route path='/otp/verify' element={<OtpForm />} />
             <Route path='/forgetpassword' element={<ForgetPassword />} />
@@ -47,14 +51,13 @@ const App = () => {
             <Route path='/password-reset-confirm/:uid/:token' element={<ResetPassword />} />
             <Route path='/auth/callback' element={<AuthCallback />} />
 
-            <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path='/settings' element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path='/guidance' element={<ProtectedRoute><UniGuideChat /></ProtectedRoute>} />
-            <Route path='/opportunities' element={<ProtectedRoute><Opportunities /></ProtectedRoute>} />
-            <Route path='/hackathon' element={<ProtectedRoute><Hackathon /></ProtectedRoute>} />
-            <Route path='/news' element={<ProtectedRoute><Itnews /></ProtectedRoute>} />
-            <Route path='/my-journey' element={<ProtectedRoute><MyJourney /></ProtectedRoute>} />
+            <Route path='/profile' element={<RequireAuth><Profile /></RequireAuth>} />
+            <Route path='/settings' element={<RequireAuth><Settings /></RequireAuth>} />
+            <Route path='/guidance' element={<RequireAuth><UniGuideChat /></RequireAuth>} />
+            <Route path='/opportunities' element={<RequireAuth><Opportunities /></RequireAuth>} />
+            <Route path='/hackathon' element={<RequireAuth><Hackathon /></RequireAuth>} />
+            <Route path='/news' element={<RequireAuth><Itnews /></RequireAuth>} />
+            <Route path='/my-journey' element={<RequireAuth><MyJourney /></RequireAuth>} />
           </Routes>
         </Router>
       </AuthProvider>

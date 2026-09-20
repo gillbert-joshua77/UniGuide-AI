@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PageLayout from '../Components/layout/PageLayout';
 import GuidanceCore from '../Components/three/GuidanceCore';
 import { Button, Card, Badge } from '../Components/ui';
+import { useAuth } from '../Context/AuthContext';
 import { fadeUp, staggerContainer, fadeIn, slideInLeft, slideInRight } from '../lib/motion';
 import '../assets/Style/Home.css';
 
@@ -23,6 +24,17 @@ const steps = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { isAuthenticated, openAuthModal } = useAuth();
+
+  const goProtected = (path) => {
+    if (isAuthenticated) {
+      navigate(path);
+    } else {
+      openAuthModal(path);
+    }
+  };
+
   return (
     <PageLayout>
       {/* Hero */}
@@ -39,7 +51,7 @@ export default function Home() {
               Personalized academic, career, and opportunity guidance powered by artificial intelligence.
             </motion.p>
             <motion.div className="home-hero-actions" variants={fadeUp} custom={3}>
-              <Link to="/guidance"><Button variant="primary" size="lg">Talk to UniGuide AI</Button></Link>
+              <Button variant="primary" size="lg" onClick={() => goProtected('/guidance')}>Talk to UniGuide AI</Button>
               <Link to="/about"><Button variant="secondary" size="lg">Explore UniGuide</Button></Link>
             </motion.div>
           </motion.div>
@@ -105,7 +117,7 @@ export default function Home() {
           <motion.div className="home-cta-card" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
             <h2 className="home-cta-title">Ready to discover your path?</h2>
             <p className="home-cta-desc">Join thousands of students making informed decisions about their future.</p>
-            <Link to="/"><Button variant="gold" size="lg">Get Started Free</Button></Link>
+            <Button variant="gold" size="lg" onClick={() => goProtected('/guidance')}>Get Started Free</Button>
           </motion.div>
         </div>
       </section>
