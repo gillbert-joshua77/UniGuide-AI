@@ -12,7 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Playwright artifacts
+test-results
+playwright-report
+
 # Environment variables
+# .env.[mode].local = local-only overrides (e.g. Playwright `.env.e2e.local`),
+# keep them out of Git. Tracked per-mode defaults live in `.env.[mode]`.
 .env
 .env.local
 .env.*.local

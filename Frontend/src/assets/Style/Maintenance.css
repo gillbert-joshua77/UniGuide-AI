@@ -1,0 +1,108 @@
+/* UniGuide AI — Maintenance page */
+
+.ug-maintenance {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background:
+    radial-gradient(circle at 15% 15%, var(--gold-100), transparent 45%),
+    radial-gradient(circle at 85% 85%, var(--ai-accent-soft), transparent 45%),
+    var(--surface-section);
+}
+
+.ug-maintenance-card {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-10) var(--space-8);
+}
+
+.ug-maintenance-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.ug-maintenance-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.ug-maintenance-brand-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.ug-maintenance-brand-name span {
+  color: var(--gold-champagne);
+}
+
+.ug-maintenance-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--gold-border);
+  color: var(--gold-deep);
+}
+
+.ug-maintenance-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+.ug-maintenance-text {
+  margin-top: var(--space-4);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+}
+
+.ug-maintenance-note {
+  margin-top: var(--space-3);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
+}
+
+.ug-maintenance-divider {
+  height: 1px;
+  margin: var(--space-8) auto var(--space-5);
+  max-width: 220px;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+}
+
+.ug-maintenance-footer {
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+}
+
+@media (max-width: 480px) {
+  .ug-maintenance-card {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .ug-maintenance-title {
+    font-size: var(--text-2xl);
+  }
+}

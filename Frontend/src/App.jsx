@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -32,8 +33,16 @@ import Itnews from './Main/Itnews';
 import MyJourney from './Main/MyJourney';
 import RequireAuth from './Authentication/RequireAuth';
 import AuthModal from './Components/AuthModal';
+import Maintenance from './Main/Maintenance';
+import { isMaintenanceModeEnabled } from './lib/maintenance';
 
 const App = () => {
+  // Global kill-switch: when enabled, every route (known, protected, or
+  // unknown) renders the maintenance page and no normal UI mounts.
+  if (isMaintenanceModeEnabled()) {
+    return <Maintenance />;
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
