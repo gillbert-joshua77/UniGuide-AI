@@ -1,0 +1,17 @@
+HISTORICAL / SUPERSEDED - Phase 0 discovery snapshot, retained for provenance only.
+This file is stale. It states "No Playwright tests/config found" and "Testing
+infrastructure: none", both of which Phase 1 disproved and superseded. Current
+QA guidance lives in INITIAL_FINDINGS.md, PROJECT_OVERVIEW.md, TEST_CASES.md,
+TEST_STRATEGY.md, and ENVIRONMENT_REQUIREMENTS.md. Do not use this file as
+current guidance.
+
+Discovered:
+- Frontend React+Vite, Backend Django+DRF+SimpleJWT, MySQL local, Postgres prod
+- Auth: JWT (access/refresh), token blacklist, email verification, password reset, change password, logout
+- Protected routes enforced via RequireAuth
+- APIs: students (profile/saved-opportunities/skills), uniguide (chat/news/hackathons), auth
+- axiosInstance handles 401 -> refresh and retries once
+- No Playwright tests/config found
+- Testing infrastructure: none (college project)
+- Routes: public + protected (profile/guidance/opportunities/hackathon/news/my-journey/settings)
+- Known issue areas mentioned: 401 after refresh, profile PUT 500 historically, saved opps 404 historically (need verification)
