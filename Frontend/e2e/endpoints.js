@@ -1,0 +1,17 @@
+export const loginEndpoint = /\/api\/v1\/auth\/login\/?$/
+export const registerEndpoint = /\/api\/v1\/auth\/register\/?$/
+export const otpVerifyEndpoint = /\/api\/v1\/auth\/otp\/verify\/?$/
+export const otpResendEndpoint = /\/api\/v1\/auth\/otp\/resend\/?$/
+export const resetPasswordEndpoint = /\/api\/v1\/auth\/password-reset\/?$/
+export const setNewPasswordEndpoint = /\/api\/v1\/auth\/set-new-password\/?$/
+export const changePasswordEndpoint = /\/api\/v1\/auth\/change-password\/?$/
+export const profileEndpoint = /\/api\/v1\/students\/profile\/?$/
+export const savedOpportunitiesEndpoint = /\/api\/v1\/students\/saved-opportunities\/?$/
+export const savedOpportunityDetailEndpoint = /\/api\/v1\/students\/saved-opportunities\/\d+\/?$/
+export const skillsAddEndpoint = /\/api\/v1\/students\/skills\/add\/?$/
+export const skillDetailEndpoint = /\/api\/v1\/students\/skills\/\d+\/?$/
+export const hackathonsEndpoint = /\/api\/v1\/uniguide\/hackathons\/?(?:\?.*)?$/
+export const newsEndpoint = /\/api\/v1\/uniguide\/news\/?(?:\?.*)?$/
+export const journeyEndpoint = /\/api\/v1\/students\/journey\/?$/
+export const chatListEndpoint = /\/api\/v1\/uniguide\/chat\/?(?:\?.*)?$/
+export const chatSessionEndpoint = /\/api\/v1\/uniguide\/chat\/sessions\/[^\/]+\/?$/
