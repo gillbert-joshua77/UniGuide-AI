@@ -23,6 +23,27 @@ function onTokenRefreshed(token) {
   pendingSubscribers = [];
 }
 
+// Wait for a fresh access token, starting the refresh if none is running.
+// Every caller subscribes BEFORE the refresh kicks off (or joins it while it
+// is in flight), so the requesting path can never miss its own flush and hang.
+function waitForTokenRefresh() {
+  return new Promise((resolve) => {
+    subscribeTokenRefresh(resolve);
+    if (!isRefreshing) {
+      isRefreshing = true;
+      refreshAccessToken()
+        .then((token) => {
+          isRefreshing = false;
+          onTokenRefreshed(token);
+        })
+        .catch(() => {
+          isRefreshing = false;
+          onTokenRefreshed(null);
+        });
+    }
+  });
+}
+
 function clearAuth() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
@@ -69,16 +90,9 @@ axiosInstance.interceptors.request.use(async (req) => {
       req.headers.Authorization = `Bearer ${accessToken}`;
       return req;
     }
-    // Expired: try to refresh before sending.
-    if (!isRefreshing) {
-      isRefreshing = true;
-      const newAccess = await refreshAccessToken();
-      isRefreshing = false;
-      onTokenRefreshed(newAccess);
-    }
-    const token = await new Promise((resolve) => {
-      subscribeTokenRefresh((t) => resolve(t));
-    });
+    // Expired: refresh before sending. The caller waits on the shared
+    // subscriber queue (see waitForTokenRefresh), so it always completes.
+    const token = await waitForTokenRefresh();
     if (token) req.headers.Authorization = `Bearer ${token}`;
   } catch {
     // Ignore — backend will respond 401 and the response interceptor handles it.
@@ -96,15 +110,9 @@ axiosInstance.interceptors.response.use(
     // Only attempt recovery for auth failures and avoid infinite loops.
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      if (!isRefreshing) {
-        isRefreshing = true;
-        const newAccess = await refreshAccessToken();
-        isRefreshing = false;
-        onTokenRefreshed(newAccess);
-      } else {
-        await new Promise((resolve) => subscribeTokenRefresh(() => resolve()));
-      }
-      const token = localStorage.getItem("accessToken");
+      // Whether this request starts the refresh or joins one in flight, it
+      // resolves with the refreshed token (or null if refresh failed).
+      const token = await waitForTokenRefresh();
       if (token) {
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return axiosInstance(originalRequest);
