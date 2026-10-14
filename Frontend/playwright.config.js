@@ -11,6 +11,9 @@ const MAINTENANCE_URL = `http://localhost:${MAINTENANCE_PORT}`
 export default defineConfig({
   testDir: './e2e',
   testMatch: '**/*.spec.js',
+  // Phase 4A real-stack specs live under e2e/integration and run via
+  // playwright.integration.config.js against the real backend — never here.
+  testIgnore: '**/integration/**',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -29,7 +32,7 @@ export default defineConfig({
     {
       // Regular application: maintenance disabled (`.env.e2e`).
       name: 'chromium',
-      testIgnore: '**/maintenance.spec.js',
+      testIgnore: ['**/maintenance.spec.js', '**/integration/**'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {
