@@ -96,7 +96,10 @@ class UniGuideChatView(APIView):
         try:
             service = GeminiService()
             system_instruction = build_system_instruction(request.user)
-            history = build_chat_history(session)
+            # Exclude the message we just persisted: it is delivered to
+            # Gemini as the new `message` argument below, so including it
+            # in the history would send the same user turn twice.
+            history = build_chat_history(session, exclude_id=user_msg.id)
             reply = service.generate_reply(message, history, system_instruction)
         except GeminiError as exc:
             _rollback_failed_message(session, user_msg, is_new_session)

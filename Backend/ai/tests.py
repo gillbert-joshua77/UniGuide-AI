@@ -24,11 +24,13 @@ SESSIONS_URL = '/api/v1/uniguide/chat/sessions/'
 class FakeGeminiService:
     last_system_instruction = None
     title_call_count = 0
+    reply_call_count = 0
 
     def __init__(self, *args, **kwargs):
         pass
 
     def generate_reply(self, message, history, system_instruction):
+        FakeGeminiService.reply_call_count += 1
         FakeGeminiService.last_system_instruction = system_instruction
         return f'Echo: {message}'
 
@@ -47,6 +49,25 @@ class TitleRaisingGeminiService(FakeGeminiService):
         raise GeminiError('title generation failed')
 
 
+class RecordingGeminiService(FakeGeminiService):
+    """Fake Gemini that records the exact inputs the view sends to it.
+
+    Lets a test inspect both the new user message (``message``) and the
+    conversation history built for that request.
+    """
+
+    captured_message = None
+    captured_history = None
+
+    def generate_reply(self, message, history, system_instruction):
+        FakeGeminiService.reply_call_count += 1
+        RecordingGeminiService.captured_message = message
+        RecordingGeminiService.captured_history = [
+            {'role': turn['role'], 'parts': list(turn['parts'])} for turn in history
+        ]
+        return f'Echo: {message}'
+
+
 def fake_failing_service():
     class FailingGeminiService:
         def __init__(self, *args, **kwargs):
@@ -63,6 +84,7 @@ class ChatAPITests(TestCase):
     def setUp(self):
         cache.clear()
         FakeGeminiService.title_call_count = 0
+        FakeGeminiService.reply_call_count = 0
         self.client = APIClient()
         self.user = User.objects.create_user(
             email='student@example.com',
@@ -81,10 +103,10 @@ class ChatAPITests(TestCase):
     def tearDown(self):
         cache.clear()
 
-    def _chat_patcher(self, fail=False):
+    def _chat_patcher(self, fail=False, service=FakeGeminiService):
         if fail:
             return patch('ai.views.GeminiService', fake_failing_service())
-        return patch('ai.views.GeminiService', FakeGeminiService)
+        return patch('ai.views.GeminiService', service)
 
     def test_chat_requires_authentication(self):
         self.client.force_authenticate(user=None)
@@ -100,7 +122,94 @@ class ChatAPITests(TestCase):
         session = ChatSession.objects.get(id=resp.data['session_id'])
         self.assertEqual(session.user, self.user)
         self.assertEqual(session.chat_messages.count(), 2)
+        self.assertEqual(
+            [m.role for m in session.chat_messages.order_by('timestamp')],
+            ['user', 'assistant'],
+        )
+        # Intended behavior: on the first exchange the AI-generated title
+        # replaces the provisional truncated first message ('hello').
+        self.assertEqual(session.title, 'Smart title')
+        self.assertNotEqual(session.title, 'hello')
+        self.assertEqual(resp.data['title'], 'Smart title')
+        # A single user turn must not fan out into duplicate Gemini
+        # generation calls: exactly one reply and one title request.
+        self.assertEqual(FakeGeminiService.reply_call_count, 1)
+        self.assertEqual(FakeGeminiService.title_call_count, 1)
+
+    def test_smart_title_falls_back_to_first_message_when_unavailable(self):
+        # generate_title returning None must never break the chat; the
+        # truncated first message remains as the session title.
+        with self._chat_patcher(service=TitleFallbackGeminiService):
+            resp = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        session = ChatSession.objects.get(id=resp.data['session_id'])
         self.assertEqual(session.title, 'hello')
+        self.assertEqual(resp.data['title'], 'hello')
+        self.assertEqual(session.chat_messages.count(), 2)
+        self.assertEqual(FakeGeminiService.reply_call_count, 1)
+
+    def test_smart_title_failure_does_not_break_chat(self):
+        # A raising title generator is swallowed; the reply is still saved
+        # and the fallback title is kept.
+        with self._chat_patcher(service=TitleRaisingGeminiService):
+            resp = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        session = ChatSession.objects.get(id=resp.data['session_id'])
+        self.assertEqual(session.title, 'hello')
+        self.assertEqual(resp.data['reply'], 'Echo: hello')
+        self.assertEqual(session.chat_messages.count(), 2)
+
+    def test_title_generation_runs_once_for_the_first_exchange_only(self):
+        with self._chat_patcher():
+            first = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+            session_id = first.data['session_id']
+            self.assertEqual(FakeGeminiService.title_call_count, 1)
+            second = self.client.post(
+                CHAT_URL, {'message': 'follow up', 'session_id': session_id}, format='json'
+            )
+        self.assertEqual(second.status_code, 200, second.data)
+        self.assertEqual(second.data['session_id'], session_id)
+        # Later turns reuse the stored title; no extra title generation.
+        self.assertEqual(FakeGeminiService.title_call_count, 1)
+        # One reply request per turn, never twice for the same turn.
+        self.assertEqual(FakeGeminiService.reply_call_count, 2)
+        self.assertEqual(ChatSession.objects.get(id=session_id).title, 'Smart title')
+
+    def test_first_turn_history_excludes_current_message(self):
+        # The just-sent user message is delivered to Gemini as the new
+        # message argument, never duplicated a second time inside history.
+        with self._chat_patcher(service=RecordingGeminiService):
+            resp = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        self.assertEqual(RecordingGeminiService.captured_message, 'hello')
+        self.assertEqual(RecordingGeminiService.captured_history, [])
+
+    def test_continued_turn_history_has_no_duplicate_user_message(self):
+        with self._chat_patcher(service=RecordingGeminiService):
+            first = self.client.post(CHAT_URL, {'message': 'hello'}, format='json')
+            session_id = first.data['session_id']
+            second = self.client.post(
+                CHAT_URL, {'message': 'follow up', 'session_id': session_id}, format='json'
+            )
+        self.assertEqual(second.status_code, 200, second.data)
+        history = RecordingGeminiService.captured_history
+        self.assertEqual(RecordingGeminiService.captured_message, 'follow up')
+        # The current user turn must not also be present inside the history.
+        user_turns = [
+            part
+            for turn in history
+            if turn['role'] == 'user'
+            for part in turn['parts']
+        ]
+        self.assertNotIn('follow up', user_turns)
+        # Only the prior exchange is replayed, ending on the model turn.
+        self.assertEqual(
+            history,
+            [
+                {'role': 'user', 'parts': ['hello']},
+                {'role': 'model', 'parts': ['Echo: hello']},
+            ],
+        )
 
     def test_continue_same_session_single_session_created(self):
         with self._chat_patcher():
@@ -328,3 +437,14 @@ class ContextBuilderTests(TestCase):
             ['user', 'model', 'user'],
         )
         self.assertEqual(history[1]['parts'], ['hi there'])
+
+    def test_chat_history_can_exclude_the_newest_message(self):
+        session = ChatSession.objects.create(user=self.user, title='Test')
+        ChatMessage.objects.create(session=session, role='user', content='hello')
+        ChatMessage.objects.create(session=session, role='assistant', content='hi there')
+        newest = ChatMessage.objects.create(session=session, role='user', content='more')
+
+        history = build_chat_history(session, exclude_id=newest.id)
+
+        self.assertEqual([m['role'] for m in history], ['user', 'model'])
+        self.assertEqual(history[-1]['parts'], ['hi there'])

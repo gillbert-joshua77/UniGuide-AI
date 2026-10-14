@@ -6,9 +6,18 @@ from .models import Skill, Application, StudentProfile, SavedOpportunity
 class ProfilePictureField(serializers.ImageField):
     """Writable image field that:
     - accepts a real file upload (multipart PUT),
-    - ignores plain-string echoes of the current URL (JSON PUT of the form),
+    - ignores null and plain-string echoes of the current URL (JSON PUT of
+      the form), so a later form save never wipes the stored picture,
     - returns an absolute URL in the response.
     """
+
+    def run_validation(self, data=serializers.empty):
+        # allow_null=True makes DRF short-circuit None before
+        # to_internal_value, which would store None and clear the picture.
+        # Treat null like a missing value so the avatar is preserved.
+        if data is None:
+            raise serializers.SkipField()
+        return super().run_validation(data)
 
     def to_internal_value(self, data):
         if data is None or isinstance(data, str):
