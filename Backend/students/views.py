@@ -110,6 +110,25 @@ class SkillDetailView(APIView):
 
 # ─── Saved opportunities ─────────────────────────────────────────────
 
+
+def _normalize_opportunity_id(value):
+    """Coerce a client-supplied opportunity id to its string form, or None.
+
+    Only non-empty strings and integers are accepted. Booleans (an int
+    subclass), floats, and container types are rejected so arbitrary
+    objects are never silently turned into valid ids and stored as junk.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+    elif isinstance(value, int):
+        value = str(value)
+    else:
+        return None
+    return value or None
+
+
 class SavedOpportunityListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -121,13 +140,23 @@ class SavedOpportunityListCreateView(APIView):
         )
 
     def post(self, request):
-        # Avoid storing a duplicate opportunity for the same user.
-        opportunity_id = (request.data.get('opportunity_id') or '').strip()
-        if not opportunity_id:
-            return Response(
-                {"error": "opportunity_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
+        # Normalize the external id before any string operations so numeric
+        # ids (from the Devpost proxy, "27282") and string ids both work and
+        # no type can crash the dedup lookup below.
+        raw_id = request.data.get('opportunity_id')
+        opportunity_id = _normalize_opportunity_id(raw_id)
+        if opportunity_id is None:
+            # Blank/missing ids keep the original "required" contract;
+            # unsupported types get a distinct client error.
+            is_blank = raw_id is None or (isinstance(raw_id, str) and not raw_id.strip())
+            error = (
+                "opportunity_id is required"
+                if is_blank
+                else "opportunity_id must be a non-empty string or integer"
             )
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Avoid storing a duplicate opportunity for the same user.
         existing = SavedOpportunity.objects.filter(
             user=request.user, opportunity_id=opportunity_id
         ).first()
@@ -138,7 +167,8 @@ class SavedOpportunityListCreateView(APIView):
             )
 
         serializer = SavedOpportunitySerializer(
-            data=request.data, context={'request': request}
+            data={**request.data, 'opportunity_id': opportunity_id},
+            context={'request': request},
         )
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

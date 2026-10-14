@@ -709,16 +709,20 @@ def build_system_instruction(user, today_date=None):
     )
 
 
-def build_chat_history(session, max_messages=MAX_HISTORY_MESSAGES):
+def build_chat_history(session, max_messages=MAX_HISTORY_MESSAGES, exclude_id=None):
     """Return the recent chat messages of a session in Gemini history format.
 
     History ends with the last assistant message (a model turn), so the
     next send_message() appends the new user message without duplication.
+    Pass ``exclude_id`` (the just-persisted user turn) to omit that message
+    from the history, so a caller that sends it separately via
+    send_message() never delivers it to Gemini twice.
     Returns an empty list when there is no prior history.
     """
-    messages = list(
-        session.chat_messages.order_by('-timestamp')[:max_messages]
-    )
+    queryset = session.chat_messages.order_by('-timestamp')
+    if exclude_id is not None:
+        queryset = queryset.exclude(id=exclude_id)
+    messages = list(queryset[:max_messages])
     messages.reverse()
 
     history = []
