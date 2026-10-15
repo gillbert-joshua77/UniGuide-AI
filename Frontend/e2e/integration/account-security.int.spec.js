@@ -340,6 +340,63 @@ test.describe('real stack: account security', () => {
     expect(refresh.status()).toBe(200)
   })
 
+  // ─── Phase 4F.2: configured password-validator rejections ───────
+  test('P7: a common password is rejected by the server with 400', async ({
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const res = await changePasswordViaApi(request, user, {
+      old_password: user.password,
+      new_password: 'password123',
+      confirm_password: 'password123',
+    })
+    expect(res.status()).toBe(400)
+    expect(typeof (await res.json()).error).toBe('string')
+
+    // The original password still authenticates after the rejection.
+    const login = await request.post(`${API_BASE}/auth/login/`, {
+      data: { email: user.email, password: user.password },
+    })
+    expect(login.status()).toBe(200)
+  })
+
+  test('P8: a numeric-only password is rejected by the server with 400', async ({
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const res = await changePasswordViaApi(request, user, {
+      old_password: user.password,
+      new_password: '12345678',
+      confirm_password: '12345678',
+    })
+    expect(res.status()).toBe(400)
+    expect(typeof (await res.json()).error).toBe('string')
+
+    const login = await request.post(`${API_BASE}/auth/login/`, {
+      data: { email: user.email, password: user.password },
+    })
+    expect(login.status()).toBe(200)
+  })
+
+  test('P9: a password too similar to the account email is rejected with 400', async ({
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const similar = user.email.split('@')[0]
+    const res = await changePasswordViaApi(request, user, {
+      old_password: user.password,
+      new_password: similar,
+      confirm_password: similar,
+    })
+    expect(res.status()).toBe(400)
+    expect(typeof (await res.json()).error).toBe('string')
+
+    const login = await request.post(`${API_BASE}/auth/login/`, {
+      data: { email: user.email, password: user.password },
+    })
+    expect(login.status()).toBe(200)
+  })
+
   // ─── Logout and token security ──────────────────────────────────
   test('L1: UI logout calls the logout endpoint, clears storage, and revokes the refresh token', async ({
     page,
