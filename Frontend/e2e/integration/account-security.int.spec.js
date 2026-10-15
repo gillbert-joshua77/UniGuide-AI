@@ -341,18 +341,101 @@ test.describe('real stack: account security', () => {
   })
 
   // ─── Logout and token security ──────────────────────────────────
-  test('L1: UI logout clears storage, returns home, and makes no logout API call', async ({
+  test('L1: UI logout calls the logout endpoint, clears storage, and revokes the refresh token', async ({
+    page,
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const logoutRequests = []
+    const logoutStatuses = []
+    page.on('request', (req) => {
+      if (req.url().includes('/auth/logout/')) logoutRequests.push(req)
+    })
+    page.on('response', (res) => {
+      if (res.url().includes('/auth/logout/')) logoutStatuses.push(res.status())
+    })
+
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await loginViaUI(page, user)
+
+    // loginViaUI performs its own login, so the session the UI holds (and will
+    // revoke) is the one stored in localStorage, not the provisioning token.
+    const uiRefreshToken = await page.evaluate(() =>
+      localStorage.getItem('refreshToken')
+    )
+    expect(uiRefreshToken).toBeTruthy()
+
+    await page.locator('.profile-btn').click()
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === '/'),
+      page.getByRole('menuitem', { name: 'Log Out' }).click(),
+    ])
+
+    await expect(page.locator('.nav-username')).toHaveText('Sign In')
+
+    const state = await readAuthState(page)
+    for (const key of AUTH_KEYS) expect(state[key]).toBeNull()
+
+    // The UI actually asked the backend to revoke the refresh token, authorised
+    // by the access token, and the server accepted it.
+    expect(logoutRequests).toHaveLength(1)
+    const body = JSON.parse(logoutRequests[0].postData() || '{}')
+    expect(body.refresh_token).toBe(uiRefreshToken)
+    expect(logoutRequests[0].headers()['authorization']).toMatch(/^Bearer /)
+    expect(logoutStatuses).toContain(200)
+
+    // The blacklisted refresh token can no longer mint access tokens.
+    const refresh = await refreshViaApi(request, uiRefreshToken)
+    expect(refresh.status()).toBe(401)
+  })
+
+  test('I1: a rejected logout API call still signs out locally', async ({
+    page,
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const logoutStatuses = []
+    page.on('response', (res) => {
+      if (res.url().includes('/auth/logout/')) logoutStatuses.push(res.status())
+    })
+
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await loginViaUI(page, user)
+
+    // Keep the valid access token but make the refresh token invalid, so the
+    // server rejects the revoke with 400.
+    await page.evaluate(() =>
+      localStorage.setItem('refreshToken', 'invalid-refresh-token')
+    )
+
+    await page.locator('.profile-btn').click()
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === '/'),
+      page.getByRole('menuitem', { name: 'Log Out' }).click(),
+    ])
+
+    await expect(page.locator('.nav-username')).toHaveText('Sign In')
+
+    const state = await readAuthState(page)
+    for (const key of AUTH_KEYS) expect(state[key]).toBeNull()
+
+    expect(logoutStatuses).toContain(400)
+  })
+
+  test('I2: logout without a refresh token makes no API call but still signs out', async ({
     page,
     request,
   }) => {
     const user = await provisionUser(request)
     const logoutCalls = []
     page.on('request', (req) => {
-      if (req.url().includes('/auth/logout/')) logoutCalls.push(1)
+      if (req.url().includes('/auth/logout/')) logoutCalls.push(req.url())
     })
 
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
     await loginViaUI(page, user)
+
+    await page.evaluate(() => localStorage.removeItem('refreshToken'))
 
     await page.locator('.profile-btn').click()
     await Promise.all([
@@ -366,6 +449,38 @@ test.describe('real stack: account security', () => {
     for (const key of AUTH_KEYS) expect(state[key]).toBeNull()
 
     expect(logoutCalls).toHaveLength(0)
+  })
+
+  test('I3: rapid repeated logout clicks send at most one request', async ({
+    page,
+    request,
+  }) => {
+    const user = await provisionUser(request)
+    const logoutCalls = []
+    page.on('request', (req) => {
+      if (req.url().includes('/auth/logout/')) logoutCalls.push(req.url())
+    })
+
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await loginViaUI(page, user)
+
+    await page.locator('.profile-btn').click()
+    await page.getByRole('menuitem', { name: 'Log Out' }).waitFor()
+
+    // Dispatch two clicks in the same task, before React re-renders and removes
+    // the menu, exercising the duplicate-request guard.
+    await page.evaluate(() => {
+      const logoutBtn = [...document.querySelectorAll('[role="menuitem"]')].find(
+        (el) => el.textContent.trim() === 'Log Out'
+      )
+      logoutBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      logoutBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    })
+
+    await page.waitForURL((url) => url.pathname === '/')
+    await expect(page.locator('.nav-username')).toHaveText('Sign In')
+
+    expect(logoutCalls).toHaveLength(1)
   })
 
   test('L2: API logout blacklists the refresh token', async ({ request }) => {

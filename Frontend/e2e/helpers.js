@@ -5,6 +5,7 @@ import {
   hackathonsEndpoint,
   journeyEndpoint,
   loginEndpoint,
+  logoutEndpoint,
   newsEndpoint,
   otpResendEndpoint,
   otpVerifyEndpoint,
@@ -81,6 +82,9 @@ export async function mockLoginSuccess(context, { user = {}, saved = [] } = {}) 
       ...user,
     })
   )
+  // Logout now revokes the refresh token server-side; keep the mocked suite
+  // deterministic instead of depending on a live backend.
+  await context.route(logoutEndpoint, (route) => fulfill(route, 200, {}))
   await mockProfile(context, { user, saved })
 }
 

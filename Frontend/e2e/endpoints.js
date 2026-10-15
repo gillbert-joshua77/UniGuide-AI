@@ -5,6 +5,7 @@ export const otpResendEndpoint = /\/api\/v1\/auth\/otp\/resend\/?$/
 export const resetPasswordEndpoint = /\/api\/v1\/auth\/password-reset\/?$/
 export const setNewPasswordEndpoint = /\/api\/v1\/auth\/set-new-password\/?$/
 export const changePasswordEndpoint = /\/api\/v1\/auth\/change-password\/?$/
+export const logoutEndpoint = /\/api\/v1\/auth\/logout\/?$/
 export const profileEndpoint = /\/api\/v1\/students\/profile\/?$/
 export const savedOpportunitiesEndpoint = /\/api\/v1\/students\/saved-opportunities\/?$/
 export const savedOpportunityDetailEndpoint = /\/api\/v1\/students\/saved-opportunities\/\d+\/?$/
