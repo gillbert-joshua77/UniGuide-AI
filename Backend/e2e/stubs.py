@@ -9,6 +9,8 @@ the real backend normalization without ever contacting Devpost.
 """
 import json
 
+from ai.services.gemini_client import GeminiError
+
 # Local, unreachable sentinels. ``ai.views`` uses these constants to build the
 # upstream URL; because the whole ``requests`` module is replaced below, no
 # network call is ever made. The path fragments are what ``FakeRequests``
@@ -72,14 +74,38 @@ _HACKATHONS = [
 ]
 
 
+# Any message containing this sentinel makes the fake provider behave like an
+# unavailable Gemini: ``generate_reply`` raises the real ``GeminiError`` so the
+# genuine 502 + rollback path in ``ai.views`` is exercised. Test-only.
+FAILURE_SENTINEL = '__e2e_gemini_failure__'
+
+
 class FakeGeminiService:
-    """Stand-in for ``ai.services.gemini_client.GeminiService``."""
+    """Stand-in for ``ai.services.gemini_client.GeminiService``.
+
+    The reply is a deterministic, parseable function of the exact inputs the
+    view passes in, so an integration test can assert both the rendered answer
+    and (via ``history_turns``/``repeated_current``) that the just-sent user
+    turn was not duplicated inside the conversation history.
+    """
 
     def __init__(self, *args, **kwargs):
         pass
 
     def generate_reply(self, message, history, system_instruction):
-        return 'Deterministic E2E reply from the fake Gemini service.'
+        if FAILURE_SENTINEL in (message or ''):
+            raise GeminiError('E2E injected Gemini failure')
+
+        history = history or []
+        history_parts = [
+            part for turn in history for part in turn.get('parts', [])
+        ]
+        repeated = message in history_parts
+        return (
+            f'E2E test answer to "{message}". '
+            f'[history_turns={len(history)} '
+            f'repeated_current={str(repeated).lower()}]'
+        )
 
     def generate_guided_question(self, prompt):
         return json.dumps({'status': 'complete', 'question': None})

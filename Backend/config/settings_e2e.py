@@ -19,6 +19,15 @@ from .settings import BASE_DIR, env  # noqa: F401
 DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
+# ─── Chat rate limiting (test-only) ────────────────────────────────
+# Integration tests send several real chat messages per user in quick
+# succession, so the production 3s minimum gap is disabled here to keep the
+# suite deterministic and fast. The per-user max-message quota is left at a
+# high value for the same reason. Production settings are untouched; the
+# min-gap/quota behavior remains covered by ai/tests.py.
+CHAT_MIN_GAP_SECONDS = 0
+CHAT_MAX_MESSAGES = 1000
+
 # ─── Isolated test database ────────────────────────────────────────
 # Explicit, hard-coded local test target. No OPTIONS.ssl here: the normal
 # dev MySQL fallback points at a certs/ca.pem that does not exist in this
