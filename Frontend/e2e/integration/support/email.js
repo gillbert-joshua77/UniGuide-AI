@@ -59,6 +59,31 @@ export function readLatestEmail(predicate = () => true) {
   return null
 }
 
+// Extracts the { uid, token } pair from the password-reset link in the most
+// recent captured email for `email`. Delivery is asynchronous, so it polls
+// within a bounded window. The returned values are never logged.
+export async function readResetLinkFor(email, { timeout = 20_000 } = {}) {
+  const target = email.toLowerCase()
+  const deadline = Date.now() + timeout
+  while (Date.now() < deadline) {
+    const message = readLatestEmail(
+      ({ to, decoded }) =>
+        to.toLowerCase().includes(target) &&
+        /password-reset-confirm/i.test(decoded)
+    )
+    if (message) {
+      const match = message.decoded.match(
+        /\/password-reset-confirm\/([A-Za-z0-9_=-]+)\/([A-Za-z0-9_=-]+)\/?/
+      )
+      if (match) {
+        return { uid: match[1], token: match[2] }
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250))
+  }
+  throw new Error(`Timed out waiting for a password-reset email for ${email}`)
+}
+
 // Reads the 6-digit OTP sent to `email` from the file-based email backend.
 export function readOtpFor(email) {
   const target = email.toLowerCase()
