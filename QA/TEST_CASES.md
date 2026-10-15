@@ -55,13 +55,16 @@
 | C8 | Set password mismatch / <8 chars | API | `password != confirm_password` / 7 chars | 401 (currently `AuthenticationFailed` → 401 rather than 400) — assert actual | NEW |
 | C9 | Set password with garbage uid/token | API | `uidb64='!!'` | 401 `"Token is invalid or expired"` | GREEN (verified) |
 | C10 | Change password wrong old | API | wrong `old_password` | 400 `"Current password is incorrect"` | GREEN (verified) |
-| C11 | Change password new==old / mismatch / <8 | API | edge inputs | 400 each | NEW |
-| C12 | Change password invalidates old sessions | API | change password, then use pre-change refresh token | document: SimpleJWT without rotation → refresh still valid until 1-day expiry (**expected 200 today**) | NEW (risk) |
+| C11 | Change password mismatch / <8 / missing fields | API | edge inputs | 400 each; exact messages preserved (`"New passwords do not match"`, `"New password must be at least 8 characters"`, `"old_password, new_password and confirm_password are required"`) | GREEN (verified 4F.2) |
+| C12 | Change password invalidates old sessions | API | change password, then use pre-change access/refresh token | **Phase 4F.2 decision: token behavior intentionally unchanged** — pre-change access AND refresh tokens stay valid (access ≤60 min, refresh ≤1 day). **Residual risk**; token lifecycle (rotation/blacklisting on password change) deferred to Phase 4F.3. Pinned by `authentication/tests.py::ChangePasswordAPITests::test_existing_tokens_remain_valid_after_password_change` | GREEN (documented risk, 4F.2) |
 | C13 | **Logout blacklists refresh token** | API | POST `auth/logout/` with refresh | 200; subsequent `auth/token/refresh/` with same token → 401 | NEW |
 | C14 | **E2E logout never calls backend logout** | E2E | click logout, capture network | today: **no** `POST /auth/logout/` request; token remains valid → `AuthContext.logout()` (AuthContext.jsx:157-166) only clears localStorage | **CONFIRMED (code)** |
 | C15 | E2E logout clears storage and redirects `/` | E2E | logout | localStorage cleared, navbar shows login CTA | NEW |
 | C16 | Refresh with blacklisted/expired token | API | POST `auth/token/refresh/` bad token | 401 | NEW |
 | C17 | E2E reset UI `/forgetpassword` → `/password-reset-confirm/:uid/:token` → login with new password | E2E | with mail body captured by a stub | completes end-to-end | NEW |
+| C18 | Change password rejects configured-validator passwords | API | `new_password` common (`password123`), numeric-only (`12345678`), or similar to email/first name | 400 `{"error": "<validator message>"}` (Django `AUTH_PASSWORD_VALIDATORS` run via `validate_password(new_password, user)`); password unchanged | GREEN (verified 4F.2) |
+
+> **Phase 4F.2 (Secure Password Changes) scope:** `ChangePasswordView` now runs Django's configured `AUTH_PASSWORD_VALIDATORS` through `validate_password(new_password, user)` after the existing required-field, current-password, confirmation-match, and minimum-8-character checks. Existing 400 `{"error": ...}` responses are preserved. **Existing access and refresh tokens are intentionally left valid after a password change** (residual risk; Phase 4F.3 owns token lifecycle). Backend regression coverage: `Backend/authentication/tests.py`; integration coverage: `Frontend/e2e/integration/account-security.int.spec.js` P1–P9.
 
 ## D. Token refresh & axios interceptors (frontend)
 

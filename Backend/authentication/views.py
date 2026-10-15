@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated   # Permission 
 from django.utils.http import urlsafe_base64_decode   # Decode base64 user ID
 from django.utils.encoding import smart_str , DjangoUnicodeDecodeError   # Encoding utilities
 from django.contrib.auth.tokens import PasswordResetTokenGenerator   # Token generator for password reset
+from django.contrib.auth.password_validation import validate_password   # Run configured password validators
+from django.core.exceptions import ValidationError   # Raised by password validators
 
 
 # View to handle user registration
@@ -222,6 +224,14 @@ class ChangePasswordView(APIView):
         if len(new_password) < 8:
             return Response(
                 {'error': 'New password must be at least 8 characters'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(new_password, user)
+        except ValidationError as exc:
+            return Response(
+                {'error': ' '.join(exc.messages)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
