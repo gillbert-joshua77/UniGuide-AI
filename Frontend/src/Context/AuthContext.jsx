@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import axiosInstance from "../Utils/axiosInstance";
@@ -154,15 +155,44 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("uniguide_user_name");
-    localStorage.removeItem("uniguide_user_email");
-    setProfile(null);
-    setSavedOpportunities([]);
-    setIsAuthed(false);
-    window.location.assign("/");
+  const loggingOutRef = useRef(false);
+
+  const logout = useCallback(async () => {
+    // Guard against duplicate requests from repeated clicks.
+    if (loggingOutRef.current) return;
+    loggingOutRef.current = true;
+
+    // Read the refresh token BEFORE clearing storage or the request would be
+    // sent without (or against a blacklisted) credential.
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    // Bound the best-effort revoke so a stalled request can never block local
+    // sign-out.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    try {
+      if (refreshToken) {
+        await axiosInstance.post(
+          "/auth/logout/",
+          { refresh_token: refreshToken },
+          { signal: controller.signal }
+        );
+      }
+    } catch {
+      // Best-effort: a failed revoke must never block local sign-out. Errors
+      // (and tokens) are never logged.
+    } finally {
+      clearTimeout(timeout);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("uniguide_user_name");
+      localStorage.removeItem("uniguide_user_email");
+      setProfile(null);
+      setSavedOpportunities([]);
+      setIsAuthed(false);
+      window.location.assign("/");
+    }
   }, []);
 
   const value = {
