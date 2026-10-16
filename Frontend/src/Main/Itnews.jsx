@@ -262,7 +262,7 @@ export default function Itnews() {
                 )}
                 {rest.length > 0 && (
                   <div className="in-rows">
-                    {rest.map((a, i) => <NewsRow key={a.id} article={a} />)}
+                    {rest.map((a) => <NewsRow key={a.id} article={a} />)}
                   </div>
                 )}
                 {filtered.length === 0 && (

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 
 const AuthCallback = () => {
   const navigate = useNavigate();

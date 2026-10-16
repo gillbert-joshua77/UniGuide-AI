@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import PageLayout from '../Components/layout/PageLayout';
 import GuidanceCore from '../Components/three/GuidanceCore';
 import { Button, Card, Badge } from '../Components/ui';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/About.css';
 

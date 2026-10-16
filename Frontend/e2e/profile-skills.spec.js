@@ -23,13 +23,6 @@ function settingsInput(page, label) {
     .locator('input')
 }
 
-function settingsTextarea(page, label) {
-  return page
-    .locator('.ug-input-group')
-    .filter({ has: page.getByText(label, { exact: true }) })
-    .locator('textarea')
-}
-
 function settingsSelect(page, label) {
   return page
     .locator('.profile-edit-half')

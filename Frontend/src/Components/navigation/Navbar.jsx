@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useTheme } from '../../Context/ThemeContext'
-import { useAuth } from '../../Context/AuthContext'
+import { useTheme } from '../../Context/useTheme'
+import { useAuth } from '../../Context/useAuth'
 import '../../assets/Style/Navbar.css'
 import Logo from '../../assets/Image/UniGuide 1.png'
 

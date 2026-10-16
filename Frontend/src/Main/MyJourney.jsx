@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/axiosInstance';
 import PageLayout from '../Components/layout/PageLayout';
 import { Button, Card, Badge, Progress, Skeleton } from '../Components/ui';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Journey.css';
 

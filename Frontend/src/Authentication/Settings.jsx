@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import axiosInstance from '../Utils/axiosInstance';
 import PageLayout from '../Components/layout/PageLayout';
 import { Button, Card, Input, Textarea } from '../Components/ui';
-import { useAuth } from '../Context/AuthContext';
-import { useTheme } from '../Context/ThemeContext';
+import { useAuth } from '../Context/useAuth';
+import { useTheme } from '../Context/useTheme';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/Profile.css';
 

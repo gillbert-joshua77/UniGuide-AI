@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../Utils/axiosInstance';
 import { Button, Input } from '../Components/ui';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 import { fadeUp } from '../lib/motion';
 import '../assets/Style/Auth.css';
 
