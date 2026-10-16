@@ -22,6 +22,7 @@ const now = Math.floor(Date.now() / 1000);
 export const EXPIRED_TOKEN = makeJwt(now - 3600);
 export const VALID_TOKEN = makeJwt(now + 3600);
 export const NEW_ACCESS = "newAccessToken";
+export const NEW_REFRESH = "newRefreshToken";
 export const REFRESH_TOKEN = "refresh-token";
 
 // Rejects if `p` does not settle within `ms` — turns a hung promise into a
@@ -116,6 +117,23 @@ describe("axiosInstance token refresh", () => {
 
     expect(data.ok).toBe(true);
     expect(localStorage.getItem("accessToken")).toBe(NEW_ACCESS);
+    expect(baseMock.history.post.length).toBe(1);
+  });
+
+  it("persists the rotated refresh token returned by the refresh endpoint (4F.3)", async () => {
+    localStorage.setItem("accessToken", EXPIRED_TOKEN);
+    localStorage.setItem("refreshToken", REFRESH_TOKEN);
+    baseMock.onPost(REFRESH_RE).reply(200, { access: NEW_ACCESS, refresh: NEW_REFRESH });
+    instanceMock.onGet("/students/profile/").reply((config) => {
+      expect(config.headers.Authorization).toBe(`Bearer ${NEW_ACCESS}`);
+      return [200, { ok: true }];
+    });
+
+    const { data } = await withTimeout(axiosInstance.get("/students/profile/"));
+
+    expect(data.ok).toBe(true);
+    expect(localStorage.getItem("accessToken")).toBe(NEW_ACCESS);
+    expect(localStorage.getItem("refreshToken")).toBe(NEW_REFRESH);
     expect(baseMock.history.post.length).toBe(1);
   });
 

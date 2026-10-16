@@ -11,6 +11,10 @@ from django.utils.encoding import smart_str , DjangoUnicodeDecodeError   # Encod
 from django.contrib.auth.tokens import PasswordResetTokenGenerator   # Token generator for password reset
 from django.contrib.auth.password_validation import validate_password   # Run configured password validators
 from django.core.exceptions import ValidationError   # Raised by password validators
+from rest_framework_simplejwt.token_blacklist.models import (  # Phase 4F.3: blacklist tokens on password change
+    OutstandingToken,
+    BlacklistedToken,
+)
 
 
 # View to handle user registration
@@ -237,4 +241,14 @@ class ChangePasswordView(APIView):
 
         user.set_password(new_password)
         user.save()
+
+        # Phase 4F.3: invalidate all outstanding refresh tokens for this user so
+        # that pre-change sessions can no longer mint new access tokens.
+        # Already-issued access tokens remain valid for the remainder of their
+        # 60-minute lifetime (stateless JWTs cannot be revoked without a token-
+        # introspection layer; this is an accepted residual risk documented in
+        # TEST_CASES.md C12 and SIMPLE_JWT ACCESS_TOKEN_LIFETIME).
+        for outstanding in OutstandingToken.objects.filter(user=user):
+            BlacklistedToken.objects.get_or_create(token=outstanding)
+
         return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)

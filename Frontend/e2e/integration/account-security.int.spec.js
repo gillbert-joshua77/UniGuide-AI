@@ -317,7 +317,7 @@ test.describe('real stack: account security', () => {
     )
   })
 
-  test('P6: pre-change access and refresh tokens after a successful change', async ({
+  test('P6: pre-change refresh token is blacklisted; pre-change access token remains valid for its TTL', async ({
     request,
   }) => {
     const user = await provisionUser(request)
@@ -330,14 +330,45 @@ test.describe('real stack: account security', () => {
     })
     expect(change.status()).toBe(200)
 
-    // Record whether the pre-change tokens remain usable.
+    // Phase 4F.3: the pre-change refresh token must be blacklisted — it can no
+    // longer mint new access tokens.
+    const refresh = await refreshViaApi(request, user.refreshToken)
+    expect(refresh.status()).toBe(401)
+
+    // The pre-change access token still authorises the protected profile
+    // endpoint for the remainder of its 60-minute lifetime. Access tokens are
+    // stateless JWTs that cannot be revoked without a token-introspection
+    // layer. This is an accepted residual risk (see TEST_CASES.md C12).
     const profile = await request.get(`${API_BASE}/students/profile/`, {
       headers: authHeaders(user),
     })
-    const refresh = await refreshViaApi(request, user.refreshToken)
-
     expect(profile.status()).toBe(200)
-    expect(refresh.status()).toBe(200)
+  })
+
+  // ─── Phase 4F.3: refresh-token rotation ─────────────────────────
+  test('P10: used refresh token is blacklisted after rotation; new token is accepted', async ({
+    request,
+  }) => {
+    const user = await provisionUser(request)
+
+    // First refresh: must return both a new access token and a new refresh token.
+    const first = await refreshViaApi(request, user.refreshToken)
+    expect(first.status()).toBe(200)
+    const firstBody = await first.json()
+    expect(firstBody).toHaveProperty('access')
+    expect(firstBody).toHaveProperty('refresh')
+    expect(firstBody.access).toBeTruthy()
+    expect(firstBody.refresh).toBeTruthy()
+
+    // Replaying the original (now consumed) refresh token must be rejected.
+    const replay = await refreshViaApi(request, user.refreshToken)
+    expect(replay.status()).toBe(401)
+
+    // The newly-issued refresh token must be accepted for a further refresh.
+    const second = await refreshViaApi(request, firstBody.refresh)
+    expect(second.status()).toBe(200)
+    const secondBody = await second.json()
+    expect(secondBody.access).toBeTruthy()
   })
 
   // ─── Phase 4F.2: configured password-validator rejections ───────
