@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { useTheme } from '../Context/useTheme'
 import { useAuth } from '../Context/useAuth'
 import '../assets/Style/Navbar.css'
-import Logo from '../assets/Image/UniGuide 1.png'
+import Logo from '../assets/Image/UniGuide 1.webp'
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme()
