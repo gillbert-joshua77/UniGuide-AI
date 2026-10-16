@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import GuidanceCore from '../Components/three/GuidanceCore';
+import GuidanceCore from '../Components/three/LazyGuidanceCore';
 import GoogleOAuthButton from './SocialAuthentication';
 import LoginForm from './LoginForm';
 import { fadeUp, staggerContainer } from '../lib/motion';

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Logo from '../assets/Image/UniGuide 1.png';
+import Logo from '../assets/Image/UniGuide 1.webp';
 import '../assets/Style/Maintenance.css';
 
 const DESCRIPTION =
