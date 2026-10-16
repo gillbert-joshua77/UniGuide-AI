@@ -65,7 +65,9 @@ async function refreshAccessToken() {
       refresh: refreshToken,
     });
     const newAccess = res.data.access;
+    const newRefresh = res.data.refresh;   // Phase 4F.3: rotation issues a new refresh token
     localStorage.setItem("accessToken", newAccess);
+    if (newRefresh) localStorage.setItem("refreshToken", newRefresh);  // Phase 4F.3: persist rotated token
     return newAccess;
   } catch {
     clearAuth();

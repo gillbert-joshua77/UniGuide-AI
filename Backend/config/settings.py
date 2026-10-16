@@ -152,6 +152,11 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # Phase 4F.3: rotate refresh tokens on every use and blacklist the consumed
+    # token so that a stolen refresh token cannot be replayed after the
+    # legitimate user has refreshed once.
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
