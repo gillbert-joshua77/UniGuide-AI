@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { ThemeContext } from './useTheme'
 
 const THEME_STORAGE_KEY = 'uniguide_theme'
-
-const ThemeContext = createContext(null)
 
 const getInitialTheme = () => {
   try {
@@ -35,12 +34,4 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   )
-}
-
-export const useTheme = () => {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-  return ctx
 }

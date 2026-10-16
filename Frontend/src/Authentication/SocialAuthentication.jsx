@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/axiosInstance';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 
 const GoogleOAuthButton = ({ redirectPath = '/' }) => {
   const navigate = useNavigate();
   const btnContainerRef = useRef(null);
   const { login } = useAuth();
 
-  const handleSignWithGoogle = async (response) => {
+  const handleSignWithGoogle = useCallback(async (response) => {
     try {
       const payload = response.credential;
       if (!payload) {
@@ -40,7 +40,7 @@ const GoogleOAuthButton = ({ redirectPath = '/' }) => {
       const msg = err.response?.data?.detail || err.response?.data?.access_token || "Google authentication failed";
       toast.error(typeof msg === 'string' ? msg : "Google Authentication Failed");
     }
-  };
+  }, [login, navigate, redirectPath]);
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -78,7 +78,7 @@ const GoogleOAuthButton = ({ redirectPath = '/' }) => {
       }, 200);
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [handleSignWithGoogle]);
 
   return (
     <div style={{ width: "100%", display: "flex", justifyContent: "center", minHeight: "44px" }}>

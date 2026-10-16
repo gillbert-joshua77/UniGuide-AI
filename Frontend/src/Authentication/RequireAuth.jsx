@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { Button } from "../Components/ui";
 import { fadeUp, staggerContainer } from "../lib/motion";
 import "../assets/Style/RequireAuth.css";

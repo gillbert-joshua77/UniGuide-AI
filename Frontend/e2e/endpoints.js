@@ -15,4 +15,4 @@ export const hackathonsEndpoint = /\/api\/v1\/uniguide\/hackathons\/?(?:\?.*)?$/
 export const newsEndpoint = /\/api\/v1\/uniguide\/news\/?(?:\?.*)?$/
 export const journeyEndpoint = /\/api\/v1\/students\/journey\/?$/
 export const chatListEndpoint = /\/api\/v1\/uniguide\/chat\/?(?:\?.*)?$/
-export const chatSessionEndpoint = /\/api\/v1\/uniguide\/chat\/sessions\/[^\/]+\/?$/
+export const chatSessionEndpoint = /\/api\/v1\/uniguide\/chat\/sessions\/[^/]+\/?$/

@@ -447,7 +447,7 @@ export async function mockGuidancePage(context, {
     const req = route.request()
     const handled = onSessionDetail ? await onSessionDetail(req, state) : null
     if (handled) return fulfill(route, handled.status ?? 200, handled.body ?? {})
-    const id = req.url().match(/sessions\/([^\/]+)\/$/)?.[1]
+    const id = req.url().match(/sessions\/([^/]+)\/$/)?.[1]
     const session = state.sessions.find((s) => s.id === id)
     if (!session) return fulfill(route, 404, { error: 'Session not found' })
     const { messages, ...meta } = session

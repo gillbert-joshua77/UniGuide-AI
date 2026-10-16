@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import axiosInstance from '../Utils/axiosInstance';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 import Navbar from '../Components/navigation/Navbar';
 import { Button, Badge, Avatar, Card } from '../Components/ui';
-import { fadeUp, slideInRight } from '../lib/motion';
 import '../assets/Style/ai.css';
 
 const quickActions = [

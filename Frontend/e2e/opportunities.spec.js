@@ -339,7 +339,7 @@ test.describe('opportunities and saved opportunities', () => {
       profile: makeProfile(),
       saved: savedRef,
       hackathons: [GENESIS],
-      onSavedPost: async (req) => {
+      onSavedPost: async () => {
         posts += 1
         return null
       },

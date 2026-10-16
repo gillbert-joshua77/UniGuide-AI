@@ -5,7 +5,7 @@ import { Modal, Tabs } from './ui';
 import LoginForm from '../Authentication/LoginForm';
 import RegisterForm from '../Authentication/RegisterForm';
 import GoogleOAuthButton from '../Authentication/SocialAuthentication';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/useAuth';
 import { fadeUp, staggerContainer } from '../lib/motion';
 import '../assets/Style/AuthModal.css';
 

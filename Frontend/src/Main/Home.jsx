@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import PageLayout from '../Components/layout/PageLayout';
 import GuidanceCore from '../Components/three/GuidanceCore';
 import { Button, Card, Badge } from '../Components/ui';
-import { useAuth } from '../Context/AuthContext';
-import { fadeUp, staggerContainer, fadeIn, slideInLeft, slideInRight } from '../lib/motion';
+import { useAuth } from '../Context/useAuth';
+import { fadeUp, staggerContainer, slideInRight } from '../lib/motion';
 import '../assets/Style/Home.css';
 
 const features = [
